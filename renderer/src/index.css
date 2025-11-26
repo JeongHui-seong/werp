@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+@font-face {
+    font-family: "Noto Sans";
+    src: url("../../public/fonts/NotoSans-Regular.ttf") format("ttf");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Noto Sans";
+    src: url("../../public/fonts/NotoSans-SemiBold.ttf") format("ttf");
+    font-weight: bold;
+    font-style: normal;
+}
+
+body{
+    font-family: "Noto Sans", sans-serif;
+    letter-spacing: -0.02em;
+}
