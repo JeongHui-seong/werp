@@ -1,8 +1,22 @@
-import { Emailform } from "./components/login/emailform"
+import { Routes, Route, Navigate } from "react-router-dom"
+import { PublicRoute, PrivateRoute } from "./utils/routerState"
+import LoginPage from "./pages/login"
+import DashboardPage from "./pages/dashboard"
 
 function App() {
-  return (
-    <Emailform />
+  return(
+    <Routes>
+      // outlet 컴포넌트 사용으로 토큰이 없을 때 접근 가능한 자식 라우트 렌더링
+      <Route element={<PublicRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
+      // outlet 컴포넌트 사용으로 토큰이 있을 때 접근 가능한 자식 라우트 렌더링
+      <Route element={<PrivateRoute />}>
+        // 기본 라우트를 /dashboard로 설정
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Route>
+    </Routes>
   )
 }
 
