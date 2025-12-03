@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 
 export function Loginform(){
     const [step, setStep] = useState<"email" | "code">("email")
+
     const handleEmailResult = (res: EmailResult) => {
         if (!res.success) return toast.error(res.message);
         toast.success(res.message)
@@ -20,7 +21,7 @@ export function Loginform(){
                 transition={{ duration: 0.3}}
             >
                 <EmailForm emailResult={handleEmailResult}/>
-                <CodeForm />
+                <CodeForm isVisible = {step === "code"}/>
             </motion.div>
         </div>
     )

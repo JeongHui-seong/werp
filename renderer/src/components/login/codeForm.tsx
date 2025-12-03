@@ -1,8 +1,29 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Logo from "../../assets/logo.png"
 
-export function CodeForm(){
+export function CodeForm({ isVisible }:{ isVisible : boolean }){
     const [code, setCode] = useState("");
+    const [time, setTime] = useState(300);
+    const [resendActive, setResendActive] = useState(false)
+
+    //TODO: timer 커스텀 훅 만들어서 분리시키기
+    useEffect(() => {
+        if (!isVisible) return;
+        if (time <= 0) {
+            setResendActive(true);
+            return;
+        }
+
+        const timer = setInterval(() => {
+            setTime(time => time - 1);
+        }, 1000)
+
+        return () => clearInterval(timer);
+    },[time, isVisible]);
+
+    const minute = String(Math.floor(time / 60)).padStart(2, "0");
+    const second = String(time % 60).padStart(2, "0");
+
     const codeSubmit = () => {
         console.log(code)
     }
@@ -14,12 +35,12 @@ export function CodeForm(){
                         <p className="text-[28px] font-bold">인증코드 입력</p>
                         <p className="text-base mt-[12px]">
                             이메일로 전송된 인증코드를 확인해주세요. <br />
-                            남은 만료 시간 : 5분
+                            남은 만료 시간 : {minute}분 {second}초
                         </p>
                     </div>
                 </div>
                 <div className="text-base w-full">
-                    <label htmlFor="code">인증코드<button>재전송</button></label>
+                    <label htmlFor="code">인증코드{resendActive ? <button>재전송</button> : null}</label>
                     <input
                         type="text"
                         id="code"
