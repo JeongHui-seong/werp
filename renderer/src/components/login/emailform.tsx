@@ -3,6 +3,7 @@ import Logo from "../../assets/logo.png"
 import useEmailValidation from "../../hooks/useEmailValidation";
 import { emailValidation } from "../../api/authService";
 import type { EmailFormProps } from "../../types/login/emailResult"
+import { toast } from "react-toastify";
 
 
 export function EmailForm({ emailResult }: EmailFormProps){
@@ -10,7 +11,7 @@ export function EmailForm({ emailResult }: EmailFormProps){
     const emailValid = useEmailValidation(email);
 
     const emailSubmit = async () => {
-        if (!emailValid) return console.log("이메일 형식을 맞춰주세요.");
+        if (!emailValid) return toast.error("이메일 형식이 아닙니다.");
         const res = await emailValidation(email);
         emailResult(res);
     }

@@ -8,3 +8,5 @@
 - 로그인 상태 관리 (토큰값 유무에 따른 라우터 접근 정의)
 ### framer-motion 활용
 - 쉽고 자연스러운 애니메이션 구현을 위한 framer-motion 활용
+### react-toastify 활용
+- 액션 완료 혹은 실패를 토스트 알림으로 쉽게 확인할 수 있게 구현하기 위한 react-toastify 활용

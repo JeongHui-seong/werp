@@ -3,12 +3,13 @@ import type { EmailResult } from "../../types/login/emailResult"
 import { CodeForm } from "./codeForm";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 export function Loginform(){
     const [step, setStep] = useState<"email" | "code">("email")
     const handleEmailResult = (res: EmailResult) => {
-        if (!res.success) return;
-        console.log(res)
+        if (!res.success) return toast.error(res.message);
+        toast.success(res.message)
         setStep("code")
     }
     return(
