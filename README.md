@@ -1,4 +1,5 @@
 # werp
+[werp backend github](https://github.com/JeongHui-seong/werp_backend)
 ## React + Vite + Tailwind + Typescript + Electron ERP 개인 프로젝트
 ### Electron 선택 이유
 - React로 Desktop App을 만들 수 있는 경험
