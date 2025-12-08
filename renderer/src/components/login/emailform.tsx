@@ -38,7 +38,7 @@ export function EmailForm({ emailResult }: EmailFormProps){
                         onChange={e => setEmail(e.target.value)}
                     />
                 </div>
-                <button className="w-full rounded-2xl bg-blue-700 text-white p-[20px]" onClick={() => emailSubmit()}>이메일 인증하기</button>
+                <button className="w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer" onClick={() => emailSubmit()}>이메일 인증하기</button>
         </div>
     )
 }

@@ -37049,7 +37049,7 @@ function EmailForm({ emailResult }) {
       lineNumber: 30,
       columnNumber: 17
     }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px]", onClick: () => emailSubmit(), children: "이메일 인증하기" }, void 0, false, {
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer", onClick: () => emailSubmit(), children: "이메일 인증하기" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
       lineNumber: 41,
       columnNumber: 17
@@ -37060,8 +37060,7 @@ function EmailForm({ emailResult }) {
     columnNumber: 9
   }, this);
 }
-function CodeForm({ isVisible }) {
-  const [code, setCode] = reactExports.useState("");
+function useTimer({ isVisible }) {
   const [time2, setTime] = reactExports.useState(300);
   const [resendActive, setResendActive] = reactExports.useState(false);
   reactExports.useEffect(() => {
@@ -37075,8 +37074,13 @@ function CodeForm({ isVisible }) {
     }, 1e3);
     return () => clearInterval(timer);
   }, [time2, isVisible]);
-  const minute = String(Math.floor(time2 / 60)).padStart(2, "0");
-  const second = String(time2 % 60).padStart(2, "0");
+  return { time: time2, resendActive };
+}
+function CodeForm({ isVisible }) {
+  const [code, setCode] = reactExports.useState("");
+  const timer = useTimer({ isVisible });
+  const minute = String(Math.floor(timer.time / 60)).padStart(2, "0");
+  const second = String(timer.time % 60).padStart(2, "0");
   const codeSubmit = () => {
     console.log(code);
   };
@@ -37084,20 +37088,20 @@ function CodeForm({ isVisible }) {
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex flex-col justify-center items-center w-full gap-[48px]", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "Logo" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-        lineNumber: 33,
+        lineNumber: 18,
         columnNumber: 21
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "text-center", children: [
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-[28px] font-bold", children: "인증코드 입력" }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-          lineNumber: 35,
+          lineNumber: 20,
           columnNumber: 25
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base mt-[12px]", children: [
           "이메일로 전송된 인증코드를 확인해주세요. ",
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("br", {}, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-            lineNumber: 37,
+            lineNumber: 22,
             columnNumber: 52
           }, this),
           "남은 만료 시간 : ",
@@ -37107,30 +37111,30 @@ function CodeForm({ isVisible }) {
           "초"
         ] }, void 0, true, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-          lineNumber: 36,
+          lineNumber: 21,
           columnNumber: 25
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-        lineNumber: 34,
+        lineNumber: 19,
         columnNumber: 21
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-      lineNumber: 32,
+      lineNumber: 17,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "text-base w-full", children: [
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("label", { htmlFor: "code", children: [
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("label", { htmlFor: "code", className: "w-full flex items-center justify-between", children: [
         "인증코드",
-        resendActive ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { children: "재전송" }, void 0, false, {
+        timer.resendActive ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { children: "재전송" }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-          lineNumber: 43,
-          columnNumber: 63
+          lineNumber: 28,
+          columnNumber: 122
         }, this) : null
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-        lineNumber: 43,
+        lineNumber: 28,
         columnNumber: 21
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -37147,24 +37151,24 @@ function CodeForm({ isVisible }) {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-          lineNumber: 44,
+          lineNumber: 29,
           columnNumber: 21
         },
         this
       )
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-      lineNumber: 42,
+      lineNumber: 27,
       columnNumber: 17
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px]", onClick: () => codeSubmit(), children: "이메일 인증하기" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-      lineNumber: 53,
+      lineNumber: 38,
       columnNumber: 17
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-    lineNumber: 31,
+    lineNumber: 16,
     columnNumber: 9
   }, this);
 }

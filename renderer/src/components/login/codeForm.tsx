@@ -1,28 +1,13 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Logo from "../../assets/logo.png"
+import useTimer from "../../hooks/useTimer";
 
 export function CodeForm({ isVisible }:{ isVisible : boolean }){
     const [code, setCode] = useState("");
-    const [time, setTime] = useState(300);
-    const [resendActive, setResendActive] = useState(false)
+    const timer = useTimer({isVisible})
 
-    //TODO: timer 커스텀 훅 만들어서 분리시키기
-    useEffect(() => {
-        if (!isVisible) return;
-        if (time <= 0) {
-            setResendActive(true);
-            return;
-        }
-
-        const timer = setInterval(() => {
-            setTime(time => time - 1);
-        }, 1000)
-
-        return () => clearInterval(timer);
-    },[time, isVisible]);
-
-    const minute = String(Math.floor(time / 60)).padStart(2, "0");
-    const second = String(time % 60).padStart(2, "0");
+    const minute = String(Math.floor(timer.time / 60)).padStart(2, "0");
+    const second = String(timer.time % 60).padStart(2, "0");
 
     const codeSubmit = () => {
         console.log(code)
@@ -40,7 +25,7 @@ export function CodeForm({ isVisible }:{ isVisible : boolean }){
                     </div>
                 </div>
                 <div className="text-base w-full">
-                    <label htmlFor="code">인증코드{resendActive ? <button>재전송</button> : null}</label>
+                    <label htmlFor="code" className="w-full flex items-center justify-between">인증코드{timer.resendActive ? <button>재전송</button> : null}</label>
                     <input
                         type="text"
                         id="code"
