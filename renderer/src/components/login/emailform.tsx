@@ -11,10 +11,16 @@ export function EmailForm({ emailResult }: EmailFormProps){
     const emailValid = useEmailValidation(email);
 
     const emailSubmit = async () => {
-        if (!emailValid) return toast.error("이메일 형식이 아닙니다.");
-        const res = await emailValidation(email);
-        emailResult(res);
+        try{
+            if (!emailValid) return toast.error("이메일 형식이 아닙니다.");
+            const res = await emailValidation(email);
+            emailResult({...res, email});
+        } catch (err) {
+            toast.error("이메일 확인 중 네트워크 오류가 발생했습니다.");
+            console.log("emailSubmit Error: ", err)
+        }
     }
+    //TODO: 엔터 눌렀을 때도 이메일 submit되는 기능 구현하기, 이메일 검증하는 동안 스피너 구현
     return(
         <div className="flex flex-col justify-center items-center gap-[48px] w-full flex-shrink-0 p-[48px]">
             <div className="flex flex-col justify-center items-center w-full gap-[48px]">

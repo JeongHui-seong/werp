@@ -1,7 +1,8 @@
 export interface EmailResult {
     success: boolean;
     message: string;
-    code: string;
+    code?: string;
+    email: string;
 }
 
 export interface EmailFormProps {

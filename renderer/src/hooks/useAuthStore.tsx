@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { AuthState } from "../types/authState";
+import type { AuthState } from "../types/login/authState";
 
 // create 함수를 사용하여 스토어 생성
 // persist 미들웨어를 사용하여 로컬 스토리지 스토어 데이터 지속성 설정
