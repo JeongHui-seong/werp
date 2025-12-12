@@ -4,17 +4,14 @@ import useTimer from "../../hooks/useTimer";
 import { login, resendVerification } from "../../api/authService";
 import { toast } from "react-toastify";
 import { useAuthStore } from "../../hooks/useAuthStore";
-
-interface codeParams {
-    isVisible : boolean;
-    emailCode: string;
-    email: string;
-}
+import { useUserStore } from "../../hooks/useUserStore";
+import type { codeParams } from "../../types/login/codeParams";
 
 export function CodeForm({ isVisible, emailCode, email }:codeParams){
     const [code, setCode] = useState("");
     const timer = useTimer({isVisible});
     const setToken = useAuthStore(state => state.setToken);
+    const setUser = useUserStore(state => state.setUser);
 
     const minute = String(Math.floor(timer.time / 60)).padStart(2, "0");
     const second = String(timer.time % 60).padStart(2, "0");
@@ -32,7 +29,7 @@ export function CodeForm({ isVisible, emailCode, email }:codeParams){
             }
             toast.success(res.message);
             setToken(res.token);
-            //TODO: 유저 정보 zustand 저장
+            setUser(res.user);
         } catch (err) {
             toast.error("로그인 중 네트워크 오류가 발생했습니다.")
             console.log("codeSubmit Error: ", err);

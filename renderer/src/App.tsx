@@ -3,7 +3,9 @@ import { PublicRoute, PrivateRoute } from "./utils/routerState"
 import LoginPage from "./pages/login"
 import DashboardPage from "./pages/dashboard"
 import { ToastContainer } from "react-toastify"
+import { PrivateLayout } from "./components/common/privateLayout"
 import 'react-toastify/ReactToastify.css'
+import AttendancePage from "./pages/attendance"
 
 function App() {
   return(
@@ -15,9 +17,13 @@ function App() {
         </Route>
         // outlet 컴포넌트 사용으로 토큰이 있을 때 접근 가능한 자식 라우트 렌더링
         <Route element={<PrivateRoute />}>
-          // 기본 라우트를 /dashboard로 설정
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          // 기본 layout 설정
+          <Route element={<PrivateLayout />}>
+            // 기본 라우트를 /dashboard로 설정
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/attendance/attendance" element={<AttendancePage />} />
+          </Route>
         </Route>
       </Routes>
       <ToastContainer 
