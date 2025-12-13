@@ -36528,7 +36528,7 @@ const useAuthStore = create(
   })
 );
 function PublicRoute() {
-  const { token } = useAuthStore();
+  const { token } = useAuthStore.getState();
   return token ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Navigate, { to: "/dashboard", replace: true }, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/utils/routerState.tsx",
     lineNumber: 8,
@@ -36540,7 +36540,7 @@ function PublicRoute() {
   }, this);
 }
 function PrivateRoute() {
-  const { token } = useAuthStore();
+  const { token } = useAuthStore.getState();
   return token ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Outlet, {}, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/utils/routerState.tsx",
     lineNumber: 14,
@@ -37204,7 +37204,7 @@ function EmailForm({ emailResult }) {
       lineNumber: 41,
       columnNumber: 17
     }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer", onClick: () => emailSubmit(), children: isLoading ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SyncLoader, {}, void 0, false, {
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer", onClick: () => emailSubmit(), children: isLoading ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SyncLoader, { size: 8, color: "#ffffff" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
       lineNumber: 57,
       columnNumber: 146
@@ -37373,7 +37373,7 @@ function CodeForm({ isVisible, emailCode, email }) {
       lineNumber: 70,
       columnNumber: 17
     }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer", onClick: () => codeSubmit(), children: isLoading ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SyncLoader, {}, void 0, false, {
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer", onClick: () => codeSubmit(), children: isLoading ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SyncLoader, { size: 8, color: "#ffffff" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
       lineNumber: 86,
       columnNumber: 145

@@ -54,7 +54,7 @@ export function EmailForm({ emailResult }: EmailFormProps){
                         }}
                     />
                 </div>
-                <button className="w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer" onClick={() => emailSubmit()}>{isLoading ? <SyncLoader /> : "이메일 인증하기"}</button>
+                <button className="w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer" onClick={() => emailSubmit()}>{isLoading ? <SyncLoader size={8} color="#ffffff"/> : "이메일 인증하기"}</button>
         </div>
     )
 }
