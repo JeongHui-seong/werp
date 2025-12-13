@@ -37005,59 +37005,174 @@ function Lt(t) {
     return ct.createElement("div", { tabIndex: -1, className: S(f), "data-stacked": e, style: b, key: `c-${f}` }, p.map(({ content: i, props: n }) => ct.createElement(wt, { ...n, stacked: e, collapseAll: E, isIn: d(n.toastId, n.containerId), key: `t-${n.key}` }, i)));
   }));
 }
+var cssUnit = {
+  cm: true,
+  mm: true,
+  in: true,
+  px: true,
+  pt: true,
+  pc: true,
+  em: true,
+  ex: true,
+  ch: true,
+  rem: true,
+  vw: true,
+  vh: true,
+  vmin: true,
+  vmax: true,
+  "%": true
+};
+function parseLengthAndUnit(size) {
+  if (typeof size === "number") {
+    return {
+      value: size,
+      unit: "px"
+    };
+  }
+  var value;
+  var valueString = (size.match(/^[0-9.]*/) || "").toString();
+  if (valueString.includes(".")) {
+    value = parseFloat(valueString);
+  } else {
+    value = parseInt(valueString, 10);
+  }
+  var unit = (size.match(/[^0-9]*$/) || "").toString();
+  if (cssUnit[unit]) {
+    return {
+      value,
+      unit
+    };
+  }
+  console.warn("React Spinners: ".concat(size, " is not a valid css value. Defaulting to ").concat(value, "px."));
+  return {
+    value,
+    unit: "px"
+  };
+}
+function cssValue(value) {
+  var lengthWithunit = parseLengthAndUnit(value);
+  return "".concat(lengthWithunit.value).concat(lengthWithunit.unit);
+}
+var createAnimation = function(loaderName, frames, suffix) {
+  var animationName = "react-spinners-".concat(loaderName, "-").concat(suffix);
+  if (typeof window == "undefined" || !window.document) {
+    return animationName;
+  }
+  var styleEl = document.createElement("style");
+  document.head.appendChild(styleEl);
+  var styleSheet = styleEl.sheet;
+  var keyFrames = "\n    @keyframes ".concat(animationName, " {\n      ").concat(frames, "\n    }\n  ");
+  if (styleSheet) {
+    styleSheet.insertRule(keyFrames, 0);
+  }
+  return animationName;
+};
+var __assign = function() {
+  __assign = Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+        t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
+};
+var __rest = function(s, e) {
+  var t = {};
+  for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+    t[p] = s[p];
+  if (s != null && typeof Object.getOwnPropertySymbols === "function")
+    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+        t[p[i]] = s[p[i]];
+    }
+  return t;
+};
+var sync = createAnimation("SyncLoader", "33% {transform: translateY(10px)}\n  66% {transform: translateY(-10px)}\n  100% {transform: translateY(0)}", "sync");
+function SyncLoader(_a) {
+  var _b = _a.loading, loading = _b === void 0 ? true : _b, _c = _a.color, color2 = _c === void 0 ? "#000000" : _c, _d = _a.speedMultiplier, speedMultiplier = _d === void 0 ? 1 : _d, _e = _a.cssOverride, cssOverride = _e === void 0 ? {} : _e, _f = _a.size, size = _f === void 0 ? 15 : _f, _g = _a.margin, margin2 = _g === void 0 ? 2 : _g, additionalprops = __rest(_a, ["loading", "color", "speedMultiplier", "cssOverride", "size", "margin"]);
+  var wrapper2 = __assign({ display: "inherit" }, cssOverride);
+  var style2 = function(i) {
+    return {
+      backgroundColor: color2,
+      width: cssValue(size),
+      height: cssValue(size),
+      margin: cssValue(margin2),
+      borderRadius: "100%",
+      display: "inline-block",
+      animation: "".concat(sync, " ").concat(0.6 / speedMultiplier, "s ").concat(i * 0.07, "s infinite ease-in-out"),
+      animationFillMode: "both"
+    };
+  };
+  if (!loading) {
+    return null;
+  }
+  return reactExports.createElement(
+    "span",
+    __assign({ style: wrapper2 }, additionalprops),
+    reactExports.createElement("span", { style: style2(1) }),
+    reactExports.createElement("span", { style: style2(2) }),
+    reactExports.createElement("span", { style: style2(3) })
+  );
+}
 function EmailForm({ emailResult }) {
+  const [isLoading, setIsLoading] = reactExports.useState(false);
   const [email, setEmail] = reactExports.useState("");
   const emailValid = useEmailValidation(email);
   const emailSubmit = async () => {
     try {
       if (!emailValid) return y.error("이메일 형식이 아닙니다.");
+      setIsLoading(true);
       const res = await emailValidation(email);
       emailResult({ ...res, email });
     } catch (err) {
       y.error("이메일 확인 중 네트워크 오류가 발생했습니다.");
       console.log("emailSubmit Error: ", err);
+    } finally {
+      setIsLoading(false);
     }
   };
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex flex-col justify-center items-center gap-[48px] w-full flex-shrink-0 p-[48px]", children: [
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex flex-col justify-center items-center w-full gap-[48px]", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "Logo" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-        lineNumber: 27,
+        lineNumber: 32,
         columnNumber: 21
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "text-center", children: [
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-[28px] font-bold", children: "이메일 인증" }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-          lineNumber: 29,
+          lineNumber: 34,
           columnNumber: 25
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base mt-[12px]", children: [
           "현재 서비스는 이메일 인증된 회원에 한해 이용이 가능합니다. ",
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("br", {}, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-            lineNumber: 31,
+            lineNumber: 36,
             columnNumber: 63
           }, this),
           "이메일 인증을 진행해주세요."
         ] }, void 0, true, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-          lineNumber: 30,
+          lineNumber: 35,
           columnNumber: 25
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-        lineNumber: 28,
+        lineNumber: 33,
         columnNumber: 21
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-      lineNumber: 26,
+      lineNumber: 31,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "text-base w-full", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("label", { htmlFor: "email", children: "Email" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-        lineNumber: 37,
+        lineNumber: 42,
         columnNumber: 21
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -37068,30 +37183,39 @@ function EmailForm({ emailResult }) {
           placeholder: "example@example.com",
           className: "w-full mt-[8px] p-[20px] rounded-2xl border border-gray-40",
           value: email,
-          onChange: (e) => setEmail(e.target.value)
+          onChange: (e) => setEmail(e.target.value),
+          onKeyDown: (e) => {
+            if (e.key === "Enter") {
+              emailSubmit();
+            }
+          }
         },
         void 0,
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-          lineNumber: 38,
+          lineNumber: 43,
           columnNumber: 21
         },
         this
       )
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-      lineNumber: 36,
+      lineNumber: 41,
       columnNumber: 17
     }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer", onClick: () => emailSubmit(), children: "이메일 인증하기" }, void 0, false, {
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer", onClick: () => emailSubmit(), children: isLoading ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SyncLoader, {}, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-      lineNumber: 47,
+      lineNumber: 57,
+      columnNumber: 146
+    }, this) : "이메일 인증하기" }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
+      lineNumber: 57,
       columnNumber: 17
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-    lineNumber: 25,
+    lineNumber: 30,
     columnNumber: 9
   }, this);
 }
@@ -37124,6 +37248,7 @@ const useUserStore = create(
   )
 );
 function CodeForm({ isVisible, emailCode, email }) {
+  const [isLoading, setIsLoading] = reactExports.useState(false);
   const [code, setCode] = reactExports.useState("");
   const timer = useTimer({ isVisible });
   const setToken = useAuthStore((state) => state.setToken);
@@ -37137,6 +37262,7 @@ function CodeForm({ isVisible, emailCode, email }) {
     }
     try {
       const res = await login(email);
+      setIsLoading(true);
       if (!res.success) {
         y.error(res.message);
         return;
@@ -37147,6 +37273,8 @@ function CodeForm({ isVisible, emailCode, email }) {
     } catch (err) {
       y.error("로그인 중 네트워크 오류가 발생했습니다.");
       console.log("codeSubmit Error: ", err);
+    } finally {
+      setIsLoading(false);
     }
   };
   const codeResend = async () => {
@@ -37167,20 +37295,20 @@ function CodeForm({ isVisible, emailCode, email }) {
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex flex-col justify-center items-center w-full gap-[48px]", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "Logo" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-        lineNumber: 57,
+        lineNumber: 61,
         columnNumber: 21
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "text-center", children: [
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-[28px] font-bold", children: "인증코드 입력" }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-          lineNumber: 59,
+          lineNumber: 63,
           columnNumber: 25
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base mt-[12px]", children: [
           "이메일로 전송된 인증코드를 확인해주세요. ",
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("br", {}, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-            lineNumber: 61,
+            lineNumber: 65,
             columnNumber: 52
           }, this),
           "남은 만료 시간 : ",
@@ -37190,17 +37318,17 @@ function CodeForm({ isVisible, emailCode, email }) {
           "초"
         ] }, void 0, true, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-          lineNumber: 60,
+          lineNumber: 64,
           columnNumber: 25
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-        lineNumber: 58,
+        lineNumber: 62,
         columnNumber: 21
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-      lineNumber: 56,
+      lineNumber: 60,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "text-base w-full", children: [
@@ -37208,12 +37336,12 @@ function CodeForm({ isVisible, emailCode, email }) {
         "인증코드",
         timer.resendActive ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "cursor-pointer text-blue-700", onClick: () => codeResend(), children: "재전송" }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-          lineNumber: 67,
+          lineNumber: 71,
           columnNumber: 122
         }, this) : null
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-        lineNumber: 67,
+        lineNumber: 71,
         columnNumber: 21
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -37224,30 +37352,39 @@ function CodeForm({ isVisible, emailCode, email }) {
           placeholder: "인증코드",
           className: "w-full mt-[8px] p-[20px] rounded-2xl border border-gray-40",
           value: code,
-          onChange: (e) => setCode(e.target.value)
+          onChange: (e) => setCode(e.target.value),
+          onKeyDown: (e) => {
+            if (e.key === "Enter") {
+              codeSubmit();
+            }
+          }
         },
         void 0,
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-          lineNumber: 68,
+          lineNumber: 72,
           columnNumber: 21
         },
         this
       )
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-      lineNumber: 66,
+      lineNumber: 70,
       columnNumber: 17
     }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer", onClick: () => codeSubmit(), children: "이메일 인증하기" }, void 0, false, {
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer", onClick: () => codeSubmit(), children: isLoading ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SyncLoader, {}, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-      lineNumber: 77,
+      lineNumber: 86,
+      columnNumber: 145
+    }, this) : "이메일 인증하기" }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
+      lineNumber: 86,
       columnNumber: 17
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/codeForm.tsx",
-    lineNumber: 55,
+    lineNumber: 59,
     columnNumber: 9
   }, this);
 }
@@ -39506,7 +39643,7 @@ class AsyncMotionValueAnimation extends WithPromise {
     this.keyframeResolver = new KeyframeResolver$1(keyframes2, (resolvedKeyframes, finalKeyframe, forced) => this.onKeyframesResolved(resolvedKeyframes, finalKeyframe, optionsWithDefaults, !forced), name, motionValue2, element);
     this.keyframeResolver?.scheduleResolve();
   }
-  onKeyframesResolved(keyframes2, finalKeyframe, options, sync) {
+  onKeyframesResolved(keyframes2, finalKeyframe, options, sync2) {
     this.keyframeResolver = void 0;
     const { name, type, velocity, delay: delay2, isHandoff, onUpdate } = options;
     this.resolvedAt = time.now();
@@ -39518,7 +39655,7 @@ class AsyncMotionValueAnimation extends WithPromise {
       makeAnimationInstant(options);
       options.repeat = 0;
     }
-    const startTime = sync ? !this.resolvedAt ? this.createdAt : this.resolvedAt - this.createdAt > MAX_RESOLVE_DELAY ? this.resolvedAt : this.createdAt : void 0;
+    const startTime = sync2 ? !this.resolvedAt ? this.createdAt : this.resolvedAt - this.createdAt > MAX_RESOLVE_DELAY ? this.resolvedAt : this.createdAt : void 0;
     const resolvedOptions = {
       startTime,
       finalKeyframe,

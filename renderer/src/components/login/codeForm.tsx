@@ -6,8 +6,10 @@ import { toast } from "react-toastify";
 import { useAuthStore } from "../../hooks/useAuthStore";
 import { useUserStore } from "../../hooks/useUserStore";
 import type { codeParams } from "../../types/login/codeParams";
+import { SyncLoader } from "react-spinners";
 
 export function CodeForm({ isVisible, emailCode, email }:codeParams){
+    const [isLoading, setIsLoading] = useState(false);
     const [code, setCode] = useState("");
     const timer = useTimer({isVisible});
     const setToken = useAuthStore(state => state.setToken);
@@ -23,6 +25,7 @@ export function CodeForm({ isVisible, emailCode, email }:codeParams){
         }
         try{
             const res = await login(email);
+            setIsLoading(true);
             if (!res.success) {
                 toast.error(res.message);
                 return;
@@ -33,13 +36,8 @@ export function CodeForm({ isVisible, emailCode, email }:codeParams){
         } catch (err) {
             toast.error("로그인 중 네트워크 오류가 발생했습니다.")
             console.log("codeSubmit Error: ", err);
-        }
-    }
-    //TODO: 코드 검증하는 동안 스피너 구현
-
-    const keyEnterSubmit = (event: KeyboardEvent) => {
-        if (event.key === 'Enter') {
-            codeSubmit()
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -78,9 +76,14 @@ export function CodeForm({ isVisible, emailCode, email }:codeParams){
                         className="w-full mt-[8px] p-[20px] rounded-2xl border border-gray-40"
                         value={code}
                         onChange={e => setCode(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                codeSubmit()
+                            }
+                        }}
                     />
                 </div>
-                <button className="w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer" onKeyDown={() => keyEnterSubmit} onClick={() => codeSubmit()}>이메일 인증하기</button>
+                <button className="w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer" onClick={() => codeSubmit()}>{isLoading ? <SyncLoader /> : "이메일 인증하기"}</button>
         </div>
     )
 }
