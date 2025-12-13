@@ -35,7 +35,13 @@ export function CodeForm({ isVisible, emailCode, email }:codeParams){
             console.log("codeSubmit Error: ", err);
         }
     }
-    //TODO: 엔터 눌렀을 때도 코드 submit되는 기능 구현하기, 코드 검증하는 동안 스피너 구현
+    //TODO: 코드 검증하는 동안 스피너 구현
+
+    const keyEnterSubmit = (event: KeyboardEvent) => {
+        if (event.key === 'Enter') {
+            codeSubmit()
+        }
+    }
 
     const codeResend = async() => {
         try{
@@ -74,7 +80,7 @@ export function CodeForm({ isVisible, emailCode, email }:codeParams){
                         onChange={e => setCode(e.target.value)}
                     />
                 </div>
-                <button className="w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer" onClick={() => codeSubmit()}>이메일 인증하기</button>
+                <button className="w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer" onKeyDown={() => keyEnterSubmit} onClick={() => codeSubmit()}>이메일 인증하기</button>
         </div>
     )
 }

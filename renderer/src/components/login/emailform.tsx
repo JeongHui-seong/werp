@@ -20,7 +20,13 @@ export function EmailForm({ emailResult }: EmailFormProps){
             console.log("emailSubmit Error: ", err)
         }
     }
-    //TODO: 엔터 눌렀을 때도 이메일 submit되는 기능 구현하기, 이메일 검증하는 동안 스피너 구현
+    //TODO: 이메일 검증하는 동안 스피너 구현
+    const keyEnterSubmit = (event: KeyboardEvent) => {
+        if (event.key === 'Enter') {
+            emailSubmit()
+        }
+    }
+
     return(
         <div className="flex flex-col justify-center items-center gap-[48px] w-full flex-shrink-0 p-[48px]">
             <div className="flex flex-col justify-center items-center w-full gap-[48px]">
@@ -44,7 +50,7 @@ export function EmailForm({ emailResult }: EmailFormProps){
                         onChange={e => setEmail(e.target.value)}
                     />
                 </div>
-                <button className="w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer" onClick={() => emailSubmit()}>이메일 인증하기</button>
+                <button className="w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer" onKeyDown={() => keyEnterSubmit} onClick={() => emailSubmit()}>이메일 인증하기</button>
         </div>
     )
 }
