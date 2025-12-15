@@ -36573,6 +36573,10 @@ const emailValidation = async (email) => {
       },
       body: JSON.stringify({ email })
     });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
     const data = await res.json();
     return data;
   } catch (err) {
@@ -36588,6 +36592,10 @@ const resendVerification = async (email) => {
       },
       body: JSON.stringify({ email })
     });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
     const data = await res.json();
     return data;
   } catch (err) {
@@ -36603,6 +36611,10 @@ const login = async (email) => {
       },
       body: JSON.stringify({ email })
     });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
     const data = await res.json();
     return data;
   } catch (err) {

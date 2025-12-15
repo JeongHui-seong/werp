@@ -9,6 +9,10 @@ export const emailValidation = async(email: string) => {
             },
             body: JSON.stringify({ email }),
         });
+        if(!res.ok){
+            const error = await res.json()
+            throw new Error(error.message);
+        }
         const data = await res.json();
         return data;
     } catch (err) {
@@ -25,6 +29,10 @@ export const resendVerification = async(email: string) => {
             },
             body: JSON.stringify({ email }),
         });
+        if(!res.ok){
+            const error = await res.json()
+            throw new Error(error.message);
+        }
         const data = await res.json()
         return data;
     } catch (err) {
@@ -41,6 +49,10 @@ export const login = async (email: string) => {
             },
             body: JSON.stringify({ email }),
         });
+        if(!res.ok){
+            const error = await res.json()
+            throw new Error(error.message);
+        }
         const data = await res.json();
         return data;
     } catch (err) {
