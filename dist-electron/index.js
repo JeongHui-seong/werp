@@ -231,8 +231,8 @@ function requireReact_development() {
       }
       function escape(key) {
         var escaperLookup = { "=": "=0", ":": "=2" };
-        return "$" + key.replace(/[=:]/g, function(match) {
-          return escaperLookup[match];
+        return "$" + key.replace(/[=:]/g, function(match2) {
+          return escaperLookup[match2];
         });
       }
       function getElementKey(element, index) {
@@ -2252,8 +2252,8 @@ function requireReactDomClient_development() {
         try {
           throw Error();
         } catch (x) {
-          var match = x.stack.trim().match(/\n( *(at )?)/);
-          prefix = match && match[1] || "";
+          var match2 = x.stack.trim().match(/\n( *(at )?)/);
+          prefix = match2 && match2[1] || "";
           suffix = -1 < x.stack.indexOf("\n    at") ? " (<anonymous>)" : -1 < x.stack.indexOf("@") ? "@unknown:0:0" : "";
         }
       return "\n" + prefix + name + suffix;
@@ -4048,7 +4048,7 @@ function requireReactDomClient_development() {
     function sanitizeURL(url2) {
       return isJavaScriptProtocol.test("" + url2) ? "javascript:throw new Error('React has blocked a javascript: URL as a security precaution.')" : url2;
     }
-    function noop$1() {
+    function noop$12() {
     }
     function getEventTarget(nativeEvent) {
       nativeEvent = nativeEvent.target || nativeEvent.srcElement || window;
@@ -5473,7 +5473,7 @@ function requireReactDomClient_development() {
           );
       }
       type = props.children;
-      "string" !== typeof type && "number" !== typeof type && "bigint" !== typeof type || didHydrate.textContent === "" + type || true === props.suppressHydrationWarning || checkForUnmatchedText(didHydrate.textContent, type) ? (null != props.popover && (listenToNonDelegatedEvent("beforetoggle", didHydrate), listenToNonDelegatedEvent("toggle", didHydrate)), null != props.onScroll && listenToNonDelegatedEvent("scroll", didHydrate), null != props.onScrollEnd && listenToNonDelegatedEvent("scrollend", didHydrate), null != props.onClick && (didHydrate.onclick = noop$1), didHydrate = true) : didHydrate = false;
+      "string" !== typeof type && "number" !== typeof type && "bigint" !== typeof type || didHydrate.textContent === "" + type || true === props.suppressHydrationWarning || checkForUnmatchedText(didHydrate.textContent, type) ? (null != props.popover && (listenToNonDelegatedEvent("beforetoggle", didHydrate), listenToNonDelegatedEvent("toggle", didHydrate)), null != props.onScroll && listenToNonDelegatedEvent("scroll", didHydrate), null != props.onScrollEnd && listenToNonDelegatedEvent("scrollend", didHydrate), null != props.onClick && (didHydrate.onclick = noop$12), didHydrate = true) : didHydrate = false;
       didHydrate || throwOnHydrationMismatch(fiber, true);
     }
     function popToNextHostParent(fiber) {
@@ -5943,7 +5943,7 @@ function requireReactDomClient_development() {
       index = trackedThenables[index];
       void 0 === index ? trackedThenables.push(thenable) : index !== thenable && (thenableState2.didWarnAboutUncachedPromise || (thenableState2.didWarnAboutUncachedPromise = true, console.error(
         "A component was suspended by an uncached promise. Creating promises inside a Client Component or hook is not yet supported, except via a Suspense-compatible library or framework."
-      )), thenable.then(noop$1, noop$1), thenable = index);
+      )), thenable.then(noop$12, noop$12), thenable = index);
       if (void 0 === thenable._debugInfo) {
         thenableState2 = performance.now();
         trackedThenables = thenable.displayName;
@@ -5965,7 +5965,7 @@ function requireReactDomClient_development() {
           throw thenableState2 = thenable.reason, checkIfUseWrappedInAsyncCatch(thenableState2), thenableState2;
         default:
           if ("string" === typeof thenable.status)
-            thenable.then(noop$1, noop$1);
+            thenable.then(noop$12, noop$12);
           else {
             thenableState2 = workInProgressRoot;
             if (null !== thenableState2 && 100 < thenableState2.shellSuspendCounter)
@@ -9446,11 +9446,11 @@ function requireReactDomClient_development() {
             JSCompiler_object_inline_digest_2724 = JSCompiler_object_inline_componentStack_2726.nextSibling && JSCompiler_object_inline_componentStack_2726.nextSibling.dataset;
             if (JSCompiler_object_inline_digest_2724) {
               nextPrimaryChildren = JSCompiler_object_inline_digest_2724.dgst;
-              var message = JSCompiler_object_inline_digest_2724.msg;
+              var message2 = JSCompiler_object_inline_digest_2724.msg;
               mode = JSCompiler_object_inline_digest_2724.stck;
               var componentStack = JSCompiler_object_inline_digest_2724.cstck;
             }
-            JSCompiler_object_inline_message_2723 = message;
+            JSCompiler_object_inline_message_2723 = message2;
             JSCompiler_object_inline_digest_2724 = nextPrimaryChildren;
             JSCompiler_object_inline_stack_2725 = mode;
             JSCompiler_object_inline_componentStack_2726 = componentStack;
@@ -11186,7 +11186,7 @@ function requireReactDomClient_development() {
     function insertOrAppendPlacementNodeIntoContainer(node, before, parent) {
       var tag = node.tag;
       if (5 === tag || 6 === tag)
-        node = node.stateNode, before ? (warnForReactChildrenConflict(parent), (9 === parent.nodeType ? parent.body : "HTML" === parent.nodeName ? parent.ownerDocument.body : parent).insertBefore(node, before)) : (warnForReactChildrenConflict(parent), before = 9 === parent.nodeType ? parent.body : "HTML" === parent.nodeName ? parent.ownerDocument.body : parent, before.appendChild(node), parent = parent._reactRootContainer, null !== parent && void 0 !== parent || null !== before.onclick || (before.onclick = noop$1));
+        node = node.stateNode, before ? (warnForReactChildrenConflict(parent), (9 === parent.nodeType ? parent.body : "HTML" === parent.nodeName ? parent.ownerDocument.body : parent).insertBefore(node, before)) : (warnForReactChildrenConflict(parent), before = 9 === parent.nodeType ? parent.body : "HTML" === parent.nodeName ? parent.ownerDocument.body : parent, before.appendChild(node), parent = parent._reactRootContainer, null !== parent && void 0 !== parent || null !== before.onclick || (before.onclick = noop$12));
       else if (4 !== tag && (27 === tag && isSingletonScope(node.type) && (parent = node.stateNode, before = null), node = node.child, null !== node))
         for (insertOrAppendPlacementNodeIntoContainer(node, before, parent), node = node.sibling; null !== node; )
           insertOrAppendPlacementNodeIntoContainer(node, before, parent), node = node.sibling;
@@ -13465,7 +13465,7 @@ function requireReactDomClient_development() {
           suspenseyImages: [],
           waitingForImages: true,
           waitingForViewTransition: false,
-          unsuspend: noop$1
+          unsuspend: noop$12
         }, accumulateSuspenseyCommitOnFiber(finishedWork, lanes, suspendedState), subtreeFlags = (lanes & 62914560) === lanes ? globalMostRecentFallbackTime - now$1() : (lanes & 4194048) === lanes ? globalMostRecentTransitionTime - now$1() : 0, subtreeFlags = waitForCommitToBeReady(suspendedState, subtreeFlags), null !== subtreeFlags) {
           pendingEffectsLanes = lanes;
           root2.cancelPendingCommit = subtreeFlags(
@@ -15761,7 +15761,7 @@ function requireReactDomClient_development() {
           domElement.setAttribute(key, value);
           break;
         case "onClick":
-          null != value && ("function" !== typeof value && warnForInvalidEventListener(key, value), domElement.onclick = noop$1);
+          null != value && ("function" !== typeof value && warnForInvalidEventListener(key, value), domElement.onclick = noop$12);
           break;
         case "onScroll":
           null != value && ("function" !== typeof value && warnForInvalidEventListener(key, value), listenToNonDelegatedEvent("scroll", domElement));
@@ -15988,7 +15988,7 @@ function requireReactDomClient_development() {
           null != value && ("function" !== typeof value && warnForInvalidEventListener(key, value), listenToNonDelegatedEvent("scrollend", domElement));
           break;
         case "onClick":
-          null != value && ("function" !== typeof value && warnForInvalidEventListener(key, value), domElement.onclick = noop$1);
+          null != value && ("function" !== typeof value && warnForInvalidEventListener(key, value), domElement.onclick = noop$12);
           break;
         case "suppressContentEditableWarning":
         case "suppressHydrationWarning":
@@ -21874,16 +21874,16 @@ function requireChunkAMVS5XVJ() {
       options
     );
   }
-  function invariant2(value, message) {
+  function invariant2(value, message2) {
     if (value === false || value === null || typeof value === "undefined") {
-      throw new Error(message);
+      throw new Error(message2);
     }
   }
-  function warning2(cond, message) {
+  function warning2(cond, message2) {
     if (!cond) {
-      if (typeof console !== "undefined") console.warn(message);
+      if (typeof console !== "undefined") console.warn(message2);
       try {
-        throw new Error(message);
+        throw new Error(message2);
       } catch (e) {
       }
     }
@@ -22206,8 +22206,8 @@ function requireChunkAMVS5XVJ() {
     }
     return matches;
   }
-  function convertRouteMatchToUiMatch(match, loaderData) {
-    let { route, pathname, params } = match;
+  function convertRouteMatchToUiMatch(match2, loaderData) {
+    let { route, pathname, params } = match2;
     return {
       id: route.id,
       pathname,
@@ -22347,13 +22347,13 @@ function requireChunkAMVS5XVJ() {
       let meta = routesMeta[i];
       let end = i === routesMeta.length - 1;
       let remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/";
-      let match = matchPath(
+      let match2 = matchPath(
         { path: meta.relativePath, caseSensitive: meta.caseSensitive, end },
         remainingPathname
       );
       let route = meta.route;
-      if (!match && end && allowPartial && !routesMeta[routesMeta.length - 1].route.index) {
-        match = matchPath(
+      if (!match2 && end && allowPartial && !routesMeta[routesMeta.length - 1].route.index) {
+        match2 = matchPath(
           {
             path: meta.relativePath,
             caseSensitive: meta.caseSensitive,
@@ -22362,21 +22362,21 @@ function requireChunkAMVS5XVJ() {
           remainingPathname
         );
       }
-      if (!match) {
+      if (!match2) {
         return null;
       }
-      Object.assign(matchedParams, match.params);
+      Object.assign(matchedParams, match2.params);
       matches.push({
         // TODO: Can this as be avoided?
         params: matchedParams,
-        pathname: joinPaths([matchedPathname, match.pathname]),
+        pathname: joinPaths([matchedPathname, match2.pathname]),
         pathnameBase: normalizePathname(
-          joinPaths([matchedPathname, match.pathnameBase])
+          joinPaths([matchedPathname, match2.pathnameBase])
         ),
         route
       });
-      if (match.pathnameBase !== "/") {
-        matchedPathname = joinPaths([matchedPathname, match.pathnameBase]);
+      if (match2.pathnameBase !== "/") {
+        matchedPathname = joinPaths([matchedPathname, match2.pathnameBase]);
       }
     }
     return matches;
@@ -22418,11 +22418,11 @@ function requireChunkAMVS5XVJ() {
       pattern.caseSensitive,
       pattern.end
     );
-    let match = pathname.match(matcher);
-    if (!match) return null;
-    let matchedPathname = match[0];
+    let match2 = pathname.match(matcher);
+    if (!match2) return null;
+    let matchedPathname = match2[0];
     let pathnameBase = matchedPathname.replace(/(.)\/+$/, "$1");
-    let captureGroups = match.slice(1);
+    let captureGroups = match2.slice(1);
     let params = compiledParams.reduce(
       (memo2, { paramName, isOptional }, index) => {
         if (paramName === "*") {
@@ -22554,13 +22554,13 @@ function requireChunkAMVS5XVJ() {
   }
   function getPathContributingMatches(matches) {
     return matches.filter(
-      (match, index) => index === 0 || match.route.path && match.route.path.length > 0
+      (match2, index) => index === 0 || match2.route.path && match2.route.path.length > 0
     );
   }
   function getResolveToMatches(matches) {
     let pathMatches = getPathContributingMatches(matches);
     return pathMatches.map(
-      (match, idx) => idx === pathMatches.length - 1 ? match.pathname : match.pathnameBase
+      (match2, idx) => idx === pathMatches.length - 1 ? match2.pathname : match2.pathnameBase
     );
   }
   function resolveTo(toArg, routePathnames, locationPathname, isPathRelative = false) {
@@ -23630,9 +23630,9 @@ function requireChunkAMVS5XVJ() {
         );
         result = results[actionMatch.route.id];
         if (!result) {
-          for (let match of matches) {
-            if (results[match.route.id]) {
-              result = results[match.route.id];
+          for (let match2 of matches) {
+            if (results[match2.route.id]) {
+              result = results[match2.route.id];
               break;
             }
           }
@@ -23983,8 +23983,8 @@ function requireChunkAMVS5XVJ() {
           requestMatches = discoverResult.matches;
         }
       }
-      let match = getTargetMatch(requestMatches, path);
-      if (!match.route.action && !match.route.lazy) {
+      let match2 = getTargetMatch(requestMatches, path);
+      if (!match2.route.action && !match2.route.lazy) {
         let error = getInternalRouterError(405, {
           method: submission.formMethod,
           pathname: path,
@@ -24000,7 +24000,7 @@ function requireChunkAMVS5XVJ() {
         manifest,
         fetchRequest,
         requestMatches,
-        match,
+        match2,
         hydrationRouteProperties2,
         scopedContext
       );
@@ -24010,11 +24010,11 @@ function requireChunkAMVS5XVJ() {
         scopedContext,
         key
       );
-      let actionResult = actionResults[match.route.id];
+      let actionResult = actionResults[match2.route.id];
       if (!actionResult) {
-        for (let match2 of fetchMatches) {
-          if (actionResults[match2.route.id]) {
-            actionResult = actionResults[match2.route.id];
+        for (let match22 of fetchMatches) {
+          if (actionResults[match22.route.id]) {
+            actionResult = actionResults[match22.route.id];
             break;
           }
         }
@@ -24083,7 +24083,7 @@ function requireChunkAMVS5XVJ() {
         routesToUse,
         basename,
         init.patchRoutesOnNavigation != null,
-        [match.route.id, actionResult]
+        [match2.route.id, actionResult]
       );
       revalidatingFetchers.filter((rf) => rf.key !== key).forEach((rf) => {
         let staleKey = rf.key;
@@ -24215,7 +24215,7 @@ function requireChunkAMVS5XVJ() {
           matches = discoverResult.matches;
         }
       }
-      let match = getTargetMatch(matches, path);
+      let match2 = getTargetMatch(matches, path);
       fetchControllers.set(key, abortController);
       let originatingLoadId = incrementingLoadId;
       let dsMatches = getTargetedDataStrategyMatches(
@@ -24223,7 +24223,7 @@ function requireChunkAMVS5XVJ() {
         manifest,
         fetchRequest,
         matches,
-        match,
+        match2,
         hydrationRouteProperties2,
         scopedContext
       );
@@ -24233,7 +24233,7 @@ function requireChunkAMVS5XVJ() {
         scopedContext,
         key
       );
-      let result = results[match.route.id];
+      let result = results[match2.route.id];
       if (fetchControllers.get(key) === abortController) {
         fetchControllers.delete(key);
       }
@@ -25004,13 +25004,13 @@ function requireChunkAMVS5XVJ() {
       } else if (!matches) {
         throw getInternalRouterError(404, { pathname: location2.pathname });
       }
-      let match = routeId ? matches.find((m) => m.route.id === routeId) : getTargetMatch(matches, location2);
-      if (routeId && !match) {
+      let match2 = routeId ? matches.find((m) => m.route.id === routeId) : getTargetMatch(matches, location2);
+      if (routeId && !match2) {
         throw getInternalRouterError(403, {
           pathname: location2.pathname,
           routeId
         });
-      } else if (!match) {
+      } else if (!match2) {
         throw getInternalRouterError(404, { pathname: location2.pathname });
       }
       if (generateMiddlewareResponse) {
@@ -25039,7 +25039,7 @@ function requireChunkAMVS5XVJ() {
                   requestContext,
                   dataStrategy || null,
                   false,
-                  match,
+                  match2,
                   null,
                   false
                 );
@@ -25068,7 +25068,7 @@ function requireChunkAMVS5XVJ() {
         requestContext,
         dataStrategy || null,
         false,
-        match,
+        match2,
         null,
         false
       );
@@ -25299,14 +25299,14 @@ function requireChunkAMVS5XVJ() {
           matches.findIndex((m) => m.route.id === pendingActionResult[0]) - 1
         ) : void 0;
         let pattern = getRoutePattern(matches.map((m) => m.route.path));
-        dsMatches = matches.map((match, index) => {
+        dsMatches = matches.map((match2, index) => {
           if (maxIdx != null && index > maxIdx) {
             return getDataStrategyMatch(
               mapRouteProperties2,
               manifest,
               request,
               pattern,
-              match,
+              match2,
               [],
               requestContext,
               false
@@ -25317,10 +25317,10 @@ function requireChunkAMVS5XVJ() {
             manifest,
             request,
             pattern,
-            match,
+            match2,
             [],
             requestContext,
-            (match.route.loader || match.route.lazy) != null && (!filterMatchesToLoad || filterMatchesToLoad(match))
+            (match2.route.loader || match2.route.lazy) != null && (!filterMatchesToLoad || filterMatchesToLoad(match2))
           );
         });
       }
@@ -25368,17 +25368,17 @@ function requireChunkAMVS5XVJ() {
       );
       let dataResults = {};
       await Promise.all(
-        matches.map(async (match) => {
-          if (!(match.route.id in results)) {
+        matches.map(async (match2) => {
+          if (!(match2.route.id in results)) {
             return;
           }
-          let result = results[match.route.id];
+          let result = results[match2.route.id];
           if (isRedirectDataStrategyResult(result)) {
             let response = result.result;
             throw normalizeRelativeRoutingRedirectResponse(
               response,
               request,
-              match.route.id,
+              match2.route.id,
               matches,
               basename
             );
@@ -25390,7 +25390,7 @@ function requireChunkAMVS5XVJ() {
               throw dataWithResponseInitToResponse(result.result);
             }
           }
-          dataResults[match.route.id] = await convertDataStrategyResultToDataResult(result);
+          dataResults[match2.route.id] = await convertDataStrategyResultToDataResult(result);
         })
       );
       return dataResults;
@@ -25428,10 +25428,10 @@ function requireChunkAMVS5XVJ() {
     let activeRouteMatch;
     if (fromRouteId) {
       contextualMatches = [];
-      for (let match of matches) {
-        contextualMatches.push(match);
-        if (match.route.id === fromRouteId) {
-          activeRouteMatch = match;
+      for (let match2 of matches) {
+        contextualMatches.push(match2);
+        if (match2.route.id === fromRouteId) {
+          activeRouteMatch = match2;
           break;
         }
       }
@@ -25598,8 +25598,8 @@ function requireChunkAMVS5XVJ() {
       actionStatus
     };
     let pattern = getRoutePattern(matches.map((m) => m.route.path));
-    let dsMatches = matches.map((match, index) => {
-      let { route } = match;
+    let dsMatches = matches.map((match2, index) => {
+      let { route } = match2;
       let forceShouldLoad = null;
       if (maxIdx != null && index > maxIdx) {
         forceShouldLoad = false;
@@ -25613,7 +25613,7 @@ function requireChunkAMVS5XVJ() {
           state.loaderData,
           state.errors
         );
-      } else if (isNewLoader(state.loaderData, state.matches[index], match)) {
+      } else if (isNewLoader(state.loaderData, state.matches[index], match2)) {
         forceShouldLoad = true;
       }
       if (forceShouldLoad !== null) {
@@ -25622,7 +25622,7 @@ function requireChunkAMVS5XVJ() {
           manifest,
           request,
           pattern,
-          match,
+          match2,
           lazyRoutePropertiesToSkip,
           scopedContext,
           forceShouldLoad
@@ -25631,19 +25631,19 @@ function requireChunkAMVS5XVJ() {
       let defaultShouldRevalidate = shouldSkipRevalidation ? false : (
         // Forced revalidation due to submission, useRevalidator, or X-Remix-Revalidate
         isRevalidationRequired || currentUrl.pathname + currentUrl.search === nextUrl.pathname + nextUrl.search || // Search params affect all loaders
-        currentUrl.search !== nextUrl.search || isNewRouteInstance(state.matches[index], match)
+        currentUrl.search !== nextUrl.search || isNewRouteInstance(state.matches[index], match2)
       );
       let shouldRevalidateArgs = {
         ...baseShouldRevalidateArgs,
         defaultShouldRevalidate
       };
-      let shouldLoad = shouldRevalidateLoader(match, shouldRevalidateArgs);
+      let shouldLoad = shouldRevalidateLoader(match2, shouldRevalidateArgs);
       return getDataStrategyMatch(
         mapRouteProperties2,
         manifest,
         request,
         pattern,
-        match,
+        match2,
         lazyRoutePropertiesToSkip,
         scopedContext,
         shouldLoad,
@@ -25759,22 +25759,22 @@ function requireChunkAMVS5XVJ() {
     }
     return !hasData && !hasError;
   }
-  function isNewLoader(currentLoaderData, currentMatch, match) {
+  function isNewLoader(currentLoaderData, currentMatch, match2) {
     let isNew = (
       // [a] -> [a, b]
       !currentMatch || // [a, b] -> [a, c]
-      match.route.id !== currentMatch.route.id
+      match2.route.id !== currentMatch.route.id
     );
-    let isMissingData = !currentLoaderData.hasOwnProperty(match.route.id);
+    let isMissingData = !currentLoaderData.hasOwnProperty(match2.route.id);
     return isNew || isMissingData;
   }
-  function isNewRouteInstance(currentMatch, match) {
+  function isNewRouteInstance(currentMatch, match2) {
     let currentPath = currentMatch.route.path;
     return (
       // param change for this match, /users/123 -> /users/456
-      currentMatch.pathname !== match.pathname || // splat param changed, which is not present in match.path
+      currentMatch.pathname !== match2.pathname || // splat param changed, which is not present in match.path
       // e.g. /files/images/avatar.jpg -> files/finances.xls
-      currentPath != null && currentPath.endsWith("*") && currentMatch.params["*"] !== match.params["*"]
+      currentPath != null && currentPath.endsWith("*") && currentMatch.params["*"] !== match2.params["*"]
     );
   }
   function shouldRevalidateLoader(loaderMatch, arg2) {
@@ -26164,15 +26164,15 @@ function requireChunkAMVS5XVJ() {
       return response;
     }
   }
-  function getDataStrategyMatchLazyPromises(mapRouteProperties2, manifest, request, match, lazyRoutePropertiesToSkip) {
+  function getDataStrategyMatchLazyPromises(mapRouteProperties2, manifest, request, match2, lazyRoutePropertiesToSkip) {
     let lazyMiddlewarePromise = loadLazyRouteProperty({
       key: "middleware",
-      route: match.route,
+      route: match2.route,
       manifest,
       mapRouteProperties: mapRouteProperties2
     });
     let lazyRoutePromises = loadLazyRoute(
-      match.route,
+      match2.route,
       isMutationMethod(request.method) ? "action" : "loader",
       manifest,
       mapRouteProperties2,
@@ -26184,17 +26184,17 @@ function requireChunkAMVS5XVJ() {
       handler: lazyRoutePromises.lazyHandlerPromise
     };
   }
-  function getDataStrategyMatch(mapRouteProperties2, manifest, request, unstable_pattern, match, lazyRoutePropertiesToSkip, scopedContext, shouldLoad, unstable_shouldRevalidateArgs = null) {
+  function getDataStrategyMatch(mapRouteProperties2, manifest, request, unstable_pattern, match2, lazyRoutePropertiesToSkip, scopedContext, shouldLoad, unstable_shouldRevalidateArgs = null) {
     let isUsingNewApi = false;
     let _lazyPromises = getDataStrategyMatchLazyPromises(
       mapRouteProperties2,
       manifest,
       request,
-      match,
+      match2,
       lazyRoutePropertiesToSkip
     );
     return {
-      ...match,
+      ...match2,
       _lazyPromises,
       shouldLoad,
       unstable_shouldRevalidateArgs,
@@ -26204,22 +26204,22 @@ function requireChunkAMVS5XVJ() {
           return shouldLoad;
         }
         if (typeof defaultShouldRevalidate === "boolean") {
-          return shouldRevalidateLoader(match, {
+          return shouldRevalidateLoader(match2, {
             ...unstable_shouldRevalidateArgs,
             defaultShouldRevalidate
           });
         }
-        return shouldRevalidateLoader(match, unstable_shouldRevalidateArgs);
+        return shouldRevalidateLoader(match2, unstable_shouldRevalidateArgs);
       },
       resolve(handlerOverride) {
-        let { lazy, loader, middleware } = match.route;
+        let { lazy, loader, middleware } = match2.route;
         let callHandler = isUsingNewApi || shouldLoad || handlerOverride && !isMutationMethod(request.method) && (lazy || loader);
         let isMiddlewareOnlyRoute = middleware && middleware.length > 0 && !loader && !lazy;
         if (callHandler && (isMutationMethod(request.method) || !isMiddlewareOnlyRoute)) {
           return callLoaderOrAction({
             request,
             unstable_pattern,
-            match,
+            match: match2,
             lazyHandlerPromise: _optionalChain([_lazyPromises, "optionalAccess", (_39) => _39.handler]),
             lazyRoutePromise: _optionalChain([_lazyPromises, "optionalAccess", (_40) => _40.route]),
             handlerOverride,
@@ -26231,10 +26231,10 @@ function requireChunkAMVS5XVJ() {
     };
   }
   function getTargetedDataStrategyMatches(mapRouteProperties2, manifest, request, matches, targetMatch, lazyRoutePropertiesToSkip, scopedContext, shouldRevalidateArgs = null) {
-    return matches.map((match) => {
-      if (match.route.id !== targetMatch.route.id) {
+    return matches.map((match2) => {
+      if (match2.route.id !== targetMatch.route.id) {
         return {
-          ...match,
+          ...match2,
           shouldLoad: false,
           unstable_shouldRevalidateArgs: shouldRevalidateArgs,
           unstable_shouldCallHandler: () => false,
@@ -26242,7 +26242,7 @@ function requireChunkAMVS5XVJ() {
             mapRouteProperties2,
             manifest,
             request,
-            match,
+            match2,
             lazyRoutePropertiesToSkip
           ),
           resolve: () => Promise.resolve({ type: "data", result: void 0 })
@@ -26253,7 +26253,7 @@ function requireChunkAMVS5XVJ() {
         manifest,
         request,
         getRoutePattern(matches.map((m) => m.route.path)),
-        match,
+        match2,
         lazyRoutePropertiesToSkip,
         scopedContext,
         true,
@@ -26309,7 +26309,7 @@ function requireChunkAMVS5XVJ() {
   async function callLoaderOrAction({
     request,
     unstable_pattern,
-    match,
+    match: match2,
     lazyHandlerPromise,
     lazyRoutePromise,
     handlerOverride,
@@ -26328,7 +26328,7 @@ function requireChunkAMVS5XVJ() {
         if (typeof handler !== "function") {
           return Promise.reject(
             new Error(
-              `You cannot call the handler for a route which defines a boolean "${type}" [routeId: ${match.route.id}]`
+              `You cannot call the handler for a route which defines a boolean "${type}" [routeId: ${match2.route.id}]`
             )
           );
         }
@@ -26336,7 +26336,7 @@ function requireChunkAMVS5XVJ() {
           {
             request,
             unstable_pattern,
-            params: match.params,
+            params: match2.params,
             context: scopedContext
           },
           ...ctx !== void 0 ? [ctx] : []
@@ -26353,7 +26353,7 @@ function requireChunkAMVS5XVJ() {
       return Promise.race([handlerPromise, abortPromise]);
     };
     try {
-      let handler = isAction ? match.route.action : match.route.loader;
+      let handler = isAction ? match2.route.action : match2.route.loader;
       if (lazyHandlerPromise || lazyRoutePromise) {
         if (handler) {
           let handlerError;
@@ -26374,7 +26374,7 @@ function requireChunkAMVS5XVJ() {
           result = value;
         } else {
           await lazyHandlerPromise;
-          let handler2 = isAction ? match.route.action : match.route.loader;
+          let handler2 = isAction ? match2.route.action : match2.route.loader;
           if (handler2) {
             [result] = await Promise.all([runHandler(handler2), lazyRoutePromise]);
           } else if (type === "action") {
@@ -26383,7 +26383,7 @@ function requireChunkAMVS5XVJ() {
             throw getInternalRouterError(405, {
               method: request.method,
               pathname,
-              routeId: match.route.id
+              routeId: match2.route.id
             });
           } else {
             return { type: "data", result: void 0 };
@@ -26547,11 +26547,11 @@ function requireChunkAMVS5XVJ() {
     let foundError = false;
     let loaderHeaders = {};
     let pendingError = pendingActionResult && isErrorResult(pendingActionResult[1]) ? pendingActionResult[1].error : void 0;
-    matches.forEach((match) => {
-      if (!(match.route.id in results)) {
+    matches.forEach((match2) => {
+      if (!(match2.route.id in results)) {
         return;
       }
-      let id2 = match.route.id;
+      let id2 = match2.route.id;
       let result = results[id2];
       invariant2(
         !isRedirectResult(result),
@@ -26612,14 +26612,14 @@ function requireChunkAMVS5XVJ() {
       pendingActionResult
     );
     revalidatingFetchers.filter((f) => !f.matches || f.matches.some((m) => m.shouldLoad)).forEach((rf) => {
-      let { key, match, controller } = rf;
+      let { key, match: match2, controller } = rf;
       if (controller && controller.signal.aborted) {
         return;
       }
       let result = fetcherResults[key];
       invariant2(result, "Did not find corresponding fetcher result");
       if (isErrorResult(result)) {
-        let boundaryMatch = findNearestBoundary(state.matches, _optionalChain([match, "optionalAccess", (_61) => _61.route, "access", (_62) => _62.id]));
+        let boundaryMatch = findNearestBoundary(state.matches, _optionalChain([match2, "optionalAccess", (_61) => _61.route, "access", (_62) => _62.id]));
         if (!(errors && errors[boundaryMatch.route.id])) {
           errors = {
             ...errors,
@@ -26641,9 +26641,9 @@ function requireChunkAMVS5XVJ() {
       merged[k] = v;
       return merged;
     }, {});
-    for (let match of matches) {
-      let id2 = match.route.id;
-      if (!newLoaderData.hasOwnProperty(id2) && loaderData.hasOwnProperty(id2) && match.route.loader) {
+    for (let match2 of matches) {
+      let id2 = match2.route.id;
+      if (!newLoaderData.hasOwnProperty(id2) && loaderData.hasOwnProperty(id2) && match2.route.loader) {
         mergedLoaderData[id2] = loaderData[id2];
       }
       if (errors && errors.hasOwnProperty(id2)) {
@@ -26690,7 +26690,7 @@ function requireChunkAMVS5XVJ() {
     routeId,
     method,
     type,
-    message
+    message: message2
   } = {}) {
     let statusText = "Unknown Server Error";
     let errorMessage = "Unknown @remix-run/router error";
@@ -27356,8 +27356,8 @@ function requireChunkAMVS5XVJ() {
               }
               continue;
             case TYPE_ERROR:
-              const [, message, errorType] = value;
-              let error = errorType && globalObj && globalObj[errorType] ? new globalObj[errorType](message) : new Error(message);
+              const [, message2, errorType] = value;
+              let error = errorType && globalObj && globalObj[errorType] ? new globalObj[errorType](message2) : new Error(message2);
               hydrated[index2] = error;
               set(error);
               continue;
@@ -27689,11 +27689,11 @@ function requireChunkAMVS5XVJ() {
   };
   var ESCAPE_REGEX = /[&><\u2028\u2029]/g;
   function escapeHtml(html) {
-    return html.replace(ESCAPE_REGEX, (match) => ESCAPE_LOOKUP[match]);
+    return html.replace(ESCAPE_REGEX, (match2) => ESCAPE_LOOKUP[match2]);
   }
-  function invariant22(value, message) {
+  function invariant22(value, message2) {
     if (value === false || value === null || typeof value === "undefined") {
-      throw new Error(message);
+      throw new Error(message2);
     }
   }
   var SingleFetchRedirectSymbol = Symbol("SingleFetchRedirect");
@@ -27770,10 +27770,10 @@ function requireChunkAMVS5XVJ() {
   function getTurboStreamSingleFetchDataStrategy(getRouter, manifest, routeModules, ssr, basename) {
     let dataStrategy = getSingleFetchDataStrategyImpl(
       getRouter,
-      (match) => {
-        let manifestRoute = manifest.routes[match.route.id];
+      (match2) => {
+        let manifestRoute = manifest.routes[match2.route.id];
         invariant22(manifestRoute, "Route not found in manifest");
-        let routeModule = routeModules[match.route.id];
+        let routeModule = routeModules[match2.route.id];
         return {
           hasLoader: manifestRoute.hasLoader,
           hasClientLoader: manifestRoute.hasClientLoader,
@@ -27939,13 +27939,13 @@ function requireChunkAMVS5XVJ() {
       let middlewareError;
       let fetchedData = await singleFetchPromise;
       if ("routes" in fetchedData) {
-        for (let match of matches) {
-          if (match.route.id in fetchedData.routes) {
-            let routeResult = fetchedData.routes[match.route.id];
+        for (let match2 of matches) {
+          if (match2.route.id in fetchedData.routes) {
+            let routeResult = fetchedData.routes[match2.route.id];
             if ("error" in routeResult) {
               middlewareError = routeResult.error;
-              if (_optionalChain([results, "access", (_68) => _68[match.route.id], "optionalAccess", (_69) => _69.result]) == null) {
-                results[match.route.id] = {
+              if (_optionalChain([results, "access", (_68) => _68[match2.route.id], "optionalAccess", (_69) => _69.result]) == null) {
+                results[match2.route.id] = {
                   type: "error",
                   result: middlewareError
                 };
@@ -28075,12 +28075,12 @@ function requireChunkAMVS5XVJ() {
       plugins: [
         (type, ...rest) => {
           if (type === "SanitizedError") {
-            let [name, message, stack] = rest;
+            let [name, message2, stack] = rest;
             let Constructor = Error;
             if (name && name in global2 && typeof global2[name] === "function") {
               Constructor = global2[name];
             }
-            let error = new Constructor(message);
+            let error = new Constructor(message2);
             error.stack = stack;
             return { value: error };
           }
@@ -28390,8 +28390,8 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
     }
     let renderedMatches = _renderMatches(
       matches && matches.map(
-        (match) => Object.assign({}, match, {
-          params: Object.assign({}, parentParams, match.params),
+        (match2) => Object.assign({}, match2, {
+          params: Object.assign({}, parentParams, match2.params),
           pathname: joinPaths([
             parentPathnameBase,
             // Re-encode pathnames that were decoded inside matchRoutes.
@@ -28399,18 +28399,18 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
             // `new URL()` internally and we need to prevent it from treating
             // them as separators
             navigator2.encodeLocation ? navigator2.encodeLocation(
-              match.pathname.replace(/\?/g, "%3F").replace(/#/g, "%23")
-            ).pathname : match.pathname
+              match2.pathname.replace(/\?/g, "%3F").replace(/#/g, "%23")
+            ).pathname : match2.pathname
           ]),
-          pathnameBase: match.pathnameBase === "/" ? parentPathnameBase : joinPaths([
+          pathnameBase: match2.pathnameBase === "/" ? parentPathnameBase : joinPaths([
             parentPathnameBase,
             // Re-encode pathnames that were decoded inside matchRoutes
             // Pre-encode `?` and `#` ahead of `encodeLocation` because it uses
             // `new URL()` internally and we need to prevent it from treating
             // them as separators
             navigator2.encodeLocation ? navigator2.encodeLocation(
-              match.pathnameBase.replace(/\?/g, "%3F").replace(/#/g, "%23")
-            ).pathname : match.pathnameBase
+              match2.pathnameBase.replace(/\?/g, "%3F").replace(/#/g, "%23")
+            ).pathname : match2.pathnameBase
           ])
         })
       ),
@@ -28443,7 +28443,7 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
   }
   function DefaultErrorComponent() {
     let error = useRouteError();
-    let message = isRouteErrorResponse(error) ? `${error.status} ${error.statusText}` : error instanceof Error ? error.message : JSON.stringify(error);
+    let message2 = isRouteErrorResponse(error) ? `${error.status} ${error.statusText}` : error instanceof Error ? error.message : JSON.stringify(error);
     let stack = error instanceof Error ? error.stack : null;
     let lightgrey = "rgba(200,200,200, 0.5)";
     let preStyles = { padding: "0.5rem", backgroundColor: lightgrey };
@@ -28456,7 +28456,7 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
       );
       devInfo = /* @__PURE__ */ React3.createElement(React3.Fragment, null, /* @__PURE__ */ React3.createElement("p", null, "💿 Hey developer 👋"), /* @__PURE__ */ React3.createElement("p", null, "You can provide a way better UX than this when your app throws errors by providing your own ", /* @__PURE__ */ React3.createElement("code", { style: codeStyles }, "ErrorBoundary"), " or", " ", /* @__PURE__ */ React3.createElement("code", { style: codeStyles }, "errorElement"), " prop on your route."));
     }
-    return /* @__PURE__ */ React3.createElement(React3.Fragment, null, /* @__PURE__ */ React3.createElement("h2", null, "Unexpected Application Error!"), /* @__PURE__ */ React3.createElement("h3", { style: { fontStyle: "italic" } }, message), stack ? /* @__PURE__ */ React3.createElement("pre", { style: preStyles }, stack) : null, devInfo);
+    return /* @__PURE__ */ React3.createElement(React3.Fragment, null, /* @__PURE__ */ React3.createElement("h2", null, "Unexpected Application Error!"), /* @__PURE__ */ React3.createElement("h3", { style: { fontStyle: "italic" } }, message2), stack ? /* @__PURE__ */ React3.createElement("pre", { style: preStyles }, stack) : null, devInfo);
   }
   var defaultErrorElement = /* @__PURE__ */ React3.createElement(DefaultErrorComponent, null);
   var RenderErrorBoundary = class extends React3.Component {
@@ -28505,10 +28505,10 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
       )) : this.props.children;
     }
   };
-  function RenderedRoute({ routeContext, match, children }) {
+  function RenderedRoute({ routeContext, match: match2, children }) {
     let dataRouterContext = React3.useContext(DataRouterContext);
-    if (dataRouterContext && dataRouterContext.static && dataRouterContext.staticContext && (match.route.errorElement || match.route.ErrorBoundary)) {
-      dataRouterContext.staticContext._deepestRenderedBoundaryId = match.route.id;
+    if (dataRouterContext && dataRouterContext.static && dataRouterContext.staticContext && (match2.route.errorElement || match2.route.ErrorBoundary)) {
+      dataRouterContext.staticContext._deepestRenderedBoundaryId = match2.route.id;
     }
     return /* @__PURE__ */ React3.createElement(RouteContext.Provider, { value: routeContext }, children);
   }
@@ -28546,14 +28546,14 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
     let fallbackIndex = -1;
     if (dataRouterState) {
       for (let i = 0; i < renderedMatches.length; i++) {
-        let match = renderedMatches[i];
-        if (match.route.HydrateFallback || match.route.hydrateFallbackElement) {
+        let match2 = renderedMatches[i];
+        if (match2.route.HydrateFallback || match2.route.hydrateFallbackElement) {
           fallbackIndex = i;
         }
-        if (match.route.id) {
+        if (match2.route.id) {
           let { loaderData, errors: errors2 } = dataRouterState;
-          let needsToRunLoader = match.route.loader && !loaderData.hasOwnProperty(match.route.id) && (!errors2 || errors2[match.route.id] === void 0);
-          if (match.route.lazy || needsToRunLoader) {
+          let needsToRunLoader = match2.route.loader && !loaderData.hasOwnProperty(match2.route.id) && (!errors2 || errors2[match2.route.id] === void 0);
+          if (match2.route.lazy || needsToRunLoader) {
             renderFallback = true;
             if (fallbackIndex >= 0) {
               renderedMatches = renderedMatches.slice(0, fallbackIndex + 1);
@@ -28573,14 +28573,14 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
       });
     } : void 0;
     return renderedMatches.reduceRight(
-      (outlet, match, index) => {
+      (outlet, match2, index) => {
         let error;
         let shouldRenderHydrateFallback = false;
         let errorElement = null;
         let hydrateFallbackElement = null;
         if (dataRouterState) {
-          error = errors && match.route.id ? errors[match.route.id] : void 0;
-          errorElement = match.route.errorElement || defaultErrorElement;
+          error = errors && match2.route.id ? errors[match2.route.id] : void 0;
+          errorElement = match2.route.errorElement || defaultErrorElement;
           if (renderFallback) {
             if (fallbackIndex < 0 && index === 0) {
               warningOnce(
@@ -28592,7 +28592,7 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
               hydrateFallbackElement = null;
             } else if (fallbackIndex === index) {
               shouldRenderHydrateFallback = true;
-              hydrateFallbackElement = match.route.hydrateFallbackElement || null;
+              hydrateFallbackElement = match2.route.hydrateFallbackElement || null;
             }
           }
         }
@@ -28603,17 +28603,17 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
             children = errorElement;
           } else if (shouldRenderHydrateFallback) {
             children = hydrateFallbackElement;
-          } else if (match.route.Component) {
-            children = /* @__PURE__ */ React3.createElement(match.route.Component, null);
-          } else if (match.route.element) {
-            children = match.route.element;
+          } else if (match2.route.Component) {
+            children = /* @__PURE__ */ React3.createElement(match2.route.Component, null);
+          } else if (match2.route.element) {
+            children = match2.route.element;
           } else {
             children = outlet;
           }
           return /* @__PURE__ */ React3.createElement(
             RenderedRoute,
             {
-              match,
+              match: match2,
               routeContext: {
                 outlet,
                 matches: matches2,
@@ -28623,7 +28623,7 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
             }
           );
         };
-        return dataRouterState && (match.route.ErrorBoundary || match.route.errorElement || index === 0) ? /* @__PURE__ */ React3.createElement(
+        return dataRouterState && (match2.route.ErrorBoundary || match2.route.errorElement || index === 0) ? /* @__PURE__ */ React3.createElement(
           RenderErrorBoundary,
           {
             location: dataRouterState.location,
@@ -28832,10 +28832,10 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
     return navigate;
   }
   var alreadyWarned = {};
-  function warningOnce(key, cond, message) {
+  function warningOnce(key, cond, message2) {
     if (!cond && !alreadyWarned[key]) {
       alreadyWarned[key] = true;
-      warning2(false, message);
+      warning2(false, message2);
     }
   }
   function useRoute(...args) {
@@ -28881,9 +28881,9 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
     }
   }
   function getKeyedLinksForMatches(matches, routeModules, manifest) {
-    let descriptors = matches.map((match) => {
-      let module = routeModules[match.route.id];
-      let route = manifest.routes[match.route.id];
+    let descriptors = matches.map((match2) => {
+      let module = routeModules[match2.route.id];
+      let route = manifest.routes[match2.route.id];
       return [
         route && route.css ? route.css.map((href) => ({ rel: "stylesheet", href })) : [],
         _optionalChain([module, "optionalAccess", (_85) => _85.links, "optionalCall", (_86) => _86()]) || []
@@ -28962,8 +28962,8 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
   }
   async function getKeyedPrefetchLinks(matches, manifest, routeModules) {
     let links = await Promise.all(
-      matches.map(async (match) => {
-        let route = manifest.routes[match.route.id];
+      matches.map(async (match2) => {
+        let route = manifest.routes[match2.route.id];
         if (route) {
           let mod = await loadRouteModule(route, routeModules);
           return mod.links ? mod.links() : [];
@@ -28978,41 +28978,41 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
     );
   }
   function getNewMatchesForLinks(page, nextMatches, currentMatches, manifest, location2, mode) {
-    let isNew = (match, index) => {
+    let isNew = (match2, index) => {
       if (!currentMatches[index]) return true;
-      return match.route.id !== currentMatches[index].route.id;
+      return match2.route.id !== currentMatches[index].route.id;
     };
-    let matchPathChanged = (match, index) => {
+    let matchPathChanged = (match2, index) => {
       return (
         // param change, /users/123 -> /users/456
-        currentMatches[index].pathname !== match.pathname || // splat param changed, which is not present in match.path
+        currentMatches[index].pathname !== match2.pathname || // splat param changed, which is not present in match.path
         // e.g. /files/images/avatar.jpg -> files/finances.xls
-        _optionalChain([currentMatches, "access", (_87) => _87[index], "access", (_88) => _88.route, "access", (_89) => _89.path, "optionalAccess", (_90) => _90.endsWith, "call", (_91) => _91("*")]) && currentMatches[index].params["*"] !== match.params["*"]
+        _optionalChain([currentMatches, "access", (_87) => _87[index], "access", (_88) => _88.route, "access", (_89) => _89.path, "optionalAccess", (_90) => _90.endsWith, "call", (_91) => _91("*")]) && currentMatches[index].params["*"] !== match2.params["*"]
       );
     };
     if (mode === "assets") {
       return nextMatches.filter(
-        (match, index) => isNew(match, index) || matchPathChanged(match, index)
+        (match2, index) => isNew(match2, index) || matchPathChanged(match2, index)
       );
     }
     if (mode === "data") {
-      return nextMatches.filter((match, index) => {
-        let manifestRoute = manifest.routes[match.route.id];
+      return nextMatches.filter((match2, index) => {
+        let manifestRoute = manifest.routes[match2.route.id];
         if (!manifestRoute || !manifestRoute.hasLoader) {
           return false;
         }
-        if (isNew(match, index) || matchPathChanged(match, index)) {
+        if (isNew(match2, index) || matchPathChanged(match2, index)) {
           return true;
         }
-        if (match.route.shouldRevalidate) {
-          let routeChoice = match.route.shouldRevalidate({
+        if (match2.route.shouldRevalidate) {
+          let routeChoice = match2.route.shouldRevalidate({
             currentUrl: new URL(
               location2.pathname + location2.search + location2.hash,
               window.origin
             ),
             currentParams: _optionalChain([currentMatches, "access", (_92) => _92[0], "optionalAccess", (_93) => _93.params]) || {},
             nextUrl: new URL(page, window.origin),
-            nextParams: match.params,
+            nextParams: match2.params,
             defaultShouldRevalidate: true
           });
           if (typeof routeChoice === "boolean") {
@@ -29026,8 +29026,8 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
   }
   function getModuleLinkHrefs(matches, manifest, { includeHydrateFallback } = {}) {
     return dedupeHrefs(
-      matches.map((match) => {
-        let route = manifest.routes[match.route.id];
+      matches.map((match2) => {
+        let route = manifest.routes[match2.route.id];
         if (!route) return [];
         let hrefs = [route.module];
         if (route.clientActionModule) {
@@ -29084,10 +29084,10 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
     return _isPreloadSupported;
   }
   var alreadyWarned2 = {};
-  function warnOnce2(condition, message) {
-    if (!condition && !alreadyWarned2[message]) {
-      alreadyWarned2[message] = true;
-      console.warn(message);
+  function warnOnce2(condition, message2) {
+    if (!condition && !alreadyWarned2[message2]) {
+      alreadyWarned2[message2] = true;
+      console.warn(message2);
     }
   }
   function RemixRootDefaultHydrateFallback() {
@@ -29977,7 +29977,7 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
       let params = _match.params;
       let routeModule = routeModules[routeId];
       let routeMeta = [];
-      let match = {
+      let match2 = {
         id: routeId,
         data: data2,
         loaderData: data2,
@@ -29987,7 +29987,7 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
         handle: _match.route.handle,
         error
       };
-      matches[i] = match;
+      matches[i] = match2;
       if (_optionalChain([routeModule, "optionalAccess", (_106) => _106.meta])) {
         routeMeta = typeof routeModule.meta === "function" ? routeModule.meta({
           data: data2,
@@ -30006,8 +30006,8 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
           "The route at " + _match.route.path + " returns an invalid value. All route meta functions must return an array of meta objects.\n\nTo reference the meta function API, see https://remix.run/route/meta"
         );
       }
-      match.meta = routeMeta;
-      matches[i] = match;
+      match2.meta = routeMeta;
+      matches[i] = match2;
       meta = [...routeMeta];
       leafMeta = meta;
     }
@@ -30088,10 +30088,10 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
       let streamScript = "window.__reactRouterContext.stream = new ReadableStream({start(controller){window.__reactRouterContext.streamController = controller;}}).pipeThrough(new TextEncoderStream());";
       let contextScript = staticContext ? `window.__reactRouterContext = ${serverHandoffString};${streamScript}` : " ";
       let routeModulesScript = !isStatic ? " " : `${_optionalChain([manifest, "access", (_107) => _107.hmr, "optionalAccess", (_108) => _108.runtime]) ? `import ${JSON.stringify(manifest.hmr.runtime)};` : ""}${!enableFogOfWar ? `import ${JSON.stringify(manifest.url)}` : ""};
-${matches.map((match, routeIndex) => {
+${matches.map((match2, routeIndex) => {
         let routeVarName = `route${routeIndex}`;
-        let manifestEntry = manifest.routes[match.route.id];
-        invariant22(manifestEntry, `Route ${match.route.id} not found in manifest`);
+        let manifestEntry = manifest.routes[match2.route.id];
+        invariant22(manifestEntry, `Route ${match2.route.id} not found in manifest`);
         let {
           clientActionModule,
           clientLoaderModule,
@@ -30141,7 +30141,7 @@ ${matches.map((match, routeIndex) => {
           2
         )};`
       ) : ""}
-  window.__reactRouterRouteModules = {${matches.map((match, index) => `${JSON.stringify(match.route.id)}:route${index}`).join(",")}};
+  window.__reactRouterRouteModules = {${matches.map((match2, index) => `${JSON.stringify(match2.route.id)}:route${index}`).join(",")}};
 
 import(${JSON.stringify(manifest.entry.module)});`;
       return /* @__PURE__ */ React7.createElement(React7.Fragment, null, /* @__PURE__ */ React7.createElement(
@@ -31232,8 +31232,8 @@ function requireChunkPZWDWJAY() {
     };
     let initialMatches = _chunkAMVS5XVJjs.matchRoutes.call(void 0, routes, location2, basename);
     if (initialMatches) {
-      for (let match of initialMatches) {
-        let routeId = match.route.id;
+      for (let match2 of initialMatches) {
+        let routeId = match2.route.id;
         let routeInfo = getRouteInfo(routeId);
         if (_chunkAMVS5XVJjs.shouldHydrateRouteLoader.call(
           void 0,
@@ -31361,17 +31361,17 @@ function requireChunkPZWDWJAY() {
   }
   function createRSCRouteModules(payload) {
     const routeModules = {};
-    for (const match of payload.matches) {
-      populateRSCRouteModules(routeModules, match);
+    for (const match2 of payload.matches) {
+      populateRSCRouteModules(routeModules, match2);
     }
     return routeModules;
   }
   function populateRSCRouteModules(routeModules, matches) {
     matches = Array.isArray(matches) ? matches : [matches];
-    for (const match of matches) {
-      routeModules[match.id] = {
-        links: match.links,
-        meta: match.meta,
+    for (const match2 of matches) {
+      routeModules[match2.id] = {
+        links: match2.links,
+        meta: match2.meta,
         default: noopComponent
       };
     }
@@ -32121,7 +32121,7 @@ function requireChunkO4JVZSOY() {
     let { basename } = React.useContext(_chunkAMVS5XVJjs.NavigationContext);
     let routeContext = React.useContext(_chunkAMVS5XVJjs.RouteContext);
     _chunkAMVS5XVJjs.invariant.call(void 0, routeContext, "useFormAction must be used inside a RouteContext");
-    let [match] = routeContext.matches.slice(-1);
+    let [match2] = routeContext.matches.slice(-1);
     let path = { ..._chunkAMVS5XVJjs.useResolvedPath.call(void 0, action ? action : ".", { relative }) };
     let location2 = _chunkAMVS5XVJjs.useLocation.call(void 0);
     if (action == null) {
@@ -32136,7 +32136,7 @@ function requireChunkO4JVZSOY() {
         path.search = qs ? `?${qs}` : "";
       }
     }
-    if ((!action || action === ".") && match.route.index) {
+    if ((!action || action === ".") && match2.route.index) {
       path.search = path.search ? path.search.replace(/^\?/, "?index&") : "?index";
     }
     if (basename !== "/") {
@@ -32368,19 +32368,19 @@ function requireChunkO4JVZSOY() {
   }
   function usePrompt({
     when,
-    message
+    message: message2
   }) {
     let blocker = _chunkAMVS5XVJjs.useBlocker.call(void 0, when);
     React.useEffect(() => {
       if (blocker.state === "blocked") {
-        let proceed = window.confirm(message);
+        let proceed = window.confirm(message2);
         if (proceed) {
           setTimeout(blocker.proceed, 0);
         } else {
           blocker.reset();
         }
       }
-    }, [blocker, message]);
+    }, [blocker, message2]);
     React.useEffect(() => {
       if (blocker.state === "blocked" && !when) {
         blocker.reset();
@@ -32567,10 +32567,10 @@ function requireChunkO4JVZSOY() {
       void 0,
       manifest
     );
-    let matches = context.matches.map((match) => {
-      let route = manifest[match.route.id] || match.route;
+    let matches = context.matches.map((match2) => {
+      let route = manifest[match2.route.id] || match2.route;
       return {
-        ...match,
+        ...match2,
         route
       };
     });
@@ -32681,7 +32681,7 @@ function requireChunkO4JVZSOY() {
   };
   var ESCAPE_REGEX = /[&><\u2028\u2029]/g;
   function htmlEscape(str) {
-    return str.replace(ESCAPE_REGEX, (match) => ESCAPE_LOOKUP[match]);
+    return str.replace(ESCAPE_REGEX, (match2) => ESCAPE_LOOKUP[match2]);
   }
   chunkO4JVZSOY.createSearchParams = createSearchParams;
   chunkO4JVZSOY.createBrowserRouter = createBrowserRouter;
@@ -32808,7 +32808,7 @@ function requireDist$1() {
       str += "; Path=" + cookie.path;
     }
     if (cookie.expires) {
-      if (!isDate(cookie.expires) || !Number.isFinite(cookie.expires.valueOf())) {
+      if (!isDate2(cookie.expires) || !Number.isFinite(cookie.expires.valueOf())) {
         throw new TypeError(`option expires is invalid: ${cookie.expires}`);
       }
       str += "; Expires=" + cookie.expires.toUTCString();
@@ -32953,7 +32953,7 @@ function requireDist$1() {
       return str;
     }
   }
-  function isDate(val) {
+  function isDate2(val) {
     return __toString.call(val) === "[object Date]";
   }
   return dist;
@@ -33216,8 +33216,8 @@ function requireDevelopment() {
     context.staticHandlerContext.loaderData = {
       ...context.staticHandlerContext.loaderData
     };
-    for (let match of context.staticHandlerContext.matches) {
-      let routeId = match.route.id;
+    for (let match2 of context.staticHandlerContext.matches) {
+      let routeId = match2.route.id;
       let route = routeModules[routeId];
       let manifestRoute = context.manifest.routes[routeId];
       if (route && manifestRoute && _chunkAMVS5XVJjs.shouldHydrateRouteLoader.call(
@@ -33626,10 +33626,10 @@ function requireDevelopment() {
       basename
     );
     if (!matches) return null;
-    return matches.map((match) => ({
-      params: match.params,
-      pathname: match.pathname,
-      route: match.route
+    return matches.map((match2) => ({
+      params: match2.params,
+      pathname: match2.pathname,
+      route: match2.route
     }));
   }
   async function callRouteHandler(handler, args) {
@@ -33682,12 +33682,12 @@ function requireDevelopment() {
     }
     return new Request(url2.href, init);
   }
-  function invariant2(value, message) {
+  function invariant2(value, message2) {
     if (value === false || value === null || typeof value === "undefined") {
       console.error(
         "The following error is a bug in React Router; please open an issue! https://github.com/remix-run/react-router/issues/new/choose"
       );
-      throw new Error(message);
+      throw new Error(message2);
     }
   }
   var globalDevServerHooksKey = "__reactRouterDevServerHooks";
@@ -33815,8 +33815,8 @@ function requireDevelopment() {
     let errorHeaders;
     if (boundaryIdx >= 0) {
       let { actionHeaders, actionData, loaderHeaders, loaderData } = context;
-      context.matches.slice(boundaryIdx).some((match) => {
-        let id2 = match.route.id;
+      context.matches.slice(boundaryIdx).some((match2) => {
+        let id2 = match2.route.id;
         if (actionHeaders[id2] && (!actionData || !actionData.hasOwnProperty(id2))) {
           errorHeaders = actionHeaders[id2];
         } else if (loaderHeaders[id2] && !loaderData.hasOwnProperty(id2)) {
@@ -33826,13 +33826,13 @@ function requireDevelopment() {
       });
     }
     const defaultHeaders = new Headers(_defaultHeaders);
-    return matches.reduce((parentHeaders, match, idx) => {
-      let { id: id2 } = match.route;
+    return matches.reduce((parentHeaders, match2, idx) => {
+      let { id: id2 } = match2.route;
       let loaderHeaders = context.loaderHeaders[id2] || new Headers();
       let actionHeaders = context.actionHeaders[id2] || new Headers();
       let includeErrorHeaders = errorHeaders != null && idx === matches.length - 1;
       let includeErrorCookies = includeErrorHeaders && errorHeaders !== loaderHeaders && errorHeaders !== actionHeaders;
-      let headersFn = getRouteHeadersFn(match);
+      let headersFn = getRouteHeadersFn(match2);
       if (headersFn == null) {
         let headers2 = new Headers(parentHeaders);
         if (includeErrorCookies) {
@@ -34086,8 +34086,8 @@ function requireDevelopment() {
       plugins: [
         (value) => {
           if (value instanceof Error) {
-            let { name, message, stack } = serverMode === "production" ? sanitizeError(value, serverMode) : value;
-            return ["SanitizedError", name, message, stack];
+            let { name, message: message2, stack } = serverMode === "production" ? sanitizeError(value, serverMode) : value;
+            return ["SanitizedError", name, message2, stack];
           }
           if (value instanceof _chunkAMVS5XVJjs.ErrorResponseImpl) {
             let { data: data3, status, statusText } = value;
@@ -34380,8 +34380,8 @@ function requireDevelopment() {
       for (let path of paths) {
         let matches = matchServerRoutes(routes, path, build.basename);
         if (matches) {
-          for (let match of matches) {
-            let routeId = match.route.id;
+          for (let match2 of matches) {
+            let routeId = match2.route.id;
             let route = build.assets.routes[routeId];
             if (route) {
               patches[routeId] = route;
@@ -34613,13 +34613,13 @@ function requireDevelopment() {
     );
   }
   function returnLastResortErrorResponse(error, serverMode) {
-    let message = "Unexpected Server Error";
+    let message2 = "Unexpected Server Error";
     if (serverMode !== "production") {
-      message += `
+      message2 += `
 
 ${String(error)}`;
     }
-    return new Response(message, {
+    return new Response(message2, {
       status: 500,
       headers: {
         "Content-Type": "text/plain"
@@ -35062,15 +35062,15 @@ ${String(error)}`;
     }
     if (payload.type !== "render") return null;
     let patchedLoaderData = { ...payload.loaderData };
-    for (const match of payload.matches) {
+    for (const match2 of payload.matches) {
       if (_chunkAMVS5XVJjs.shouldHydrateRouteLoader.call(
         void 0,
-        match.id,
-        match.clientLoader,
-        match.hasLoader,
+        match2.id,
+        match2.clientLoader,
+        match2.hasLoader,
         false
-      ) && (match.hydrateFallbackElement || !match.hasLoader)) {
-        delete patchedLoaderData[match.id];
+      ) && (match2.hydrateFallbackElement || !match2.hasLoader)) {
+        delete patchedLoaderData[match2.id];
       }
     }
     const context = {
@@ -35088,37 +35088,37 @@ ${String(error)}`;
       loaderHeaders: {},
       location: payload.location,
       statusCode: 200,
-      matches: payload.matches.map((match) => ({
-        params: match.params,
-        pathname: match.pathname,
-        pathnameBase: match.pathnameBase,
+      matches: payload.matches.map((match2) => ({
+        params: match2.params,
+        pathname: match2.pathname,
+        pathnameBase: match2.pathnameBase,
         route: {
-          id: match.id,
-          action: match.hasAction || !!match.clientAction,
-          handle: match.handle,
-          hasErrorBoundary: match.hasErrorBoundary,
-          loader: match.hasLoader || !!match.clientLoader,
-          index: match.index,
-          path: match.path,
-          shouldRevalidate: match.shouldRevalidate
+          id: match2.id,
+          action: match2.hasAction || !!match2.clientAction,
+          handle: match2.handle,
+          hasErrorBoundary: match2.hasErrorBoundary,
+          loader: match2.hasLoader || !!match2.clientLoader,
+          index: match2.index,
+          path: match2.path,
+          shouldRevalidate: match2.shouldRevalidate
         }
       }))
     };
     const router = _chunkO4JVZSOYjs.createStaticRouter.call(
       void 0,
-      payload.matches.reduceRight((previous, match) => {
+      payload.matches.reduceRight((previous, match2) => {
         const route = {
-          id: match.id,
-          action: match.hasAction || !!match.clientAction,
-          element: match.element,
-          errorElement: match.errorElement,
-          handle: match.handle,
-          hasErrorBoundary: !!match.errorElement,
-          hydrateFallbackElement: match.hydrateFallbackElement,
-          index: match.index,
-          loader: match.hasLoader || !!match.clientLoader,
-          path: match.path,
-          shouldRevalidate: match.shouldRevalidate
+          id: match2.id,
+          action: match2.hasAction || !!match2.clientAction,
+          element: match2.element,
+          errorElement: match2.errorElement,
+          handle: match2.handle,
+          hasErrorBoundary: !!match2.errorElement,
+          hydrateFallbackElement: match2.hydrateFallbackElement,
+          index: match2.index,
+          loader: match2.hasLoader || !!match2.clientLoader,
+          path: match2.path,
+          shouldRevalidate: match2.shouldRevalidate
         };
         if (previous.length > 0) {
           route.children = previous;
@@ -35652,13 +35652,13 @@ function requireDomExport() {
             }
             return () => {
               let lastMatch;
-              for (const match of rerender.matches) {
+              for (const match2 of rerender.matches) {
                 globalVar.__reactRouterDataRouter.patchRoutes(
                   _nullishCoalesce(_optionalChain([lastMatch, "optionalAccess", (_21) => _21.id]), () => null),
-                  [createRouteFromServerManifest(match)],
+                  [createRouteFromServerManifest(match2)],
                   true
                 );
-                lastMatch = match;
+                lastMatch = match2;
               }
               window.__reactRouterDataRouter._internalSetStateDoNotUseOrYouWillBreakYourApp(
                 {
@@ -35712,14 +35712,14 @@ function requireDomExport() {
       }
       _optionalChain([patches, "access", (_25) => _25.get, "call", (_26) => _26(patch.parentId), "optionalAccess", (_27) => _27.push, "call", (_28) => _28(patch)]);
     })]);
-    let routes = payload.matches.reduceRight((previous, match) => {
+    let routes = payload.matches.reduceRight((previous, match2) => {
       const route = createRouteFromServerManifest(
-        match,
+        match2,
         payload
       );
       if (previous.length > 0) {
         route.children = previous;
-        let childrenToPatch = patches.get(match.id);
+        let childrenToPatch = patches.get(match2.id);
         if (childrenToPatch) {
           route.children.push(
             ...childrenToPatch.map((r2) => createRouteFromServerManifest(r2))
@@ -35741,12 +35741,12 @@ function requireDomExport() {
         },
         routes,
         getRouteInfo: (routeId) => {
-          let match = payload.matches.find((m) => m.id === routeId);
-          _chunkAMVS5XVJjs.invariant.call(void 0, match, "Route not found in payload");
+          let match2 = payload.matches.find((m) => m.id === routeId);
+          _chunkAMVS5XVJjs.invariant.call(void 0, match2, "Route not found in payload");
           return {
-            clientLoader: match.clientLoader,
-            hasLoader: match.hasLoader,
-            hasHydrateFallback: match.hydrateFallbackElement != null
+            clientLoader: match2.clientLoader,
+            hasLoader: match2.hasLoader,
+            hasHydrateFallback: match2.hydrateFallbackElement != null
           };
         },
         location: payload.location,
@@ -35845,8 +35845,8 @@ function requireDomExport() {
     let dataStrategy = _chunkAMVS5XVJjs.getSingleFetchDataStrategyImpl.call(
       void 0,
       getRouter,
-      (match) => {
-        let M = match;
+      (match2) => {
+        let M = match2;
         return {
           hasLoader: M.route.hasLoader,
           hasClientLoader: M.route.hasClientLoader,
@@ -35863,8 +35863,8 @@ function requireDomExport() {
       // If the route has a component but we don't have an element, we need to hit
       // the server loader flow regardless of whether the client loader calls
       // `serverLoader` or not, otherwise we'll have nothing to render.
-      (match) => {
-        let M = match;
+      (match2) => {
+        let M = match2;
         return M.route.hasComponent && !M.route.element;
       }
     );
@@ -35879,8 +35879,8 @@ function requireDomExport() {
         }
         renderedRoutesById.get(route.id).push(route);
       }
-      for (const match of args.matches) {
-        const renderedRoutes = renderedRoutesById.get(match.route.id);
+      for (const match2 of args.matches) {
+        const renderedRoutes = renderedRoutesById.get(match2.route.id);
         if (renderedRoutes) {
           for (const rendered of renderedRoutes) {
             window.__reactRouterDataRouter.patchRoutes(
@@ -36056,34 +36056,34 @@ function requireDomExport() {
     };
     return /* @__PURE__ */ React3.createElement(_chunkAMVS5XVJjs.RSCRouterContext.Provider, { value: true }, /* @__PURE__ */ React3.createElement(_chunkPZWDWJAYjs.RSCRouterGlobalErrorBoundary, { location: location2 }, /* @__PURE__ */ React3.createElement(_chunkAMVS5XVJjs.FrameworkContext.Provider, { value: frameworkContext }, /* @__PURE__ */ React3.createElement(_chunkAMVS5XVJjs.UNSTABLE_TransitionEnabledRouterProvider, { router: router2, flushSync: ReactDOM2.flushSync }))));
   }
-  function createRouteFromServerManifest(match, payload) {
-    let hasInitialData = payload && match.id in payload.loaderData;
-    let initialData = _optionalChain([payload, "optionalAccess", (_32) => _32.loaderData, "access", (_33) => _33[match.id]]);
-    let hasInitialError = _optionalChain([payload, "optionalAccess", (_34) => _34.errors]) && match.id in payload.errors;
-    let initialError = _optionalChain([payload, "optionalAccess", (_35) => _35.errors, "optionalAccess", (_36) => _36[match.id]]);
-    let isHydrationRequest = _optionalChain([match, "access", (_37) => _37.clientLoader, "optionalAccess", (_38) => _38.hydrate]) === true || !match.hasLoader || // If the route has a component but we don't have an element, we need to hit
+  function createRouteFromServerManifest(match2, payload) {
+    let hasInitialData = payload && match2.id in payload.loaderData;
+    let initialData = _optionalChain([payload, "optionalAccess", (_32) => _32.loaderData, "access", (_33) => _33[match2.id]]);
+    let hasInitialError = _optionalChain([payload, "optionalAccess", (_34) => _34.errors]) && match2.id in payload.errors;
+    let initialError = _optionalChain([payload, "optionalAccess", (_35) => _35.errors, "optionalAccess", (_36) => _36[match2.id]]);
+    let isHydrationRequest = _optionalChain([match2, "access", (_37) => _37.clientLoader, "optionalAccess", (_38) => _38.hydrate]) === true || !match2.hasLoader || // If the route has a component but we don't have an element, we need to hit
     // the server loader flow regardless of whether the client loader calls
     // `serverLoader` or not, otherwise we'll have nothing to render.
-    match.hasComponent && !match.element;
+    match2.hasComponent && !match2.element;
     _chunkAMVS5XVJjs.invariant.call(void 0, window.__reactRouterRouteModules);
-    _chunkPZWDWJAYjs.populateRSCRouteModules.call(void 0, window.__reactRouterRouteModules, match);
+    _chunkPZWDWJAYjs.populateRSCRouteModules.call(void 0, window.__reactRouterRouteModules, match2);
     let dataRoute = {
-      id: match.id,
-      element: match.element,
-      errorElement: match.errorElement,
-      handle: match.handle,
-      hasErrorBoundary: match.hasErrorBoundary,
-      hydrateFallbackElement: match.hydrateFallbackElement,
-      index: match.index,
-      loader: match.clientLoader ? async (args, singleFetch) => {
+      id: match2.id,
+      element: match2.element,
+      errorElement: match2.errorElement,
+      handle: match2.handle,
+      hasErrorBoundary: match2.hasErrorBoundary,
+      hydrateFallbackElement: match2.hydrateFallbackElement,
+      index: match2.index,
+      loader: match2.clientLoader ? async (args, singleFetch) => {
         try {
-          let result = await match.clientLoader({
+          let result = await match2.clientLoader({
             ...args,
             serverLoader: () => {
               preventInvalidServerHandlerCall(
                 "loader",
-                match.id,
-                match.hasLoader
+                match2.id,
+                match2.hasLoader
               );
               if (isHydrationRequest) {
                 if (hasInitialData) {
@@ -36105,35 +36105,35 @@ function requireDomExport() {
         // have a `loader` we may need to get the `element` implementation
         ((_, singleFetch) => callSingleFetch(singleFetch))
       ),
-      action: match.clientAction ? (args, singleFetch) => match.clientAction({
+      action: match2.clientAction ? (args, singleFetch) => match2.clientAction({
         ...args,
         serverAction: async () => {
           preventInvalidServerHandlerCall(
             "action",
-            match.id,
-            match.hasLoader
+            match2.id,
+            match2.hasLoader
           );
           return await callSingleFetch(singleFetch);
         }
-      }) : match.hasAction ? (_, singleFetch) => callSingleFetch(singleFetch) : () => {
-        throw _chunkAMVS5XVJjs.noActionDefinedError.call(void 0, "action", match.id);
+      }) : match2.hasAction ? (_, singleFetch) => callSingleFetch(singleFetch) : () => {
+        throw _chunkAMVS5XVJjs.noActionDefinedError.call(void 0, "action", match2.id);
       },
-      path: match.path,
-      shouldRevalidate: match.shouldRevalidate,
+      path: match2.path,
+      shouldRevalidate: match2.shouldRevalidate,
       // We always have a "loader" in this RSC world since even if we don't
       // have a `loader` we may need to get the `element` implementation
       hasLoader: true,
-      hasClientLoader: match.clientLoader != null,
-      hasAction: match.hasAction,
-      hasClientAction: match.clientAction != null,
-      hasShouldRevalidate: match.shouldRevalidate != null
+      hasClientLoader: match2.clientLoader != null,
+      hasAction: match2.hasAction,
+      hasClientAction: match2.clientAction != null,
+      hasShouldRevalidate: match2.shouldRevalidate != null
     };
     if (typeof dataRoute.loader === "function") {
       dataRoute.loader.hydrate = _chunkAMVS5XVJjs.shouldHydrateRouteLoader.call(
         void 0,
-        match.id,
-        match.clientLoader,
-        match.hasLoader,
+        match2.id,
+        match2.clientLoader,
+        match2.hasLoader,
         false
       );
     }
@@ -36553,7 +36553,7 @@ function PrivateRoute() {
 }
 const Logo = "/assets/logo-RJEXY2h1.png";
 function useEmailValidation(value) {
-  const [isValid, setIsValid] = reactExports.useState(false);
+  const [isValid2, setIsValid] = reactExports.useState(false);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const checkEmail = () => {
     setIsValid(emailRegex.test(value));
@@ -36561,12 +36561,12 @@ function useEmailValidation(value) {
   reactExports.useEffect(() => {
     checkEmail();
   }, [value]);
-  return isValid;
+  return isValid2;
 }
-const url = "http://localhost:4000/api";
+const url$1 = "http://localhost:4000/api";
 const emailValidation = async (email) => {
   try {
-    const res = await fetch(`${url}/auth/find-email`, {
+    const res = await fetch(`${url$1}/auth/find-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -36585,7 +36585,7 @@ const emailValidation = async (email) => {
 };
 const resendVerification = async (email) => {
   try {
-    const res = await fetch(`${url}/auth/resend-code`, {
+    const res = await fetch(`${url$1}/auth/resend-code`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -36604,7 +36604,7 @@ const resendVerification = async (email) => {
 };
 const login = async (email) => {
   try {
-    const res = await fetch(`${url}/auth/login`, {
+    const res = await fetch(`${url$1}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -37695,22 +37695,22 @@ const clamp$1 = (min, max, v) => {
     return min;
   return v;
 };
-function formatErrorMessage(message, errorCode) {
-  return errorCode ? `${message}. For more information and steps for solving, visit https://motion.dev/troubleshooting/${errorCode}` : message;
+function formatErrorMessage(message2, errorCode) {
+  return errorCode ? `${message2}. For more information and steps for solving, visit https://motion.dev/troubleshooting/${errorCode}` : message2;
 }
 let warning = () => {
 };
 let invariant = () => {
 };
 {
-  warning = (check, message, errorCode) => {
+  warning = (check, message2, errorCode) => {
     if (!check && typeof console !== "undefined") {
-      console.warn(formatErrorMessage(message, errorCode));
+      console.warn(formatErrorMessage(message2, errorCode));
     }
   };
-  invariant = (check, message, errorCode) => {
+  invariant = (check, message2, errorCode) => {
     if (!check) {
-      throw new Error(formatErrorMessage(message, errorCode));
+      throw new Error(formatErrorMessage(message2, errorCode));
     }
   };
 }
@@ -37729,7 +37729,7 @@ function memo(callback) {
     return result;
   };
 }
-const noop = /* @__NO_SIDE_EFFECTS__ */ (any) => any;
+const noop$1 = /* @__NO_SIDE_EFFECTS__ */ (any) => any;
 const combineFunctions = (a, b) => (v) => b(a(v));
 const pipe = (...transformers) => transformers.reduce(combineFunctions);
 const progress = /* @__NO_SIDE_EFFECTS__ */ (from, to, value) => {
@@ -37770,11 +37770,11 @@ function velocityPerSecond(velocity, frameDuration) {
   return frameDuration ? velocity * (1e3 / frameDuration) : 0;
 }
 const warned = /* @__PURE__ */ new Set();
-function warnOnce(condition, message, errorCode) {
-  if (condition || warned.has(message))
+function warnOnce(condition, message2, errorCode) {
+  if (condition || warned.has(message2))
     return;
-  console.warn(formatErrorMessage(message, errorCode));
-  warned.add(message);
+  console.warn(formatErrorMessage(message2, errorCode));
+  warned.add(message2);
 }
 const calcBezier = (t, a1, a2) => (((1 - 3 * a2 + 3 * a1) * t + (3 * a2 - 6 * a1)) * t + 3 * a1) * t;
 const subdivisionPrecision = 1e-7;
@@ -37796,7 +37796,7 @@ function binarySubdivide(x, lowerBound, upperBound, mX1, mX2) {
 }
 function cubicBezier(mX1, mY1, mX2, mY2) {
   if (mX1 === mY1 && mX2 === mY2)
-    return noop;
+    return noop$1;
   const getTForX = (aX) => binarySubdivide(aX, 0, 1, mX1, mX2);
   return (t) => t === 0 || t === 1 ? t : calcBezier(getTForX(t), mY1, mY2);
 }
@@ -37817,7 +37817,7 @@ const isEasingArray = (ease2) => {
 };
 const isBezierDefinition = (easing2) => Array.isArray(easing2) && typeof easing2[0] === "number";
 const easingLookup = {
-  linear: noop,
+  linear: noop$1,
   easeIn,
   easeInOut,
   easeOut,
@@ -37981,7 +37981,7 @@ function createRenderBatcher(scheduleNextBatch, allowKeepAlive) {
   };
   return { schedule, cancel, state, steps };
 }
-const { schedule: frame, cancel: cancelFrame, state: frameData, steps: frameSteps } = /* @__PURE__ */ createRenderBatcher(typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : noop, true);
+const { schedule: frame, cancel: cancelFrame, state: frameData, steps: frameSteps } = /* @__PURE__ */ createRenderBatcher(typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : noop$1, true);
 let now;
 function clearTime() {
   now = void 0;
@@ -38683,7 +38683,7 @@ function createMixers(output, ease2, customMixer) {
   for (let i = 0; i < numMixers; i++) {
     let mixer = mixerFactory(output[i], output[i + 1]);
     if (ease2) {
-      const easingFunction = Array.isArray(ease2) ? ease2[i] || noop : ease2;
+      const easingFunction = Array.isArray(ease2) ? ease2[i] || noop$1 : ease2;
       mixer = pipe(easingFunction, mixer);
     }
     mixers.push(mixer);
@@ -39107,20 +39107,20 @@ function parseValueFromTransform(transform, name) {
   }
   const matrix3dMatch = transform.match(/^matrix3d\(([-\d.e\s,]+)\)$/u);
   let parsers;
-  let match;
+  let match2;
   if (matrix3dMatch) {
     parsers = matrix3dParsers;
-    match = matrix3dMatch;
+    match2 = matrix3dMatch;
   } else {
     const matrix2dMatch = transform.match(/^matrix\(([-\d.e\s,]+)\)$/u);
     parsers = matrix2dParsers;
-    match = matrix2dMatch;
+    match2 = matrix2dMatch;
   }
-  if (!match) {
+  if (!match2) {
     return defaultTransformValue(name);
   }
   const valueParser = parsers[name];
-  const values2 = match[1].split(",").map(convertTransformToNumber);
+  const values2 = match2[1].split(",").map(convertTransformToNumber);
   return typeof valueParser === "function" ? valueParser(values2) : values2[valueParser];
 }
 const readTransformValue = (instance, name) => {
@@ -39510,7 +39510,7 @@ class NativeAnimation extends WithPromise {
     this.animation.onfinish = null;
     if (timeline && supportsScrollTimeline()) {
       this.animation.timeline = timeline;
-      return noop;
+      return noop$1;
     } else {
       return observe(this);
     }
@@ -39678,7 +39678,7 @@ class AsyncMotionValueAnimation extends WithPromise {
       ...resolvedOptions,
       element: resolvedOptions.motionValue.owner.current
     }) : new JSAnimation(resolvedOptions);
-    animation.finished.then(() => this.notifyFinished()).catch(noop);
+    animation.finished.then(() => this.notifyFinished()).catch(noop$1);
     if (this.pendingTimeline) {
       this.stopTimeline = animation.attachTimeline(this.pendingTimeline);
       this.pendingTimeline = void 0;
@@ -39756,10 +39756,10 @@ const splitCSSVariableRegex = (
   /^var\(--(?:([\w-]+)|([\w-]+), ?([a-zA-Z\d ()%#.,-]+))\)/u
 );
 function parseCSSVariable(current) {
-  const match = splitCSSVariableRegex.exec(current);
-  if (!match)
+  const match2 = splitCSSVariableRegex.exec(current);
+  if (!match2)
     return [,];
-  const [, token1, token2, fallback] = match;
+  const [, token1, token2, fallback] = match2;
   return [`--${token1 ?? token2}`, fallback];
 }
 const maxDepth = 4;
@@ -43083,8 +43083,8 @@ function getCurrentDirection(offset, lockThreshold = 10) {
 class DragGesture extends Feature {
   constructor(node) {
     super(node);
-    this.removeGroupControls = noop;
-    this.removeListeners = noop;
+    this.removeGroupControls = noop$1;
+    this.removeListeners = noop$1;
     this.controls = new VisualElementDragControls(node);
   }
   mount() {
@@ -43092,7 +43092,7 @@ class DragGesture extends Feature {
     if (dragControls) {
       this.removeGroupControls = dragControls.subscribe(this.controls);
     }
-    this.removeListeners = this.controls.addListeners() || noop;
+    this.removeListeners = this.controls.addListeners() || noop$1;
   }
   unmount() {
     this.removeGroupControls();
@@ -43107,7 +43107,7 @@ const asyncHandler = (handler) => (event, info) => {
 class PanGesture extends Feature {
   constructor() {
     super(...arguments);
-    this.removePointerDownListener = noop;
+    this.removePointerDownListener = noop$1;
   }
   onPointerDown(pointerDownEvent) {
     this.session = new PanSession(pointerDownEvent, this.createPanHandlers(), {
@@ -43375,7 +43375,7 @@ function getRadius(values2, radiusName) {
   return values2[radiusName] !== void 0 ? values2[radiusName] : values2.borderRadius;
 }
 const easeCrossfadeIn = /* @__PURE__ */ compress(0, 0.5, circOut);
-const easeCrossfadeOut = /* @__PURE__ */ compress(0.5, 0.95, noop);
+const easeCrossfadeOut = /* @__PURE__ */ compress(0.5, 0.95, noop$1);
 function compress(min, max, easing2) {
   return (p) => {
     if (p < min)
@@ -44609,7 +44609,7 @@ const defaultLayoutTransition = {
   ease: [0.4, 0, 0.1, 1]
 };
 const userAgentContains = (string) => typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().includes(string);
-const roundPoint = userAgentContains("applewebkit/") && !userAgentContains("chrome/") ? Math.round : noop;
+const roundPoint = userAgentContains("applewebkit/") && !userAgentContains("chrome/") ? Math.round : noop$1;
 function roundAxis(axis) {
   axis.min = roundPoint(axis.min);
   axis.max = roundPoint(axis.max);
@@ -45209,12 +45209,12 @@ function requireCheckPropTypes() {
     var loggedTypeFailures = {};
     var has2 = /* @__PURE__ */ requireHas();
     printWarning = function(text) {
-      var message = "Warning: " + text;
+      var message2 = "Warning: " + text;
       if (typeof console !== "undefined") {
-        console.error(message);
+        console.error(message2);
       }
       try {
-        throw new Error(message);
+        throw new Error(message2);
       } catch (x) {
       }
     };
@@ -45274,12 +45274,12 @@ function requireFactoryWithTypeCheckers() {
   };
   {
     printWarning = function(text) {
-      var message = "Warning: " + text;
+      var message2 = "Warning: " + text;
       if (typeof console !== "undefined") {
-        console.error(message);
+        console.error(message2);
       }
       try {
-        throw new Error(message);
+        throw new Error(message2);
       } catch (x) {
       }
     };
@@ -45325,8 +45325,8 @@ function requireFactoryWithTypeCheckers() {
         return x !== x && y2 !== y2;
       }
     }
-    function PropTypeError(message, data) {
-      this.message = message;
+    function PropTypeError(message2, data) {
+      this.message = message2;
       this.data = data && typeof data === "object" ? data : {};
       this.stack = "";
     }
@@ -45840,7 +45840,7 @@ function requireReactIs$1() {
   return reactIs$1.exports;
 }
 var reactIsExports = /* @__PURE__ */ requireReactIs$1();
-function isPlainObject(item) {
+function isPlainObject$1(item) {
   if (typeof item !== "object" || item === null) {
     return false;
   }
@@ -45848,7 +45848,7 @@ function isPlainObject(item) {
   return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(Symbol.toStringTag in item) && !(Symbol.iterator in item);
 }
 function deepClone(source) {
-  if (/* @__PURE__ */ reactExports.isValidElement(source) || reactIsExports.isValidElementType(source) || !isPlainObject(source)) {
+  if (/* @__PURE__ */ reactExports.isValidElement(source) || reactIsExports.isValidElementType(source) || !isPlainObject$1(source)) {
     return source;
   }
   const output = {};
@@ -45863,15 +45863,15 @@ function deepmerge(target, source, options = {
   const output = options.clone ? {
     ...target
   } : target;
-  if (isPlainObject(target) && isPlainObject(source)) {
+  if (isPlainObject$1(target) && isPlainObject$1(source)) {
     Object.keys(source).forEach((key) => {
       if (/* @__PURE__ */ reactExports.isValidElement(source[key]) || reactIsExports.isValidElementType(source[key])) {
         output[key] = source[key];
-      } else if (isPlainObject(source[key]) && // Avoid prototype pollution
-      Object.prototype.hasOwnProperty.call(target, key) && isPlainObject(target[key])) {
+      } else if (isPlainObject$1(source[key]) && // Avoid prototype pollution
+      Object.prototype.hasOwnProperty.call(target, key) && isPlainObject$1(target[key])) {
         output[key] = deepmerge(target[key], source[key], options);
       } else if (options.clone) {
-        output[key] = isPlainObject(source[key]) ? deepClone(source[key]) : source[key];
+        output[key] = isPlainObject$1(source[key]) ? deepClone(source[key]) : source[key];
       } else {
         output[key] = source[key];
       }
@@ -48503,7 +48503,7 @@ function requireEmotionSerialize_cjs() {
       case "animation":
       case "animationName": {
         if (typeof value === "string") {
-          return value.replace(animationRegex, function(match, p1, p2) {
+          return value.replace(animationRegex, function(match2, p1, p2) {
             cursor = {
               name: p1,
               styles: p2,
@@ -48643,9 +48643,9 @@ function requireEmotionSerialize_cjs() {
     }
     labelPattern.lastIndex = 0;
     var identifierName = "";
-    var match;
-    while ((match = labelPattern.exec(styles)) !== null) {
-      identifierName += "-" + match[1];
+    var match2;
+    while ((match2 = labelPattern.exec(styles)) !== null) {
+      identifierName += "-" + match2[1];
     }
     var name = hashString__default["default"](styles) + identifierName;
     return {
@@ -48810,12 +48810,12 @@ function requireEmotionElementA1829a1e_cjs() {
       WithTheme.displayName = "WithTheme(" + componentName + ")";
       return _isolatedHnrs_dist_emotionReact_isolatedHnrs["default"](WithTheme, Component);
     }
-    var hasOwn = {}.hasOwnProperty;
+    var hasOwn2 = {}.hasOwnProperty;
     var typePropName = "__EMOTION_TYPE_PLEASE_DO_NOT_USE__";
     var createEmotionProps = function createEmotionProps2(type, props) {
       var newProps = {};
       for (var _key in props) {
-        if (hasOwn.call(props, _key)) {
+        if (hasOwn2.call(props, _key)) {
           newProps[_key] = props[_key];
         }
       }
@@ -48859,7 +48859,7 @@ function requireEmotionElementA1829a1e_cjs() {
       className += cache.key + "-" + serialized.name;
       var newProps = {};
       for (var _key2 in props) {
-        if (hasOwn.call(props, _key2) && _key2 !== "css" && _key2 !== typePropName && !isDevelopment) {
+        if (hasOwn2.call(props, _key2) && _key2 !== "css" && _key2 !== typePropName && !isDevelopment) {
           newProps[_key2] = props[_key2];
         }
       }
@@ -48880,7 +48880,7 @@ function requireEmotionElementA1829a1e_cjs() {
     exports$1.ThemeProvider = ThemeProvider;
     exports$1.__unsafe_useEmotionCache = __unsafe_useEmotionCache;
     exports$1.createEmotionProps = createEmotionProps;
-    exports$1.hasOwn = hasOwn;
+    exports$1.hasOwn = hasOwn2;
     exports$1.isBrowser = isBrowser2;
     exports$1.isDevelopment = isDevelopment;
     exports$1.useTheme = useTheme;
@@ -49905,7 +49905,7 @@ function createStyled(input = {}) {
           return processStyle(props, style2, props.theme.modularCssLayers ? layerName : void 0);
         };
       }
-      if (isPlainObject(style2)) {
+      if (isPlainObject$1(style2)) {
         const serialized = preprocessStyles(style2);
         return function styleObjectProcessor(props) {
           if (!serialized.variants) {
@@ -51212,7 +51212,7 @@ const zIndex = {
   tooltip: 1500
 };
 function isSerializable(val) {
-  return isPlainObject(val) || typeof val === "undefined" || typeof val === "string" || typeof val === "boolean" || typeof val === "number" || Array.isArray(val);
+  return isPlainObject$1(val) || typeof val === "undefined" || typeof val === "string" || typeof val === "boolean" || typeof val === "number" || Array.isArray(val);
 }
 function stringifyTheme(baseTheme = {}) {
   const serializableTheme = {
@@ -51224,7 +51224,7 @@ function stringifyTheme(baseTheme = {}) {
       const [key, value] = array[index];
       if (!isSerializable(value) || key.startsWith("unstable_")) {
         delete object[key];
-      } else if (isPlainObject(value)) {
+      } else if (isPlainObject$1(value)) {
         object[key] = {
           ...value
         };
@@ -52213,52 +52213,4327 @@ function createSvgIcon(path, displayName) {
 const NotificationsNoneRoundedIcon = createSvgIcon(/* @__PURE__ */ jsxRuntimeExports.jsx("path", {
   d: "M19.29 17.29 18 16v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-1.29 1.29c-.63.63-.19 1.71.7 1.71h13.17c.9 0 1.34-1.08.71-1.71M16 17H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5zm-4 5c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2"
 }), "NotificationsNoneRounded");
+var Subscribable = class {
+  constructor() {
+    this.listeners = /* @__PURE__ */ new Set();
+    this.subscribe = this.subscribe.bind(this);
+  }
+  subscribe(listener) {
+    this.listeners.add(listener);
+    this.onSubscribe();
+    return () => {
+      this.listeners.delete(listener);
+      this.onUnsubscribe();
+    };
+  }
+  hasListeners() {
+    return this.listeners.size > 0;
+  }
+  onSubscribe() {
+  }
+  onUnsubscribe() {
+  }
+};
+var defaultTimeoutProvider = {
+  // We need the wrapper function syntax below instead of direct references to
+  // global setTimeout etc.
+  //
+  // BAD: `setTimeout: setTimeout`
+  // GOOD: `setTimeout: (cb, delay) => setTimeout(cb, delay)`
+  //
+  // If we use direct references here, then anything that wants to spy on or
+  // replace the global setTimeout (like tests) won't work since we'll already
+  // have a hard reference to the original implementation at the time when this
+  // file was imported.
+  setTimeout: (callback, delay2) => setTimeout(callback, delay2),
+  clearTimeout: (timeoutId) => clearTimeout(timeoutId),
+  setInterval: (callback, delay2) => setInterval(callback, delay2),
+  clearInterval: (intervalId) => clearInterval(intervalId)
+};
+var TimeoutManager = class {
+  // We cannot have TimeoutManager<T> as we must instantiate it with a concrete
+  // type at app boot; and if we leave that type, then any new timer provider
+  // would need to support ReturnType<typeof setTimeout>, which is infeasible.
+  //
+  // We settle for type safety for the TimeoutProvider type, and accept that
+  // this class is unsafe internally to allow for extension.
+  #provider = defaultTimeoutProvider;
+  #providerCalled = false;
+  setTimeoutProvider(provider) {
+    {
+      if (this.#providerCalled && provider !== this.#provider) {
+        console.error(
+          `[timeoutManager]: Switching provider after calls to previous provider might result in unexpected behavior.`,
+          { previous: this.#provider, provider }
+        );
+      }
+    }
+    this.#provider = provider;
+    {
+      this.#providerCalled = false;
+    }
+  }
+  setTimeout(callback, delay2) {
+    {
+      this.#providerCalled = true;
+    }
+    return this.#provider.setTimeout(callback, delay2);
+  }
+  clearTimeout(timeoutId) {
+    this.#provider.clearTimeout(timeoutId);
+  }
+  setInterval(callback, delay2) {
+    {
+      this.#providerCalled = true;
+    }
+    return this.#provider.setInterval(callback, delay2);
+  }
+  clearInterval(intervalId) {
+    this.#provider.clearInterval(intervalId);
+  }
+};
+var timeoutManager = new TimeoutManager();
+function systemSetTimeoutZero(callback) {
+  setTimeout(callback, 0);
+}
+var isServer = typeof window === "undefined" || "Deno" in globalThis;
+function noop() {
+}
+function functionalUpdate(updater, input) {
+  return typeof updater === "function" ? updater(input) : updater;
+}
+function isValidTimeout(value) {
+  return typeof value === "number" && value >= 0 && value !== Infinity;
+}
+function timeUntilStale(updatedAt, staleTime) {
+  return Math.max(updatedAt + (staleTime || 0) - Date.now(), 0);
+}
+function resolveStaleTime(staleTime, query) {
+  return typeof staleTime === "function" ? staleTime(query) : staleTime;
+}
+function resolveEnabled(enabled, query) {
+  return typeof enabled === "function" ? enabled(query) : enabled;
+}
+function matchQuery(filters, query) {
+  const {
+    type = "all",
+    exact,
+    fetchStatus,
+    predicate,
+    queryKey,
+    stale
+  } = filters;
+  if (queryKey) {
+    if (exact) {
+      if (query.queryHash !== hashQueryKeyByOptions(queryKey, query.options)) {
+        return false;
+      }
+    } else if (!partialMatchKey(query.queryKey, queryKey)) {
+      return false;
+    }
+  }
+  if (type !== "all") {
+    const isActive = query.isActive();
+    if (type === "active" && !isActive) {
+      return false;
+    }
+    if (type === "inactive" && isActive) {
+      return false;
+    }
+  }
+  if (typeof stale === "boolean" && query.isStale() !== stale) {
+    return false;
+  }
+  if (fetchStatus && fetchStatus !== query.state.fetchStatus) {
+    return false;
+  }
+  if (predicate && !predicate(query)) {
+    return false;
+  }
+  return true;
+}
+function matchMutation(filters, mutation) {
+  const { exact, status, predicate, mutationKey } = filters;
+  if (mutationKey) {
+    if (!mutation.options.mutationKey) {
+      return false;
+    }
+    if (exact) {
+      if (hashKey(mutation.options.mutationKey) !== hashKey(mutationKey)) {
+        return false;
+      }
+    } else if (!partialMatchKey(mutation.options.mutationKey, mutationKey)) {
+      return false;
+    }
+  }
+  if (status && mutation.state.status !== status) {
+    return false;
+  }
+  if (predicate && !predicate(mutation)) {
+    return false;
+  }
+  return true;
+}
+function hashQueryKeyByOptions(queryKey, options) {
+  const hashFn = options?.queryKeyHashFn || hashKey;
+  return hashFn(queryKey);
+}
+function hashKey(queryKey) {
+  return JSON.stringify(
+    queryKey,
+    (_, val) => isPlainObject(val) ? Object.keys(val).sort().reduce((result, key) => {
+      result[key] = val[key];
+      return result;
+    }, {}) : val
+  );
+}
+function partialMatchKey(a, b) {
+  if (a === b) {
+    return true;
+  }
+  if (typeof a !== typeof b) {
+    return false;
+  }
+  if (a && b && typeof a === "object" && typeof b === "object") {
+    return Object.keys(b).every((key) => partialMatchKey(a[key], b[key]));
+  }
+  return false;
+}
+var hasOwn = Object.prototype.hasOwnProperty;
+function replaceEqualDeep(a, b) {
+  if (a === b) {
+    return a;
+  }
+  const array = isPlainArray(a) && isPlainArray(b);
+  if (!array && !(isPlainObject(a) && isPlainObject(b))) return b;
+  const aItems = array ? a : Object.keys(a);
+  const aSize = aItems.length;
+  const bItems = array ? b : Object.keys(b);
+  const bSize = bItems.length;
+  const copy = array ? new Array(bSize) : {};
+  let equalItems = 0;
+  for (let i = 0; i < bSize; i++) {
+    const key = array ? i : bItems[i];
+    const aItem = a[key];
+    const bItem = b[key];
+    if (aItem === bItem) {
+      copy[key] = aItem;
+      if (array ? i < aSize : hasOwn.call(a, key)) equalItems++;
+      continue;
+    }
+    if (aItem === null || bItem === null || typeof aItem !== "object" || typeof bItem !== "object") {
+      copy[key] = bItem;
+      continue;
+    }
+    const v = replaceEqualDeep(aItem, bItem);
+    copy[key] = v;
+    if (v === aItem) equalItems++;
+  }
+  return aSize === bSize && equalItems === aSize ? a : copy;
+}
+function shallowEqualObjects(a, b) {
+  if (!b || Object.keys(a).length !== Object.keys(b).length) {
+    return false;
+  }
+  for (const key in a) {
+    if (a[key] !== b[key]) {
+      return false;
+    }
+  }
+  return true;
+}
+function isPlainArray(value) {
+  return Array.isArray(value) && value.length === Object.keys(value).length;
+}
+function isPlainObject(o) {
+  if (!hasObjectPrototype(o)) {
+    return false;
+  }
+  const ctor = o.constructor;
+  if (ctor === void 0) {
+    return true;
+  }
+  const prot = ctor.prototype;
+  if (!hasObjectPrototype(prot)) {
+    return false;
+  }
+  if (!prot.hasOwnProperty("isPrototypeOf")) {
+    return false;
+  }
+  if (Object.getPrototypeOf(o) !== Object.prototype) {
+    return false;
+  }
+  return true;
+}
+function hasObjectPrototype(o) {
+  return Object.prototype.toString.call(o) === "[object Object]";
+}
+function sleep(timeout) {
+  return new Promise((resolve) => {
+    timeoutManager.setTimeout(resolve, timeout);
+  });
+}
+function replaceData(prevData, data, options) {
+  if (typeof options.structuralSharing === "function") {
+    return options.structuralSharing(prevData, data);
+  } else if (options.structuralSharing !== false) {
+    {
+      try {
+        return replaceEqualDeep(prevData, data);
+      } catch (error) {
+        console.error(
+          `Structural sharing requires data to be JSON serializable. To fix this, turn off structuralSharing or return JSON-serializable data from your queryFn. [${options.queryHash}]: ${error}`
+        );
+        throw error;
+      }
+    }
+    return replaceEqualDeep(prevData, data);
+  }
+  return data;
+}
+function addToEnd(items, item, max = 0) {
+  const newItems = [...items, item];
+  return max && newItems.length > max ? newItems.slice(1) : newItems;
+}
+function addToStart(items, item, max = 0) {
+  const newItems = [item, ...items];
+  return max && newItems.length > max ? newItems.slice(0, -1) : newItems;
+}
+var skipToken = Symbol();
+function ensureQueryFn(options, fetchOptions) {
+  {
+    if (options.queryFn === skipToken) {
+      console.error(
+        `Attempted to invoke queryFn when set to skipToken. This is likely a configuration error. Query hash: '${options.queryHash}'`
+      );
+    }
+  }
+  if (!options.queryFn && fetchOptions?.initialPromise) {
+    return () => fetchOptions.initialPromise;
+  }
+  if (!options.queryFn || options.queryFn === skipToken) {
+    return () => Promise.reject(new Error(`Missing queryFn: '${options.queryHash}'`));
+  }
+  return options.queryFn;
+}
+function shouldThrowError(throwOnError, params) {
+  if (typeof throwOnError === "function") {
+    return throwOnError(...params);
+  }
+  return !!throwOnError;
+}
+var FocusManager = class extends Subscribable {
+  #focused;
+  #cleanup;
+  #setup;
+  constructor() {
+    super();
+    this.#setup = (onFocus) => {
+      if (!isServer && window.addEventListener) {
+        const listener = () => onFocus();
+        window.addEventListener("visibilitychange", listener, false);
+        return () => {
+          window.removeEventListener("visibilitychange", listener);
+        };
+      }
+      return;
+    };
+  }
+  onSubscribe() {
+    if (!this.#cleanup) {
+      this.setEventListener(this.#setup);
+    }
+  }
+  onUnsubscribe() {
+    if (!this.hasListeners()) {
+      this.#cleanup?.();
+      this.#cleanup = void 0;
+    }
+  }
+  setEventListener(setup) {
+    this.#setup = setup;
+    this.#cleanup?.();
+    this.#cleanup = setup((focused) => {
+      if (typeof focused === "boolean") {
+        this.setFocused(focused);
+      } else {
+        this.onFocus();
+      }
+    });
+  }
+  setFocused(focused) {
+    const changed = this.#focused !== focused;
+    if (changed) {
+      this.#focused = focused;
+      this.onFocus();
+    }
+  }
+  onFocus() {
+    const isFocused = this.isFocused();
+    this.listeners.forEach((listener) => {
+      listener(isFocused);
+    });
+  }
+  isFocused() {
+    if (typeof this.#focused === "boolean") {
+      return this.#focused;
+    }
+    return globalThis.document?.visibilityState !== "hidden";
+  }
+};
+var focusManager = new FocusManager();
+function pendingThenable() {
+  let resolve;
+  let reject;
+  const thenable = new Promise((_resolve, _reject) => {
+    resolve = _resolve;
+    reject = _reject;
+  });
+  thenable.status = "pending";
+  thenable.catch(() => {
+  });
+  function finalize(data) {
+    Object.assign(thenable, data);
+    delete thenable.resolve;
+    delete thenable.reject;
+  }
+  thenable.resolve = (value) => {
+    finalize({
+      status: "fulfilled",
+      value
+    });
+    resolve(value);
+  };
+  thenable.reject = (reason) => {
+    finalize({
+      status: "rejected",
+      reason
+    });
+    reject(reason);
+  };
+  return thenable;
+}
+var defaultScheduler = systemSetTimeoutZero;
+function createNotifyManager() {
+  let queue = [];
+  let transactions = 0;
+  let notifyFn = (callback) => {
+    callback();
+  };
+  let batchNotifyFn = (callback) => {
+    callback();
+  };
+  let scheduleFn = defaultScheduler;
+  const schedule = (callback) => {
+    if (transactions) {
+      queue.push(callback);
+    } else {
+      scheduleFn(() => {
+        notifyFn(callback);
+      });
+    }
+  };
+  const flush = () => {
+    const originalQueue = queue;
+    queue = [];
+    if (originalQueue.length) {
+      scheduleFn(() => {
+        batchNotifyFn(() => {
+          originalQueue.forEach((callback) => {
+            notifyFn(callback);
+          });
+        });
+      });
+    }
+  };
+  return {
+    batch: (callback) => {
+      let result;
+      transactions++;
+      try {
+        result = callback();
+      } finally {
+        transactions--;
+        if (!transactions) {
+          flush();
+        }
+      }
+      return result;
+    },
+    /**
+     * All calls to the wrapped function will be batched.
+     */
+    batchCalls: (callback) => {
+      return (...args) => {
+        schedule(() => {
+          callback(...args);
+        });
+      };
+    },
+    schedule,
+    /**
+     * Use this method to set a custom notify function.
+     * This can be used to for example wrap notifications with `React.act` while running tests.
+     */
+    setNotifyFunction: (fn) => {
+      notifyFn = fn;
+    },
+    /**
+     * Use this method to set a custom function to batch notifications together into a single tick.
+     * By default React Query will use the batch function provided by ReactDOM or React Native.
+     */
+    setBatchNotifyFunction: (fn) => {
+      batchNotifyFn = fn;
+    },
+    setScheduler: (fn) => {
+      scheduleFn = fn;
+    }
+  };
+}
+var notifyManager = createNotifyManager();
+var OnlineManager = class extends Subscribable {
+  #online = true;
+  #cleanup;
+  #setup;
+  constructor() {
+    super();
+    this.#setup = (onOnline) => {
+      if (!isServer && window.addEventListener) {
+        const onlineListener = () => onOnline(true);
+        const offlineListener = () => onOnline(false);
+        window.addEventListener("online", onlineListener, false);
+        window.addEventListener("offline", offlineListener, false);
+        return () => {
+          window.removeEventListener("online", onlineListener);
+          window.removeEventListener("offline", offlineListener);
+        };
+      }
+      return;
+    };
+  }
+  onSubscribe() {
+    if (!this.#cleanup) {
+      this.setEventListener(this.#setup);
+    }
+  }
+  onUnsubscribe() {
+    if (!this.hasListeners()) {
+      this.#cleanup?.();
+      this.#cleanup = void 0;
+    }
+  }
+  setEventListener(setup) {
+    this.#setup = setup;
+    this.#cleanup?.();
+    this.#cleanup = setup(this.setOnline.bind(this));
+  }
+  setOnline(online) {
+    const changed = this.#online !== online;
+    if (changed) {
+      this.#online = online;
+      this.listeners.forEach((listener) => {
+        listener(online);
+      });
+    }
+  }
+  isOnline() {
+    return this.#online;
+  }
+};
+var onlineManager = new OnlineManager();
+function defaultRetryDelay(failureCount) {
+  return Math.min(1e3 * 2 ** failureCount, 3e4);
+}
+function canFetch(networkMode) {
+  return (networkMode ?? "online") === "online" ? onlineManager.isOnline() : true;
+}
+var CancelledError = class extends Error {
+  constructor(options) {
+    super("CancelledError");
+    this.revert = options?.revert;
+    this.silent = options?.silent;
+  }
+};
+function createRetryer(config) {
+  let isRetryCancelled = false;
+  let failureCount = 0;
+  let continueFn;
+  const thenable = pendingThenable();
+  const isResolved = () => thenable.status !== "pending";
+  const cancel = (cancelOptions) => {
+    if (!isResolved()) {
+      const error = new CancelledError(cancelOptions);
+      reject(error);
+      config.onCancel?.(error);
+    }
+  };
+  const cancelRetry = () => {
+    isRetryCancelled = true;
+  };
+  const continueRetry = () => {
+    isRetryCancelled = false;
+  };
+  const canContinue = () => focusManager.isFocused() && (config.networkMode === "always" || onlineManager.isOnline()) && config.canRun();
+  const canStart = () => canFetch(config.networkMode) && config.canRun();
+  const resolve = (value) => {
+    if (!isResolved()) {
+      continueFn?.();
+      thenable.resolve(value);
+    }
+  };
+  const reject = (value) => {
+    if (!isResolved()) {
+      continueFn?.();
+      thenable.reject(value);
+    }
+  };
+  const pause = () => {
+    return new Promise((continueResolve) => {
+      continueFn = (value) => {
+        if (isResolved() || canContinue()) {
+          continueResolve(value);
+        }
+      };
+      config.onPause?.();
+    }).then(() => {
+      continueFn = void 0;
+      if (!isResolved()) {
+        config.onContinue?.();
+      }
+    });
+  };
+  const run = () => {
+    if (isResolved()) {
+      return;
+    }
+    let promiseOrValue;
+    const initialPromise = failureCount === 0 ? config.initialPromise : void 0;
+    try {
+      promiseOrValue = initialPromise ?? config.fn();
+    } catch (error) {
+      promiseOrValue = Promise.reject(error);
+    }
+    Promise.resolve(promiseOrValue).then(resolve).catch((error) => {
+      if (isResolved()) {
+        return;
+      }
+      const retry = config.retry ?? (isServer ? 0 : 3);
+      const retryDelay = config.retryDelay ?? defaultRetryDelay;
+      const delay2 = typeof retryDelay === "function" ? retryDelay(failureCount, error) : retryDelay;
+      const shouldRetry = retry === true || typeof retry === "number" && failureCount < retry || typeof retry === "function" && retry(failureCount, error);
+      if (isRetryCancelled || !shouldRetry) {
+        reject(error);
+        return;
+      }
+      failureCount++;
+      config.onFail?.(failureCount, error);
+      sleep(delay2).then(() => {
+        return canContinue() ? void 0 : pause();
+      }).then(() => {
+        if (isRetryCancelled) {
+          reject(error);
+        } else {
+          run();
+        }
+      });
+    });
+  };
+  return {
+    promise: thenable,
+    status: () => thenable.status,
+    cancel,
+    continue: () => {
+      continueFn?.();
+      return thenable;
+    },
+    cancelRetry,
+    continueRetry,
+    canStart,
+    start: () => {
+      if (canStart()) {
+        run();
+      } else {
+        pause().then(run);
+      }
+      return thenable;
+    }
+  };
+}
+var Removable = class {
+  #gcTimeout;
+  destroy() {
+    this.clearGcTimeout();
+  }
+  scheduleGc() {
+    this.clearGcTimeout();
+    if (isValidTimeout(this.gcTime)) {
+      this.#gcTimeout = timeoutManager.setTimeout(() => {
+        this.optionalRemove();
+      }, this.gcTime);
+    }
+  }
+  updateGcTime(newGcTime) {
+    this.gcTime = Math.max(
+      this.gcTime || 0,
+      newGcTime ?? (isServer ? Infinity : 5 * 60 * 1e3)
+    );
+  }
+  clearGcTimeout() {
+    if (this.#gcTimeout) {
+      timeoutManager.clearTimeout(this.#gcTimeout);
+      this.#gcTimeout = void 0;
+    }
+  }
+};
+var Query = class extends Removable {
+  #initialState;
+  #revertState;
+  #cache;
+  #client;
+  #retryer;
+  #defaultOptions;
+  #abortSignalConsumed;
+  constructor(config) {
+    super();
+    this.#abortSignalConsumed = false;
+    this.#defaultOptions = config.defaultOptions;
+    this.setOptions(config.options);
+    this.observers = [];
+    this.#client = config.client;
+    this.#cache = this.#client.getQueryCache();
+    this.queryKey = config.queryKey;
+    this.queryHash = config.queryHash;
+    this.#initialState = getDefaultState$1(this.options);
+    this.state = config.state ?? this.#initialState;
+    this.scheduleGc();
+  }
+  get meta() {
+    return this.options.meta;
+  }
+  get promise() {
+    return this.#retryer?.promise;
+  }
+  setOptions(options) {
+    this.options = { ...this.#defaultOptions, ...options };
+    this.updateGcTime(this.options.gcTime);
+    if (this.state && this.state.data === void 0) {
+      const defaultState = getDefaultState$1(this.options);
+      if (defaultState.data !== void 0) {
+        this.setState(
+          successState(defaultState.data, defaultState.dataUpdatedAt)
+        );
+        this.#initialState = defaultState;
+      }
+    }
+  }
+  optionalRemove() {
+    if (!this.observers.length && this.state.fetchStatus === "idle") {
+      this.#cache.remove(this);
+    }
+  }
+  setData(newData, options) {
+    const data = replaceData(this.state.data, newData, this.options);
+    this.#dispatch({
+      data,
+      type: "success",
+      dataUpdatedAt: options?.updatedAt,
+      manual: options?.manual
+    });
+    return data;
+  }
+  setState(state, setStateOptions) {
+    this.#dispatch({ type: "setState", state, setStateOptions });
+  }
+  cancel(options) {
+    const promise = this.#retryer?.promise;
+    this.#retryer?.cancel(options);
+    return promise ? promise.then(noop).catch(noop) : Promise.resolve();
+  }
+  destroy() {
+    super.destroy();
+    this.cancel({ silent: true });
+  }
+  reset() {
+    this.destroy();
+    this.setState(this.#initialState);
+  }
+  isActive() {
+    return this.observers.some(
+      (observer) => resolveEnabled(observer.options.enabled, this) !== false
+    );
+  }
+  isDisabled() {
+    if (this.getObserversCount() > 0) {
+      return !this.isActive();
+    }
+    return this.options.queryFn === skipToken || this.state.dataUpdateCount + this.state.errorUpdateCount === 0;
+  }
+  isStatic() {
+    if (this.getObserversCount() > 0) {
+      return this.observers.some(
+        (observer) => resolveStaleTime(observer.options.staleTime, this) === "static"
+      );
+    }
+    return false;
+  }
+  isStale() {
+    if (this.getObserversCount() > 0) {
+      return this.observers.some(
+        (observer) => observer.getCurrentResult().isStale
+      );
+    }
+    return this.state.data === void 0 || this.state.isInvalidated;
+  }
+  isStaleByTime(staleTime = 0) {
+    if (this.state.data === void 0) {
+      return true;
+    }
+    if (staleTime === "static") {
+      return false;
+    }
+    if (this.state.isInvalidated) {
+      return true;
+    }
+    return !timeUntilStale(this.state.dataUpdatedAt, staleTime);
+  }
+  onFocus() {
+    const observer = this.observers.find((x) => x.shouldFetchOnWindowFocus());
+    observer?.refetch({ cancelRefetch: false });
+    this.#retryer?.continue();
+  }
+  onOnline() {
+    const observer = this.observers.find((x) => x.shouldFetchOnReconnect());
+    observer?.refetch({ cancelRefetch: false });
+    this.#retryer?.continue();
+  }
+  addObserver(observer) {
+    if (!this.observers.includes(observer)) {
+      this.observers.push(observer);
+      this.clearGcTimeout();
+      this.#cache.notify({ type: "observerAdded", query: this, observer });
+    }
+  }
+  removeObserver(observer) {
+    if (this.observers.includes(observer)) {
+      this.observers = this.observers.filter((x) => x !== observer);
+      if (!this.observers.length) {
+        if (this.#retryer) {
+          if (this.#abortSignalConsumed) {
+            this.#retryer.cancel({ revert: true });
+          } else {
+            this.#retryer.cancelRetry();
+          }
+        }
+        this.scheduleGc();
+      }
+      this.#cache.notify({ type: "observerRemoved", query: this, observer });
+    }
+  }
+  getObserversCount() {
+    return this.observers.length;
+  }
+  invalidate() {
+    if (!this.state.isInvalidated) {
+      this.#dispatch({ type: "invalidate" });
+    }
+  }
+  async fetch(options, fetchOptions) {
+    if (this.state.fetchStatus !== "idle" && // If the promise in the retyer is already rejected, we have to definitely
+    // re-start the fetch; there is a chance that the query is still in a
+    // pending state when that happens
+    this.#retryer?.status() !== "rejected") {
+      if (this.state.data !== void 0 && fetchOptions?.cancelRefetch) {
+        this.cancel({ silent: true });
+      } else if (this.#retryer) {
+        this.#retryer.continueRetry();
+        return this.#retryer.promise;
+      }
+    }
+    if (options) {
+      this.setOptions(options);
+    }
+    if (!this.options.queryFn) {
+      const observer = this.observers.find((x) => x.options.queryFn);
+      if (observer) {
+        this.setOptions(observer.options);
+      }
+    }
+    {
+      if (!Array.isArray(this.options.queryKey)) {
+        console.error(
+          `As of v4, queryKey needs to be an Array. If you are using a string like 'repoData', please change it to an Array, e.g. ['repoData']`
+        );
+      }
+    }
+    const abortController = new AbortController();
+    const addSignalProperty = (object) => {
+      Object.defineProperty(object, "signal", {
+        enumerable: true,
+        get: () => {
+          this.#abortSignalConsumed = true;
+          return abortController.signal;
+        }
+      });
+    };
+    const fetchFn = () => {
+      const queryFn = ensureQueryFn(this.options, fetchOptions);
+      const createQueryFnContext = () => {
+        const queryFnContext2 = {
+          client: this.#client,
+          queryKey: this.queryKey,
+          meta: this.meta
+        };
+        addSignalProperty(queryFnContext2);
+        return queryFnContext2;
+      };
+      const queryFnContext = createQueryFnContext();
+      this.#abortSignalConsumed = false;
+      if (this.options.persister) {
+        return this.options.persister(
+          queryFn,
+          queryFnContext,
+          this
+        );
+      }
+      return queryFn(queryFnContext);
+    };
+    const createFetchContext = () => {
+      const context2 = {
+        fetchOptions,
+        options: this.options,
+        queryKey: this.queryKey,
+        client: this.#client,
+        state: this.state,
+        fetchFn
+      };
+      addSignalProperty(context2);
+      return context2;
+    };
+    const context = createFetchContext();
+    this.options.behavior?.onFetch(context, this);
+    this.#revertState = this.state;
+    if (this.state.fetchStatus === "idle" || this.state.fetchMeta !== context.fetchOptions?.meta) {
+      this.#dispatch({ type: "fetch", meta: context.fetchOptions?.meta });
+    }
+    this.#retryer = createRetryer({
+      initialPromise: fetchOptions?.initialPromise,
+      fn: context.fetchFn,
+      onCancel: (error) => {
+        if (error instanceof CancelledError && error.revert) {
+          this.setState({
+            ...this.#revertState,
+            fetchStatus: "idle"
+          });
+        }
+        abortController.abort();
+      },
+      onFail: (failureCount, error) => {
+        this.#dispatch({ type: "failed", failureCount, error });
+      },
+      onPause: () => {
+        this.#dispatch({ type: "pause" });
+      },
+      onContinue: () => {
+        this.#dispatch({ type: "continue" });
+      },
+      retry: context.options.retry,
+      retryDelay: context.options.retryDelay,
+      networkMode: context.options.networkMode,
+      canRun: () => true
+    });
+    try {
+      const data = await this.#retryer.start();
+      if (data === void 0) {
+        if (true) {
+          console.error(
+            `Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ${this.queryHash}`
+          );
+        }
+        throw new Error(`${this.queryHash} data is undefined`);
+      }
+      this.setData(data);
+      this.#cache.config.onSuccess?.(data, this);
+      this.#cache.config.onSettled?.(
+        data,
+        this.state.error,
+        this
+      );
+      return data;
+    } catch (error) {
+      if (error instanceof CancelledError) {
+        if (error.silent) {
+          return this.#retryer.promise;
+        } else if (error.revert) {
+          if (this.state.data === void 0) {
+            throw error;
+          }
+          return this.state.data;
+        }
+      }
+      this.#dispatch({
+        type: "error",
+        error
+      });
+      this.#cache.config.onError?.(
+        error,
+        this
+      );
+      this.#cache.config.onSettled?.(
+        this.state.data,
+        error,
+        this
+      );
+      throw error;
+    } finally {
+      this.scheduleGc();
+    }
+  }
+  #dispatch(action) {
+    const reducer = (state) => {
+      switch (action.type) {
+        case "failed":
+          return {
+            ...state,
+            fetchFailureCount: action.failureCount,
+            fetchFailureReason: action.error
+          };
+        case "pause":
+          return {
+            ...state,
+            fetchStatus: "paused"
+          };
+        case "continue":
+          return {
+            ...state,
+            fetchStatus: "fetching"
+          };
+        case "fetch":
+          return {
+            ...state,
+            ...fetchState(state.data, this.options),
+            fetchMeta: action.meta ?? null
+          };
+        case "success":
+          const newState = {
+            ...state,
+            ...successState(action.data, action.dataUpdatedAt),
+            dataUpdateCount: state.dataUpdateCount + 1,
+            ...!action.manual && {
+              fetchStatus: "idle",
+              fetchFailureCount: 0,
+              fetchFailureReason: null
+            }
+          };
+          this.#revertState = action.manual ? newState : void 0;
+          return newState;
+        case "error":
+          const error = action.error;
+          return {
+            ...state,
+            error,
+            errorUpdateCount: state.errorUpdateCount + 1,
+            errorUpdatedAt: Date.now(),
+            fetchFailureCount: state.fetchFailureCount + 1,
+            fetchFailureReason: error,
+            fetchStatus: "idle",
+            status: "error"
+          };
+        case "invalidate":
+          return {
+            ...state,
+            isInvalidated: true
+          };
+        case "setState":
+          return {
+            ...state,
+            ...action.state
+          };
+      }
+    };
+    this.state = reducer(this.state);
+    notifyManager.batch(() => {
+      this.observers.forEach((observer) => {
+        observer.onQueryUpdate();
+      });
+      this.#cache.notify({ query: this, type: "updated", action });
+    });
+  }
+};
+function fetchState(data, options) {
+  return {
+    fetchFailureCount: 0,
+    fetchFailureReason: null,
+    fetchStatus: canFetch(options.networkMode) ? "fetching" : "paused",
+    ...data === void 0 && {
+      error: null,
+      status: "pending"
+    }
+  };
+}
+function successState(data, dataUpdatedAt) {
+  return {
+    data,
+    dataUpdatedAt: dataUpdatedAt ?? Date.now(),
+    error: null,
+    isInvalidated: false,
+    status: "success"
+  };
+}
+function getDefaultState$1(options) {
+  const data = typeof options.initialData === "function" ? options.initialData() : options.initialData;
+  const hasData = data !== void 0;
+  const initialDataUpdatedAt = hasData ? typeof options.initialDataUpdatedAt === "function" ? options.initialDataUpdatedAt() : options.initialDataUpdatedAt : 0;
+  return {
+    data,
+    dataUpdateCount: 0,
+    dataUpdatedAt: hasData ? initialDataUpdatedAt ?? Date.now() : 0,
+    error: null,
+    errorUpdateCount: 0,
+    errorUpdatedAt: 0,
+    fetchFailureCount: 0,
+    fetchFailureReason: null,
+    fetchMeta: null,
+    isInvalidated: false,
+    status: hasData ? "success" : "pending",
+    fetchStatus: "idle"
+  };
+}
+var QueryObserver = class extends Subscribable {
+  constructor(client2, options) {
+    super();
+    this.options = options;
+    this.#client = client2;
+    this.#selectError = null;
+    this.#currentThenable = pendingThenable();
+    this.bindMethods();
+    this.setOptions(options);
+  }
+  #client;
+  #currentQuery = void 0;
+  #currentQueryInitialState = void 0;
+  #currentResult = void 0;
+  #currentResultState;
+  #currentResultOptions;
+  #currentThenable;
+  #selectError;
+  #selectFn;
+  #selectResult;
+  // This property keeps track of the last query with defined data.
+  // It will be used to pass the previous data and query to the placeholder function between renders.
+  #lastQueryWithDefinedData;
+  #staleTimeoutId;
+  #refetchIntervalId;
+  #currentRefetchInterval;
+  #trackedProps = /* @__PURE__ */ new Set();
+  bindMethods() {
+    this.refetch = this.refetch.bind(this);
+  }
+  onSubscribe() {
+    if (this.listeners.size === 1) {
+      this.#currentQuery.addObserver(this);
+      if (shouldFetchOnMount(this.#currentQuery, this.options)) {
+        this.#executeFetch();
+      } else {
+        this.updateResult();
+      }
+      this.#updateTimers();
+    }
+  }
+  onUnsubscribe() {
+    if (!this.hasListeners()) {
+      this.destroy();
+    }
+  }
+  shouldFetchOnReconnect() {
+    return shouldFetchOn(
+      this.#currentQuery,
+      this.options,
+      this.options.refetchOnReconnect
+    );
+  }
+  shouldFetchOnWindowFocus() {
+    return shouldFetchOn(
+      this.#currentQuery,
+      this.options,
+      this.options.refetchOnWindowFocus
+    );
+  }
+  destroy() {
+    this.listeners = /* @__PURE__ */ new Set();
+    this.#clearStaleTimeout();
+    this.#clearRefetchInterval();
+    this.#currentQuery.removeObserver(this);
+  }
+  setOptions(options) {
+    const prevOptions = this.options;
+    const prevQuery = this.#currentQuery;
+    this.options = this.#client.defaultQueryOptions(options);
+    if (this.options.enabled !== void 0 && typeof this.options.enabled !== "boolean" && typeof this.options.enabled !== "function" && typeof resolveEnabled(this.options.enabled, this.#currentQuery) !== "boolean") {
+      throw new Error(
+        "Expected enabled to be a boolean or a callback that returns a boolean"
+      );
+    }
+    this.#updateQuery();
+    this.#currentQuery.setOptions(this.options);
+    if (prevOptions._defaulted && !shallowEqualObjects(this.options, prevOptions)) {
+      this.#client.getQueryCache().notify({
+        type: "observerOptionsUpdated",
+        query: this.#currentQuery,
+        observer: this
+      });
+    }
+    const mounted = this.hasListeners();
+    if (mounted && shouldFetchOptionally(
+      this.#currentQuery,
+      prevQuery,
+      this.options,
+      prevOptions
+    )) {
+      this.#executeFetch();
+    }
+    this.updateResult();
+    if (mounted && (this.#currentQuery !== prevQuery || resolveEnabled(this.options.enabled, this.#currentQuery) !== resolveEnabled(prevOptions.enabled, this.#currentQuery) || resolveStaleTime(this.options.staleTime, this.#currentQuery) !== resolveStaleTime(prevOptions.staleTime, this.#currentQuery))) {
+      this.#updateStaleTimeout();
+    }
+    const nextRefetchInterval = this.#computeRefetchInterval();
+    if (mounted && (this.#currentQuery !== prevQuery || resolveEnabled(this.options.enabled, this.#currentQuery) !== resolveEnabled(prevOptions.enabled, this.#currentQuery) || nextRefetchInterval !== this.#currentRefetchInterval)) {
+      this.#updateRefetchInterval(nextRefetchInterval);
+    }
+  }
+  getOptimisticResult(options) {
+    const query = this.#client.getQueryCache().build(this.#client, options);
+    const result = this.createResult(query, options);
+    if (shouldAssignObserverCurrentProperties(this, result)) {
+      this.#currentResult = result;
+      this.#currentResultOptions = this.options;
+      this.#currentResultState = this.#currentQuery.state;
+    }
+    return result;
+  }
+  getCurrentResult() {
+    return this.#currentResult;
+  }
+  trackResult(result, onPropTracked) {
+    return new Proxy(result, {
+      get: (target, key) => {
+        this.trackProp(key);
+        onPropTracked?.(key);
+        if (key === "promise") {
+          this.trackProp("data");
+          if (!this.options.experimental_prefetchInRender && this.#currentThenable.status === "pending") {
+            this.#currentThenable.reject(
+              new Error(
+                "experimental_prefetchInRender feature flag is not enabled"
+              )
+            );
+          }
+        }
+        return Reflect.get(target, key);
+      }
+    });
+  }
+  trackProp(key) {
+    this.#trackedProps.add(key);
+  }
+  getCurrentQuery() {
+    return this.#currentQuery;
+  }
+  refetch({ ...options } = {}) {
+    return this.fetch({
+      ...options
+    });
+  }
+  fetchOptimistic(options) {
+    const defaultedOptions = this.#client.defaultQueryOptions(options);
+    const query = this.#client.getQueryCache().build(this.#client, defaultedOptions);
+    return query.fetch().then(() => this.createResult(query, defaultedOptions));
+  }
+  fetch(fetchOptions) {
+    return this.#executeFetch({
+      ...fetchOptions,
+      cancelRefetch: fetchOptions.cancelRefetch ?? true
+    }).then(() => {
+      this.updateResult();
+      return this.#currentResult;
+    });
+  }
+  #executeFetch(fetchOptions) {
+    this.#updateQuery();
+    let promise = this.#currentQuery.fetch(
+      this.options,
+      fetchOptions
+    );
+    if (!fetchOptions?.throwOnError) {
+      promise = promise.catch(noop);
+    }
+    return promise;
+  }
+  #updateStaleTimeout() {
+    this.#clearStaleTimeout();
+    const staleTime = resolveStaleTime(
+      this.options.staleTime,
+      this.#currentQuery
+    );
+    if (isServer || this.#currentResult.isStale || !isValidTimeout(staleTime)) {
+      return;
+    }
+    const time2 = timeUntilStale(this.#currentResult.dataUpdatedAt, staleTime);
+    const timeout = time2 + 1;
+    this.#staleTimeoutId = timeoutManager.setTimeout(() => {
+      if (!this.#currentResult.isStale) {
+        this.updateResult();
+      }
+    }, timeout);
+  }
+  #computeRefetchInterval() {
+    return (typeof this.options.refetchInterval === "function" ? this.options.refetchInterval(this.#currentQuery) : this.options.refetchInterval) ?? false;
+  }
+  #updateRefetchInterval(nextInterval) {
+    this.#clearRefetchInterval();
+    this.#currentRefetchInterval = nextInterval;
+    if (isServer || resolveEnabled(this.options.enabled, this.#currentQuery) === false || !isValidTimeout(this.#currentRefetchInterval) || this.#currentRefetchInterval === 0) {
+      return;
+    }
+    this.#refetchIntervalId = timeoutManager.setInterval(() => {
+      if (this.options.refetchIntervalInBackground || focusManager.isFocused()) {
+        this.#executeFetch();
+      }
+    }, this.#currentRefetchInterval);
+  }
+  #updateTimers() {
+    this.#updateStaleTimeout();
+    this.#updateRefetchInterval(this.#computeRefetchInterval());
+  }
+  #clearStaleTimeout() {
+    if (this.#staleTimeoutId) {
+      timeoutManager.clearTimeout(this.#staleTimeoutId);
+      this.#staleTimeoutId = void 0;
+    }
+  }
+  #clearRefetchInterval() {
+    if (this.#refetchIntervalId) {
+      timeoutManager.clearInterval(this.#refetchIntervalId);
+      this.#refetchIntervalId = void 0;
+    }
+  }
+  createResult(query, options) {
+    const prevQuery = this.#currentQuery;
+    const prevOptions = this.options;
+    const prevResult = this.#currentResult;
+    const prevResultState = this.#currentResultState;
+    const prevResultOptions = this.#currentResultOptions;
+    const queryChange = query !== prevQuery;
+    const queryInitialState = queryChange ? query.state : this.#currentQueryInitialState;
+    const { state } = query;
+    let newState = { ...state };
+    let isPlaceholderData = false;
+    let data;
+    if (options._optimisticResults) {
+      const mounted = this.hasListeners();
+      const fetchOnMount = !mounted && shouldFetchOnMount(query, options);
+      const fetchOptionally = mounted && shouldFetchOptionally(query, prevQuery, options, prevOptions);
+      if (fetchOnMount || fetchOptionally) {
+        newState = {
+          ...newState,
+          ...fetchState(state.data, query.options)
+        };
+      }
+      if (options._optimisticResults === "isRestoring") {
+        newState.fetchStatus = "idle";
+      }
+    }
+    let { error, errorUpdatedAt, status } = newState;
+    data = newState.data;
+    let skipSelect = false;
+    if (options.placeholderData !== void 0 && data === void 0 && status === "pending") {
+      let placeholderData;
+      if (prevResult?.isPlaceholderData && options.placeholderData === prevResultOptions?.placeholderData) {
+        placeholderData = prevResult.data;
+        skipSelect = true;
+      } else {
+        placeholderData = typeof options.placeholderData === "function" ? options.placeholderData(
+          this.#lastQueryWithDefinedData?.state.data,
+          this.#lastQueryWithDefinedData
+        ) : options.placeholderData;
+      }
+      if (placeholderData !== void 0) {
+        status = "success";
+        data = replaceData(
+          prevResult?.data,
+          placeholderData,
+          options
+        );
+        isPlaceholderData = true;
+      }
+    }
+    if (options.select && data !== void 0 && !skipSelect) {
+      if (prevResult && data === prevResultState?.data && options.select === this.#selectFn) {
+        data = this.#selectResult;
+      } else {
+        try {
+          this.#selectFn = options.select;
+          data = options.select(data);
+          data = replaceData(prevResult?.data, data, options);
+          this.#selectResult = data;
+          this.#selectError = null;
+        } catch (selectError) {
+          this.#selectError = selectError;
+        }
+      }
+    }
+    if (this.#selectError) {
+      error = this.#selectError;
+      data = this.#selectResult;
+      errorUpdatedAt = Date.now();
+      status = "error";
+    }
+    const isFetching = newState.fetchStatus === "fetching";
+    const isPending = status === "pending";
+    const isError = status === "error";
+    const isLoading = isPending && isFetching;
+    const hasData = data !== void 0;
+    const result = {
+      status,
+      fetchStatus: newState.fetchStatus,
+      isPending,
+      isSuccess: status === "success",
+      isError,
+      isInitialLoading: isLoading,
+      isLoading,
+      data,
+      dataUpdatedAt: newState.dataUpdatedAt,
+      error,
+      errorUpdatedAt,
+      failureCount: newState.fetchFailureCount,
+      failureReason: newState.fetchFailureReason,
+      errorUpdateCount: newState.errorUpdateCount,
+      isFetched: newState.dataUpdateCount > 0 || newState.errorUpdateCount > 0,
+      isFetchedAfterMount: newState.dataUpdateCount > queryInitialState.dataUpdateCount || newState.errorUpdateCount > queryInitialState.errorUpdateCount,
+      isFetching,
+      isRefetching: isFetching && !isPending,
+      isLoadingError: isError && !hasData,
+      isPaused: newState.fetchStatus === "paused",
+      isPlaceholderData,
+      isRefetchError: isError && hasData,
+      isStale: isStale(query, options),
+      refetch: this.refetch,
+      promise: this.#currentThenable,
+      isEnabled: resolveEnabled(options.enabled, query) !== false
+    };
+    const nextResult = result;
+    if (this.options.experimental_prefetchInRender) {
+      const finalizeThenableIfPossible = (thenable) => {
+        if (nextResult.status === "error") {
+          thenable.reject(nextResult.error);
+        } else if (nextResult.data !== void 0) {
+          thenable.resolve(nextResult.data);
+        }
+      };
+      const recreateThenable = () => {
+        const pending = this.#currentThenable = nextResult.promise = pendingThenable();
+        finalizeThenableIfPossible(pending);
+      };
+      const prevThenable = this.#currentThenable;
+      switch (prevThenable.status) {
+        case "pending":
+          if (query.queryHash === prevQuery.queryHash) {
+            finalizeThenableIfPossible(prevThenable);
+          }
+          break;
+        case "fulfilled":
+          if (nextResult.status === "error" || nextResult.data !== prevThenable.value) {
+            recreateThenable();
+          }
+          break;
+        case "rejected":
+          if (nextResult.status !== "error" || nextResult.error !== prevThenable.reason) {
+            recreateThenable();
+          }
+          break;
+      }
+    }
+    return nextResult;
+  }
+  updateResult() {
+    const prevResult = this.#currentResult;
+    const nextResult = this.createResult(this.#currentQuery, this.options);
+    this.#currentResultState = this.#currentQuery.state;
+    this.#currentResultOptions = this.options;
+    if (this.#currentResultState.data !== void 0) {
+      this.#lastQueryWithDefinedData = this.#currentQuery;
+    }
+    if (shallowEqualObjects(nextResult, prevResult)) {
+      return;
+    }
+    this.#currentResult = nextResult;
+    const shouldNotifyListeners = () => {
+      if (!prevResult) {
+        return true;
+      }
+      const { notifyOnChangeProps } = this.options;
+      const notifyOnChangePropsValue = typeof notifyOnChangeProps === "function" ? notifyOnChangeProps() : notifyOnChangeProps;
+      if (notifyOnChangePropsValue === "all" || !notifyOnChangePropsValue && !this.#trackedProps.size) {
+        return true;
+      }
+      const includedProps = new Set(
+        notifyOnChangePropsValue ?? this.#trackedProps
+      );
+      if (this.options.throwOnError) {
+        includedProps.add("error");
+      }
+      return Object.keys(this.#currentResult).some((key) => {
+        const typedKey = key;
+        const changed = this.#currentResult[typedKey] !== prevResult[typedKey];
+        return changed && includedProps.has(typedKey);
+      });
+    };
+    this.#notify({ listeners: shouldNotifyListeners() });
+  }
+  #updateQuery() {
+    const query = this.#client.getQueryCache().build(this.#client, this.options);
+    if (query === this.#currentQuery) {
+      return;
+    }
+    const prevQuery = this.#currentQuery;
+    this.#currentQuery = query;
+    this.#currentQueryInitialState = query.state;
+    if (this.hasListeners()) {
+      prevQuery?.removeObserver(this);
+      query.addObserver(this);
+    }
+  }
+  onQueryUpdate() {
+    this.updateResult();
+    if (this.hasListeners()) {
+      this.#updateTimers();
+    }
+  }
+  #notify(notifyOptions) {
+    notifyManager.batch(() => {
+      if (notifyOptions.listeners) {
+        this.listeners.forEach((listener) => {
+          listener(this.#currentResult);
+        });
+      }
+      this.#client.getQueryCache().notify({
+        query: this.#currentQuery,
+        type: "observerResultsUpdated"
+      });
+    });
+  }
+};
+function shouldLoadOnMount(query, options) {
+  return resolveEnabled(options.enabled, query) !== false && query.state.data === void 0 && !(query.state.status === "error" && options.retryOnMount === false);
+}
+function shouldFetchOnMount(query, options) {
+  return shouldLoadOnMount(query, options) || query.state.data !== void 0 && shouldFetchOn(query, options, options.refetchOnMount);
+}
+function shouldFetchOn(query, options, field) {
+  if (resolveEnabled(options.enabled, query) !== false && resolveStaleTime(options.staleTime, query) !== "static") {
+    const value = typeof field === "function" ? field(query) : field;
+    return value === "always" || value !== false && isStale(query, options);
+  }
+  return false;
+}
+function shouldFetchOptionally(query, prevQuery, options, prevOptions) {
+  return (query !== prevQuery || resolveEnabled(prevOptions.enabled, query) === false) && (!options.suspense || query.state.status !== "error") && isStale(query, options);
+}
+function isStale(query, options) {
+  return resolveEnabled(options.enabled, query) !== false && query.isStaleByTime(resolveStaleTime(options.staleTime, query));
+}
+function shouldAssignObserverCurrentProperties(observer, optimisticResult) {
+  if (!shallowEqualObjects(observer.getCurrentResult(), optimisticResult)) {
+    return true;
+  }
+  return false;
+}
+function infiniteQueryBehavior(pages) {
+  return {
+    onFetch: (context, query) => {
+      const options = context.options;
+      const direction = context.fetchOptions?.meta?.fetchMore?.direction;
+      const oldPages = context.state.data?.pages || [];
+      const oldPageParams = context.state.data?.pageParams || [];
+      let result = { pages: [], pageParams: [] };
+      let currentPage = 0;
+      const fetchFn = async () => {
+        let cancelled = false;
+        const addSignalProperty = (object) => {
+          Object.defineProperty(object, "signal", {
+            enumerable: true,
+            get: () => {
+              if (context.signal.aborted) {
+                cancelled = true;
+              } else {
+                context.signal.addEventListener("abort", () => {
+                  cancelled = true;
+                });
+              }
+              return context.signal;
+            }
+          });
+        };
+        const queryFn = ensureQueryFn(context.options, context.fetchOptions);
+        const fetchPage = async (data, param, previous) => {
+          if (cancelled) {
+            return Promise.reject();
+          }
+          if (param == null && data.pages.length) {
+            return Promise.resolve(data);
+          }
+          const createQueryFnContext = () => {
+            const queryFnContext2 = {
+              client: context.client,
+              queryKey: context.queryKey,
+              pageParam: param,
+              direction: previous ? "backward" : "forward",
+              meta: context.options.meta
+            };
+            addSignalProperty(queryFnContext2);
+            return queryFnContext2;
+          };
+          const queryFnContext = createQueryFnContext();
+          const page = await queryFn(queryFnContext);
+          const { maxPages } = context.options;
+          const addTo = previous ? addToStart : addToEnd;
+          return {
+            pages: addTo(data.pages, page, maxPages),
+            pageParams: addTo(data.pageParams, param, maxPages)
+          };
+        };
+        if (direction && oldPages.length) {
+          const previous = direction === "backward";
+          const pageParamFn = previous ? getPreviousPageParam : getNextPageParam;
+          const oldData = {
+            pages: oldPages,
+            pageParams: oldPageParams
+          };
+          const param = pageParamFn(options, oldData);
+          result = await fetchPage(oldData, param, previous);
+        } else {
+          const remainingPages = pages ?? oldPages.length;
+          do {
+            const param = currentPage === 0 ? oldPageParams[0] ?? options.initialPageParam : getNextPageParam(options, result);
+            if (currentPage > 0 && param == null) {
+              break;
+            }
+            result = await fetchPage(result, param);
+            currentPage++;
+          } while (currentPage < remainingPages);
+        }
+        return result;
+      };
+      if (context.options.persister) {
+        context.fetchFn = () => {
+          return context.options.persister?.(
+            fetchFn,
+            {
+              client: context.client,
+              queryKey: context.queryKey,
+              meta: context.options.meta,
+              signal: context.signal
+            },
+            query
+          );
+        };
+      } else {
+        context.fetchFn = fetchFn;
+      }
+    }
+  };
+}
+function getNextPageParam(options, { pages, pageParams }) {
+  const lastIndex = pages.length - 1;
+  return pages.length > 0 ? options.getNextPageParam(
+    pages[lastIndex],
+    pages,
+    pageParams[lastIndex],
+    pageParams
+  ) : void 0;
+}
+function getPreviousPageParam(options, { pages, pageParams }) {
+  return pages.length > 0 ? options.getPreviousPageParam?.(pages[0], pages, pageParams[0], pageParams) : void 0;
+}
+var Mutation = class extends Removable {
+  #client;
+  #observers;
+  #mutationCache;
+  #retryer;
+  constructor(config) {
+    super();
+    this.#client = config.client;
+    this.mutationId = config.mutationId;
+    this.#mutationCache = config.mutationCache;
+    this.#observers = [];
+    this.state = config.state || getDefaultState();
+    this.setOptions(config.options);
+    this.scheduleGc();
+  }
+  setOptions(options) {
+    this.options = options;
+    this.updateGcTime(this.options.gcTime);
+  }
+  get meta() {
+    return this.options.meta;
+  }
+  addObserver(observer) {
+    if (!this.#observers.includes(observer)) {
+      this.#observers.push(observer);
+      this.clearGcTimeout();
+      this.#mutationCache.notify({
+        type: "observerAdded",
+        mutation: this,
+        observer
+      });
+    }
+  }
+  removeObserver(observer) {
+    this.#observers = this.#observers.filter((x) => x !== observer);
+    this.scheduleGc();
+    this.#mutationCache.notify({
+      type: "observerRemoved",
+      mutation: this,
+      observer
+    });
+  }
+  optionalRemove() {
+    if (!this.#observers.length) {
+      if (this.state.status === "pending") {
+        this.scheduleGc();
+      } else {
+        this.#mutationCache.remove(this);
+      }
+    }
+  }
+  continue() {
+    return this.#retryer?.continue() ?? // continuing a mutation assumes that variables are set, mutation must have been dehydrated before
+    this.execute(this.state.variables);
+  }
+  async execute(variables) {
+    const onContinue = () => {
+      this.#dispatch({ type: "continue" });
+    };
+    const mutationFnContext = {
+      client: this.#client,
+      meta: this.options.meta,
+      mutationKey: this.options.mutationKey
+    };
+    this.#retryer = createRetryer({
+      fn: () => {
+        if (!this.options.mutationFn) {
+          return Promise.reject(new Error("No mutationFn found"));
+        }
+        return this.options.mutationFn(variables, mutationFnContext);
+      },
+      onFail: (failureCount, error) => {
+        this.#dispatch({ type: "failed", failureCount, error });
+      },
+      onPause: () => {
+        this.#dispatch({ type: "pause" });
+      },
+      onContinue,
+      retry: this.options.retry ?? 0,
+      retryDelay: this.options.retryDelay,
+      networkMode: this.options.networkMode,
+      canRun: () => this.#mutationCache.canRun(this)
+    });
+    const restored = this.state.status === "pending";
+    const isPaused = !this.#retryer.canStart();
+    try {
+      if (restored) {
+        onContinue();
+      } else {
+        this.#dispatch({ type: "pending", variables, isPaused });
+        await this.#mutationCache.config.onMutate?.(
+          variables,
+          this,
+          mutationFnContext
+        );
+        const context = await this.options.onMutate?.(
+          variables,
+          mutationFnContext
+        );
+        if (context !== this.state.context) {
+          this.#dispatch({
+            type: "pending",
+            context,
+            variables,
+            isPaused
+          });
+        }
+      }
+      const data = await this.#retryer.start();
+      await this.#mutationCache.config.onSuccess?.(
+        data,
+        variables,
+        this.state.context,
+        this,
+        mutationFnContext
+      );
+      await this.options.onSuccess?.(
+        data,
+        variables,
+        this.state.context,
+        mutationFnContext
+      );
+      await this.#mutationCache.config.onSettled?.(
+        data,
+        null,
+        this.state.variables,
+        this.state.context,
+        this,
+        mutationFnContext
+      );
+      await this.options.onSettled?.(
+        data,
+        null,
+        variables,
+        this.state.context,
+        mutationFnContext
+      );
+      this.#dispatch({ type: "success", data });
+      return data;
+    } catch (error) {
+      try {
+        await this.#mutationCache.config.onError?.(
+          error,
+          variables,
+          this.state.context,
+          this,
+          mutationFnContext
+        );
+        await this.options.onError?.(
+          error,
+          variables,
+          this.state.context,
+          mutationFnContext
+        );
+        await this.#mutationCache.config.onSettled?.(
+          void 0,
+          error,
+          this.state.variables,
+          this.state.context,
+          this,
+          mutationFnContext
+        );
+        await this.options.onSettled?.(
+          void 0,
+          error,
+          variables,
+          this.state.context,
+          mutationFnContext
+        );
+        throw error;
+      } finally {
+        this.#dispatch({ type: "error", error });
+      }
+    } finally {
+      this.#mutationCache.runNext(this);
+    }
+  }
+  #dispatch(action) {
+    const reducer = (state) => {
+      switch (action.type) {
+        case "failed":
+          return {
+            ...state,
+            failureCount: action.failureCount,
+            failureReason: action.error
+          };
+        case "pause":
+          return {
+            ...state,
+            isPaused: true
+          };
+        case "continue":
+          return {
+            ...state,
+            isPaused: false
+          };
+        case "pending":
+          return {
+            ...state,
+            context: action.context,
+            data: void 0,
+            failureCount: 0,
+            failureReason: null,
+            error: null,
+            isPaused: action.isPaused,
+            status: "pending",
+            variables: action.variables,
+            submittedAt: Date.now()
+          };
+        case "success":
+          return {
+            ...state,
+            data: action.data,
+            failureCount: 0,
+            failureReason: null,
+            error: null,
+            status: "success",
+            isPaused: false
+          };
+        case "error":
+          return {
+            ...state,
+            data: void 0,
+            error: action.error,
+            failureCount: state.failureCount + 1,
+            failureReason: action.error,
+            isPaused: false,
+            status: "error"
+          };
+      }
+    };
+    this.state = reducer(this.state);
+    notifyManager.batch(() => {
+      this.#observers.forEach((observer) => {
+        observer.onMutationUpdate(action);
+      });
+      this.#mutationCache.notify({
+        mutation: this,
+        type: "updated",
+        action
+      });
+    });
+  }
+};
+function getDefaultState() {
+  return {
+    context: void 0,
+    data: void 0,
+    error: null,
+    failureCount: 0,
+    failureReason: null,
+    isPaused: false,
+    status: "idle",
+    variables: void 0,
+    submittedAt: 0
+  };
+}
+var MutationCache = class extends Subscribable {
+  constructor(config = {}) {
+    super();
+    this.config = config;
+    this.#mutations = /* @__PURE__ */ new Set();
+    this.#scopes = /* @__PURE__ */ new Map();
+    this.#mutationId = 0;
+  }
+  #mutations;
+  #scopes;
+  #mutationId;
+  build(client2, options, state) {
+    const mutation = new Mutation({
+      client: client2,
+      mutationCache: this,
+      mutationId: ++this.#mutationId,
+      options: client2.defaultMutationOptions(options),
+      state
+    });
+    this.add(mutation);
+    return mutation;
+  }
+  add(mutation) {
+    this.#mutations.add(mutation);
+    const scope = scopeFor(mutation);
+    if (typeof scope === "string") {
+      const scopedMutations = this.#scopes.get(scope);
+      if (scopedMutations) {
+        scopedMutations.push(mutation);
+      } else {
+        this.#scopes.set(scope, [mutation]);
+      }
+    }
+    this.notify({ type: "added", mutation });
+  }
+  remove(mutation) {
+    if (this.#mutations.delete(mutation)) {
+      const scope = scopeFor(mutation);
+      if (typeof scope === "string") {
+        const scopedMutations = this.#scopes.get(scope);
+        if (scopedMutations) {
+          if (scopedMutations.length > 1) {
+            const index = scopedMutations.indexOf(mutation);
+            if (index !== -1) {
+              scopedMutations.splice(index, 1);
+            }
+          } else if (scopedMutations[0] === mutation) {
+            this.#scopes.delete(scope);
+          }
+        }
+      }
+    }
+    this.notify({ type: "removed", mutation });
+  }
+  canRun(mutation) {
+    const scope = scopeFor(mutation);
+    if (typeof scope === "string") {
+      const mutationsWithSameScope = this.#scopes.get(scope);
+      const firstPendingMutation = mutationsWithSameScope?.find(
+        (m) => m.state.status === "pending"
+      );
+      return !firstPendingMutation || firstPendingMutation === mutation;
+    } else {
+      return true;
+    }
+  }
+  runNext(mutation) {
+    const scope = scopeFor(mutation);
+    if (typeof scope === "string") {
+      const foundMutation = this.#scopes.get(scope)?.find((m) => m !== mutation && m.state.isPaused);
+      return foundMutation?.continue() ?? Promise.resolve();
+    } else {
+      return Promise.resolve();
+    }
+  }
+  clear() {
+    notifyManager.batch(() => {
+      this.#mutations.forEach((mutation) => {
+        this.notify({ type: "removed", mutation });
+      });
+      this.#mutations.clear();
+      this.#scopes.clear();
+    });
+  }
+  getAll() {
+    return Array.from(this.#mutations);
+  }
+  find(filters) {
+    const defaultedFilters = { exact: true, ...filters };
+    return this.getAll().find(
+      (mutation) => matchMutation(defaultedFilters, mutation)
+    );
+  }
+  findAll(filters = {}) {
+    return this.getAll().filter((mutation) => matchMutation(filters, mutation));
+  }
+  notify(event) {
+    notifyManager.batch(() => {
+      this.listeners.forEach((listener) => {
+        listener(event);
+      });
+    });
+  }
+  resumePausedMutations() {
+    const pausedMutations = this.getAll().filter((x) => x.state.isPaused);
+    return notifyManager.batch(
+      () => Promise.all(
+        pausedMutations.map((mutation) => mutation.continue().catch(noop))
+      )
+    );
+  }
+};
+function scopeFor(mutation) {
+  return mutation.options.scope?.id;
+}
+var MutationObserver$1 = class MutationObserver2 extends Subscribable {
+  #client;
+  #currentResult = void 0;
+  #currentMutation;
+  #mutateOptions;
+  constructor(client2, options) {
+    super();
+    this.#client = client2;
+    this.setOptions(options);
+    this.bindMethods();
+    this.#updateResult();
+  }
+  bindMethods() {
+    this.mutate = this.mutate.bind(this);
+    this.reset = this.reset.bind(this);
+  }
+  setOptions(options) {
+    const prevOptions = this.options;
+    this.options = this.#client.defaultMutationOptions(options);
+    if (!shallowEqualObjects(this.options, prevOptions)) {
+      this.#client.getMutationCache().notify({
+        type: "observerOptionsUpdated",
+        mutation: this.#currentMutation,
+        observer: this
+      });
+    }
+    if (prevOptions?.mutationKey && this.options.mutationKey && hashKey(prevOptions.mutationKey) !== hashKey(this.options.mutationKey)) {
+      this.reset();
+    } else if (this.#currentMutation?.state.status === "pending") {
+      this.#currentMutation.setOptions(this.options);
+    }
+  }
+  onUnsubscribe() {
+    if (!this.hasListeners()) {
+      this.#currentMutation?.removeObserver(this);
+    }
+  }
+  onMutationUpdate(action) {
+    this.#updateResult();
+    this.#notify(action);
+  }
+  getCurrentResult() {
+    return this.#currentResult;
+  }
+  reset() {
+    this.#currentMutation?.removeObserver(this);
+    this.#currentMutation = void 0;
+    this.#updateResult();
+    this.#notify();
+  }
+  mutate(variables, options) {
+    this.#mutateOptions = options;
+    this.#currentMutation?.removeObserver(this);
+    this.#currentMutation = this.#client.getMutationCache().build(this.#client, this.options);
+    this.#currentMutation.addObserver(this);
+    return this.#currentMutation.execute(variables);
+  }
+  #updateResult() {
+    const state = this.#currentMutation?.state ?? getDefaultState();
+    this.#currentResult = {
+      ...state,
+      isPending: state.status === "pending",
+      isSuccess: state.status === "success",
+      isError: state.status === "error",
+      isIdle: state.status === "idle",
+      mutate: this.mutate,
+      reset: this.reset
+    };
+  }
+  #notify(action) {
+    notifyManager.batch(() => {
+      if (this.#mutateOptions && this.hasListeners()) {
+        const variables = this.#currentResult.variables;
+        const onMutateResult = this.#currentResult.context;
+        const context = {
+          client: this.#client,
+          meta: this.options.meta,
+          mutationKey: this.options.mutationKey
+        };
+        if (action?.type === "success") {
+          this.#mutateOptions.onSuccess?.(
+            action.data,
+            variables,
+            onMutateResult,
+            context
+          );
+          this.#mutateOptions.onSettled?.(
+            action.data,
+            null,
+            variables,
+            onMutateResult,
+            context
+          );
+        } else if (action?.type === "error") {
+          this.#mutateOptions.onError?.(
+            action.error,
+            variables,
+            onMutateResult,
+            context
+          );
+          this.#mutateOptions.onSettled?.(
+            void 0,
+            action.error,
+            variables,
+            onMutateResult,
+            context
+          );
+        }
+      }
+      this.listeners.forEach((listener) => {
+        listener(this.#currentResult);
+      });
+    });
+  }
+};
+var QueryCache = class extends Subscribable {
+  constructor(config = {}) {
+    super();
+    this.config = config;
+    this.#queries = /* @__PURE__ */ new Map();
+  }
+  #queries;
+  build(client2, options, state) {
+    const queryKey = options.queryKey;
+    const queryHash = options.queryHash ?? hashQueryKeyByOptions(queryKey, options);
+    let query = this.get(queryHash);
+    if (!query) {
+      query = new Query({
+        client: client2,
+        queryKey,
+        queryHash,
+        options: client2.defaultQueryOptions(options),
+        state,
+        defaultOptions: client2.getQueryDefaults(queryKey)
+      });
+      this.add(query);
+    }
+    return query;
+  }
+  add(query) {
+    if (!this.#queries.has(query.queryHash)) {
+      this.#queries.set(query.queryHash, query);
+      this.notify({
+        type: "added",
+        query
+      });
+    }
+  }
+  remove(query) {
+    const queryInMap = this.#queries.get(query.queryHash);
+    if (queryInMap) {
+      query.destroy();
+      if (queryInMap === query) {
+        this.#queries.delete(query.queryHash);
+      }
+      this.notify({ type: "removed", query });
+    }
+  }
+  clear() {
+    notifyManager.batch(() => {
+      this.getAll().forEach((query) => {
+        this.remove(query);
+      });
+    });
+  }
+  get(queryHash) {
+    return this.#queries.get(queryHash);
+  }
+  getAll() {
+    return [...this.#queries.values()];
+  }
+  find(filters) {
+    const defaultedFilters = { exact: true, ...filters };
+    return this.getAll().find(
+      (query) => matchQuery(defaultedFilters, query)
+    );
+  }
+  findAll(filters = {}) {
+    const queries = this.getAll();
+    return Object.keys(filters).length > 0 ? queries.filter((query) => matchQuery(filters, query)) : queries;
+  }
+  notify(event) {
+    notifyManager.batch(() => {
+      this.listeners.forEach((listener) => {
+        listener(event);
+      });
+    });
+  }
+  onFocus() {
+    notifyManager.batch(() => {
+      this.getAll().forEach((query) => {
+        query.onFocus();
+      });
+    });
+  }
+  onOnline() {
+    notifyManager.batch(() => {
+      this.getAll().forEach((query) => {
+        query.onOnline();
+      });
+    });
+  }
+};
+var QueryClient = class {
+  #queryCache;
+  #mutationCache;
+  #defaultOptions;
+  #queryDefaults;
+  #mutationDefaults;
+  #mountCount;
+  #unsubscribeFocus;
+  #unsubscribeOnline;
+  constructor(config = {}) {
+    this.#queryCache = config.queryCache || new QueryCache();
+    this.#mutationCache = config.mutationCache || new MutationCache();
+    this.#defaultOptions = config.defaultOptions || {};
+    this.#queryDefaults = /* @__PURE__ */ new Map();
+    this.#mutationDefaults = /* @__PURE__ */ new Map();
+    this.#mountCount = 0;
+  }
+  mount() {
+    this.#mountCount++;
+    if (this.#mountCount !== 1) return;
+    this.#unsubscribeFocus = focusManager.subscribe(async (focused) => {
+      if (focused) {
+        await this.resumePausedMutations();
+        this.#queryCache.onFocus();
+      }
+    });
+    this.#unsubscribeOnline = onlineManager.subscribe(async (online) => {
+      if (online) {
+        await this.resumePausedMutations();
+        this.#queryCache.onOnline();
+      }
+    });
+  }
+  unmount() {
+    this.#mountCount--;
+    if (this.#mountCount !== 0) return;
+    this.#unsubscribeFocus?.();
+    this.#unsubscribeFocus = void 0;
+    this.#unsubscribeOnline?.();
+    this.#unsubscribeOnline = void 0;
+  }
+  isFetching(filters) {
+    return this.#queryCache.findAll({ ...filters, fetchStatus: "fetching" }).length;
+  }
+  isMutating(filters) {
+    return this.#mutationCache.findAll({ ...filters, status: "pending" }).length;
+  }
+  /**
+   * Imperative (non-reactive) way to retrieve data for a QueryKey.
+   * Should only be used in callbacks or functions where reading the latest data is necessary, e.g. for optimistic updates.
+   *
+   * Hint: Do not use this function inside a component, because it won't receive updates.
+   * Use `useQuery` to create a `QueryObserver` that subscribes to changes.
+   */
+  getQueryData(queryKey) {
+    const options = this.defaultQueryOptions({ queryKey });
+    return this.#queryCache.get(options.queryHash)?.state.data;
+  }
+  ensureQueryData(options) {
+    const defaultedOptions = this.defaultQueryOptions(options);
+    const query = this.#queryCache.build(this, defaultedOptions);
+    const cachedData = query.state.data;
+    if (cachedData === void 0) {
+      return this.fetchQuery(options);
+    }
+    if (options.revalidateIfStale && query.isStaleByTime(resolveStaleTime(defaultedOptions.staleTime, query))) {
+      void this.prefetchQuery(defaultedOptions);
+    }
+    return Promise.resolve(cachedData);
+  }
+  getQueriesData(filters) {
+    return this.#queryCache.findAll(filters).map(({ queryKey, state }) => {
+      const data = state.data;
+      return [queryKey, data];
+    });
+  }
+  setQueryData(queryKey, updater, options) {
+    const defaultedOptions = this.defaultQueryOptions({ queryKey });
+    const query = this.#queryCache.get(
+      defaultedOptions.queryHash
+    );
+    const prevData = query?.state.data;
+    const data = functionalUpdate(updater, prevData);
+    if (data === void 0) {
+      return void 0;
+    }
+    return this.#queryCache.build(this, defaultedOptions).setData(data, { ...options, manual: true });
+  }
+  setQueriesData(filters, updater, options) {
+    return notifyManager.batch(
+      () => this.#queryCache.findAll(filters).map(({ queryKey }) => [
+        queryKey,
+        this.setQueryData(queryKey, updater, options)
+      ])
+    );
+  }
+  getQueryState(queryKey) {
+    const options = this.defaultQueryOptions({ queryKey });
+    return this.#queryCache.get(
+      options.queryHash
+    )?.state;
+  }
+  removeQueries(filters) {
+    const queryCache = this.#queryCache;
+    notifyManager.batch(() => {
+      queryCache.findAll(filters).forEach((query) => {
+        queryCache.remove(query);
+      });
+    });
+  }
+  resetQueries(filters, options) {
+    const queryCache = this.#queryCache;
+    return notifyManager.batch(() => {
+      queryCache.findAll(filters).forEach((query) => {
+        query.reset();
+      });
+      return this.refetchQueries(
+        {
+          type: "active",
+          ...filters
+        },
+        options
+      );
+    });
+  }
+  cancelQueries(filters, cancelOptions = {}) {
+    const defaultedCancelOptions = { revert: true, ...cancelOptions };
+    const promises = notifyManager.batch(
+      () => this.#queryCache.findAll(filters).map((query) => query.cancel(defaultedCancelOptions))
+    );
+    return Promise.all(promises).then(noop).catch(noop);
+  }
+  invalidateQueries(filters, options = {}) {
+    return notifyManager.batch(() => {
+      this.#queryCache.findAll(filters).forEach((query) => {
+        query.invalidate();
+      });
+      if (filters?.refetchType === "none") {
+        return Promise.resolve();
+      }
+      return this.refetchQueries(
+        {
+          ...filters,
+          type: filters?.refetchType ?? filters?.type ?? "active"
+        },
+        options
+      );
+    });
+  }
+  refetchQueries(filters, options = {}) {
+    const fetchOptions = {
+      ...options,
+      cancelRefetch: options.cancelRefetch ?? true
+    };
+    const promises = notifyManager.batch(
+      () => this.#queryCache.findAll(filters).filter((query) => !query.isDisabled() && !query.isStatic()).map((query) => {
+        let promise = query.fetch(void 0, fetchOptions);
+        if (!fetchOptions.throwOnError) {
+          promise = promise.catch(noop);
+        }
+        return query.state.fetchStatus === "paused" ? Promise.resolve() : promise;
+      })
+    );
+    return Promise.all(promises).then(noop);
+  }
+  fetchQuery(options) {
+    const defaultedOptions = this.defaultQueryOptions(options);
+    if (defaultedOptions.retry === void 0) {
+      defaultedOptions.retry = false;
+    }
+    const query = this.#queryCache.build(this, defaultedOptions);
+    return query.isStaleByTime(
+      resolveStaleTime(defaultedOptions.staleTime, query)
+    ) ? query.fetch(defaultedOptions) : Promise.resolve(query.state.data);
+  }
+  prefetchQuery(options) {
+    return this.fetchQuery(options).then(noop).catch(noop);
+  }
+  fetchInfiniteQuery(options) {
+    options.behavior = infiniteQueryBehavior(options.pages);
+    return this.fetchQuery(options);
+  }
+  prefetchInfiniteQuery(options) {
+    return this.fetchInfiniteQuery(options).then(noop).catch(noop);
+  }
+  ensureInfiniteQueryData(options) {
+    options.behavior = infiniteQueryBehavior(options.pages);
+    return this.ensureQueryData(options);
+  }
+  resumePausedMutations() {
+    if (onlineManager.isOnline()) {
+      return this.#mutationCache.resumePausedMutations();
+    }
+    return Promise.resolve();
+  }
+  getQueryCache() {
+    return this.#queryCache;
+  }
+  getMutationCache() {
+    return this.#mutationCache;
+  }
+  getDefaultOptions() {
+    return this.#defaultOptions;
+  }
+  setDefaultOptions(options) {
+    this.#defaultOptions = options;
+  }
+  setQueryDefaults(queryKey, options) {
+    this.#queryDefaults.set(hashKey(queryKey), {
+      queryKey,
+      defaultOptions: options
+    });
+  }
+  getQueryDefaults(queryKey) {
+    const defaults = [...this.#queryDefaults.values()];
+    const result = {};
+    defaults.forEach((queryDefault) => {
+      if (partialMatchKey(queryKey, queryDefault.queryKey)) {
+        Object.assign(result, queryDefault.defaultOptions);
+      }
+    });
+    return result;
+  }
+  setMutationDefaults(mutationKey, options) {
+    this.#mutationDefaults.set(hashKey(mutationKey), {
+      mutationKey,
+      defaultOptions: options
+    });
+  }
+  getMutationDefaults(mutationKey) {
+    const defaults = [...this.#mutationDefaults.values()];
+    const result = {};
+    defaults.forEach((queryDefault) => {
+      if (partialMatchKey(mutationKey, queryDefault.mutationKey)) {
+        Object.assign(result, queryDefault.defaultOptions);
+      }
+    });
+    return result;
+  }
+  defaultQueryOptions(options) {
+    if (options._defaulted) {
+      return options;
+    }
+    const defaultedOptions = {
+      ...this.#defaultOptions.queries,
+      ...this.getQueryDefaults(options.queryKey),
+      ...options,
+      _defaulted: true
+    };
+    if (!defaultedOptions.queryHash) {
+      defaultedOptions.queryHash = hashQueryKeyByOptions(
+        defaultedOptions.queryKey,
+        defaultedOptions
+      );
+    }
+    if (defaultedOptions.refetchOnReconnect === void 0) {
+      defaultedOptions.refetchOnReconnect = defaultedOptions.networkMode !== "always";
+    }
+    if (defaultedOptions.throwOnError === void 0) {
+      defaultedOptions.throwOnError = !!defaultedOptions.suspense;
+    }
+    if (!defaultedOptions.networkMode && defaultedOptions.persister) {
+      defaultedOptions.networkMode = "offlineFirst";
+    }
+    if (defaultedOptions.queryFn === skipToken) {
+      defaultedOptions.enabled = false;
+    }
+    return defaultedOptions;
+  }
+  defaultMutationOptions(options) {
+    if (options?._defaulted) {
+      return options;
+    }
+    return {
+      ...this.#defaultOptions.mutations,
+      ...options?.mutationKey && this.getMutationDefaults(options.mutationKey),
+      ...options,
+      _defaulted: true
+    };
+  }
+  clear() {
+    this.#queryCache.clear();
+    this.#mutationCache.clear();
+  }
+};
+var QueryClientContext = reactExports.createContext(
+  void 0
+);
+var useQueryClient = (queryClient2) => {
+  const client2 = reactExports.useContext(QueryClientContext);
+  if (!client2) {
+    throw new Error("No QueryClient set, use QueryClientProvider to set one");
+  }
+  return client2;
+};
+var QueryClientProvider = ({
+  client: client2,
+  children
+}) => {
+  reactExports.useEffect(() => {
+    client2.mount();
+    return () => {
+      client2.unmount();
+    };
+  }, [client2]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientContext.Provider, { value: client2, children });
+};
+var IsRestoringContext = reactExports.createContext(false);
+var useIsRestoring = () => reactExports.useContext(IsRestoringContext);
+IsRestoringContext.Provider;
+function createValue() {
+  let isReset = false;
+  return {
+    clearReset: () => {
+      isReset = false;
+    },
+    reset: () => {
+      isReset = true;
+    },
+    isReset: () => {
+      return isReset;
+    }
+  };
+}
+var QueryErrorResetBoundaryContext = reactExports.createContext(createValue());
+var useQueryErrorResetBoundary = () => reactExports.useContext(QueryErrorResetBoundaryContext);
+var ensurePreventErrorBoundaryRetry = (options, errorResetBoundary) => {
+  if (options.suspense || options.throwOnError || options.experimental_prefetchInRender) {
+    if (!errorResetBoundary.isReset()) {
+      options.retryOnMount = false;
+    }
+  }
+};
+var useClearResetErrorBoundary = (errorResetBoundary) => {
+  reactExports.useEffect(() => {
+    errorResetBoundary.clearReset();
+  }, [errorResetBoundary]);
+};
+var getHasError = ({
+  result,
+  errorResetBoundary,
+  throwOnError,
+  query,
+  suspense
+}) => {
+  return result.isError && !errorResetBoundary.isReset() && !result.isFetching && query && (suspense && result.data === void 0 || shouldThrowError(throwOnError, [result.error, query]));
+};
+var ensureSuspenseTimers = (defaultedOptions) => {
+  if (defaultedOptions.suspense) {
+    const MIN_SUSPENSE_TIME_MS = 1e3;
+    const clamp2 = (value) => value === "static" ? value : Math.max(value ?? MIN_SUSPENSE_TIME_MS, MIN_SUSPENSE_TIME_MS);
+    const originalStaleTime = defaultedOptions.staleTime;
+    defaultedOptions.staleTime = typeof originalStaleTime === "function" ? (...args) => clamp2(originalStaleTime(...args)) : clamp2(originalStaleTime);
+    if (typeof defaultedOptions.gcTime === "number") {
+      defaultedOptions.gcTime = Math.max(
+        defaultedOptions.gcTime,
+        MIN_SUSPENSE_TIME_MS
+      );
+    }
+  }
+};
+var willFetch = (result, isRestoring) => result.isLoading && result.isFetching && !isRestoring;
+var shouldSuspend = (defaultedOptions, result) => defaultedOptions?.suspense && result.isPending;
+var fetchOptimistic = (defaultedOptions, observer, errorResetBoundary) => observer.fetchOptimistic(defaultedOptions).catch(() => {
+  errorResetBoundary.clearReset();
+});
+function useBaseQuery(options, Observer, queryClient2) {
+  {
+    if (typeof options !== "object" || Array.isArray(options)) {
+      throw new Error(
+        'Bad argument type. Starting with v5, only the "Object" form is allowed when calling query related functions. Please use the error stack to find the culprit call. More info here: https://tanstack.com/query/latest/docs/react/guides/migrating-to-v5#supports-a-single-signature-one-object'
+      );
+    }
+  }
+  const isRestoring = useIsRestoring();
+  const errorResetBoundary = useQueryErrorResetBoundary();
+  const client2 = useQueryClient();
+  const defaultedOptions = client2.defaultQueryOptions(options);
+  client2.getDefaultOptions().queries?._experimental_beforeQuery?.(
+    defaultedOptions
+  );
+  {
+    if (!defaultedOptions.queryFn) {
+      console.error(
+        `[${defaultedOptions.queryHash}]: No queryFn was passed as an option, and no default queryFn was found. The queryFn parameter is only optional when using a default queryFn. More info here: https://tanstack.com/query/latest/docs/framework/react/guides/default-query-function`
+      );
+    }
+  }
+  defaultedOptions._optimisticResults = isRestoring ? "isRestoring" : "optimistic";
+  ensureSuspenseTimers(defaultedOptions);
+  ensurePreventErrorBoundaryRetry(defaultedOptions, errorResetBoundary);
+  useClearResetErrorBoundary(errorResetBoundary);
+  const isNewCacheEntry = !client2.getQueryCache().get(defaultedOptions.queryHash);
+  const [observer] = reactExports.useState(
+    () => new Observer(
+      client2,
+      defaultedOptions
+    )
+  );
+  const result = observer.getOptimisticResult(defaultedOptions);
+  const shouldSubscribe = !isRestoring && options.subscribed !== false;
+  reactExports.useSyncExternalStore(
+    reactExports.useCallback(
+      (onStoreChange) => {
+        const unsubscribe = shouldSubscribe ? observer.subscribe(notifyManager.batchCalls(onStoreChange)) : noop;
+        observer.updateResult();
+        return unsubscribe;
+      },
+      [observer, shouldSubscribe]
+    ),
+    () => observer.getCurrentResult(),
+    () => observer.getCurrentResult()
+  );
+  reactExports.useEffect(() => {
+    observer.setOptions(defaultedOptions);
+  }, [defaultedOptions, observer]);
+  if (shouldSuspend(defaultedOptions, result)) {
+    throw fetchOptimistic(defaultedOptions, observer, errorResetBoundary);
+  }
+  if (getHasError({
+    result,
+    errorResetBoundary,
+    throwOnError: defaultedOptions.throwOnError,
+    query: client2.getQueryCache().get(defaultedOptions.queryHash),
+    suspense: defaultedOptions.suspense
+  })) {
+    throw result.error;
+  }
+  client2.getDefaultOptions().queries?._experimental_afterQuery?.(
+    defaultedOptions,
+    result
+  );
+  if (defaultedOptions.experimental_prefetchInRender && !isServer && willFetch(result, isRestoring)) {
+    const promise = isNewCacheEntry ? (
+      // Fetch immediately on render in order to ensure `.promise` is resolved even if the component is unmounted
+      fetchOptimistic(defaultedOptions, observer, errorResetBoundary)
+    ) : (
+      // subscribe to the "cache promise" so that we can finalize the currentThenable once data comes in
+      client2.getQueryCache().get(defaultedOptions.queryHash)?.promise
+    );
+    promise?.catch(noop).finally(() => {
+      observer.updateResult();
+    });
+  }
+  return !defaultedOptions.notifyOnChangeProps ? observer.trackResult(result) : result;
+}
+function useQuery(options, queryClient2) {
+  return useBaseQuery(options, QueryObserver);
+}
+function useMutation(options, queryClient2) {
+  const client2 = useQueryClient();
+  const [observer] = reactExports.useState(
+    () => new MutationObserver$1(
+      client2,
+      options
+    )
+  );
+  reactExports.useEffect(() => {
+    observer.setOptions(options);
+  }, [observer, options]);
+  const result = reactExports.useSyncExternalStore(
+    reactExports.useCallback(
+      (onStoreChange) => observer.subscribe(notifyManager.batchCalls(onStoreChange)),
+      [observer]
+    ),
+    () => observer.getCurrentResult(),
+    () => observer.getCurrentResult()
+  );
+  const mutate = reactExports.useCallback(
+    (variables, mutateOptions) => {
+      observer.mutate(variables, mutateOptions).catch(noop);
+    },
+    [observer]
+  );
+  if (result.error && shouldThrowError(observer.options.throwOnError, [result.error])) {
+    throw result.error;
+  }
+  return { ...result, mutate, mutateAsync: result.mutate };
+}
+const url = "http://localhost:4000/api";
+const clockIn = async () => {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
+  }
+  try {
+    const res = await fetch(`${url}/attendance/clockin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("clockIn API 오류 : ", err);
+  }
+};
+const fetchTodayAttendance = async () => {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
+  }
+  try {
+    const res = await fetch(`${url}/attendance/today`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application-json",
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("fetchTodayAttendance API 오류 : ", err);
+  }
+};
+const millisecondsInWeek = 6048e5;
+const millisecondsInDay = 864e5;
+const constructFromSymbol = Symbol.for("constructDateFrom");
+function constructFrom(date, value) {
+  if (typeof date === "function") return date(value);
+  if (date && typeof date === "object" && constructFromSymbol in date)
+    return date[constructFromSymbol](value);
+  if (date instanceof Date) return new date.constructor(value);
+  return new Date(value);
+}
+function toDate(argument, context) {
+  return constructFrom(context || argument, argument);
+}
+let defaultOptions = {};
+function getDefaultOptions() {
+  return defaultOptions;
+}
+function startOfWeek(date, options) {
+  const defaultOptions2 = getDefaultOptions();
+  const weekStartsOn = options?.weekStartsOn ?? options?.locale?.options?.weekStartsOn ?? defaultOptions2.weekStartsOn ?? defaultOptions2.locale?.options?.weekStartsOn ?? 0;
+  const _date = toDate(date, options?.in);
+  const day = _date.getDay();
+  const diff = (day < weekStartsOn ? 7 : 0) + day - weekStartsOn;
+  _date.setDate(_date.getDate() - diff);
+  _date.setHours(0, 0, 0, 0);
+  return _date;
+}
+function startOfISOWeek(date, options) {
+  return startOfWeek(date, { ...options, weekStartsOn: 1 });
+}
+function getISOWeekYear(date, options) {
+  const _date = toDate(date, options?.in);
+  const year = _date.getFullYear();
+  const fourthOfJanuaryOfNextYear = constructFrom(_date, 0);
+  fourthOfJanuaryOfNextYear.setFullYear(year + 1, 0, 4);
+  fourthOfJanuaryOfNextYear.setHours(0, 0, 0, 0);
+  const startOfNextYear = startOfISOWeek(fourthOfJanuaryOfNextYear);
+  const fourthOfJanuaryOfThisYear = constructFrom(_date, 0);
+  fourthOfJanuaryOfThisYear.setFullYear(year, 0, 4);
+  fourthOfJanuaryOfThisYear.setHours(0, 0, 0, 0);
+  const startOfThisYear = startOfISOWeek(fourthOfJanuaryOfThisYear);
+  if (_date.getTime() >= startOfNextYear.getTime()) {
+    return year + 1;
+  } else if (_date.getTime() >= startOfThisYear.getTime()) {
+    return year;
+  } else {
+    return year - 1;
+  }
+}
+function getTimezoneOffsetInMilliseconds(date) {
+  const _date = toDate(date);
+  const utcDate = new Date(
+    Date.UTC(
+      _date.getFullYear(),
+      _date.getMonth(),
+      _date.getDate(),
+      _date.getHours(),
+      _date.getMinutes(),
+      _date.getSeconds(),
+      _date.getMilliseconds()
+    )
+  );
+  utcDate.setUTCFullYear(_date.getFullYear());
+  return +date - +utcDate;
+}
+function normalizeDates(context, ...dates) {
+  const normalize = constructFrom.bind(
+    null,
+    dates.find((date) => typeof date === "object")
+  );
+  return dates.map(normalize);
+}
+function startOfDay(date, options) {
+  const _date = toDate(date, options?.in);
+  _date.setHours(0, 0, 0, 0);
+  return _date;
+}
+function differenceInCalendarDays(laterDate, earlierDate, options) {
+  const [laterDate_, earlierDate_] = normalizeDates(
+    options?.in,
+    laterDate,
+    earlierDate
+  );
+  const laterStartOfDay = startOfDay(laterDate_);
+  const earlierStartOfDay = startOfDay(earlierDate_);
+  const laterTimestamp = +laterStartOfDay - getTimezoneOffsetInMilliseconds(laterStartOfDay);
+  const earlierTimestamp = +earlierStartOfDay - getTimezoneOffsetInMilliseconds(earlierStartOfDay);
+  return Math.round((laterTimestamp - earlierTimestamp) / millisecondsInDay);
+}
+function startOfISOWeekYear(date, options) {
+  const year = getISOWeekYear(date, options);
+  const fourthOfJanuary = constructFrom(date, 0);
+  fourthOfJanuary.setFullYear(year, 0, 4);
+  fourthOfJanuary.setHours(0, 0, 0, 0);
+  return startOfISOWeek(fourthOfJanuary);
+}
+function isDate(value) {
+  return value instanceof Date || typeof value === "object" && Object.prototype.toString.call(value) === "[object Date]";
+}
+function isValid(date) {
+  return !(!isDate(date) && typeof date !== "number" || isNaN(+toDate(date)));
+}
+function startOfYear(date, options) {
+  const date_ = toDate(date, options?.in);
+  date_.setFullYear(date_.getFullYear(), 0, 1);
+  date_.setHours(0, 0, 0, 0);
+  return date_;
+}
+const formatDistanceLocale = {
+  lessThanXSeconds: {
+    one: "less than a second",
+    other: "less than {{count}} seconds"
+  },
+  xSeconds: {
+    one: "1 second",
+    other: "{{count}} seconds"
+  },
+  halfAMinute: "half a minute",
+  lessThanXMinutes: {
+    one: "less than a minute",
+    other: "less than {{count}} minutes"
+  },
+  xMinutes: {
+    one: "1 minute",
+    other: "{{count}} minutes"
+  },
+  aboutXHours: {
+    one: "about 1 hour",
+    other: "about {{count}} hours"
+  },
+  xHours: {
+    one: "1 hour",
+    other: "{{count}} hours"
+  },
+  xDays: {
+    one: "1 day",
+    other: "{{count}} days"
+  },
+  aboutXWeeks: {
+    one: "about 1 week",
+    other: "about {{count}} weeks"
+  },
+  xWeeks: {
+    one: "1 week",
+    other: "{{count}} weeks"
+  },
+  aboutXMonths: {
+    one: "about 1 month",
+    other: "about {{count}} months"
+  },
+  xMonths: {
+    one: "1 month",
+    other: "{{count}} months"
+  },
+  aboutXYears: {
+    one: "about 1 year",
+    other: "about {{count}} years"
+  },
+  xYears: {
+    one: "1 year",
+    other: "{{count}} years"
+  },
+  overXYears: {
+    one: "over 1 year",
+    other: "over {{count}} years"
+  },
+  almostXYears: {
+    one: "almost 1 year",
+    other: "almost {{count}} years"
+  }
+};
+const formatDistance = (token, count, options) => {
+  let result;
+  const tokenValue = formatDistanceLocale[token];
+  if (typeof tokenValue === "string") {
+    result = tokenValue;
+  } else if (count === 1) {
+    result = tokenValue.one;
+  } else {
+    result = tokenValue.other.replace("{{count}}", count.toString());
+  }
+  if (options?.addSuffix) {
+    if (options.comparison && options.comparison > 0) {
+      return "in " + result;
+    } else {
+      return result + " ago";
+    }
+  }
+  return result;
+};
+function buildFormatLongFn(args) {
+  return (options = {}) => {
+    const width2 = options.width ? String(options.width) : args.defaultWidth;
+    const format2 = args.formats[width2] || args.formats[args.defaultWidth];
+    return format2;
+  };
+}
+const dateFormats = {
+  full: "EEEE, MMMM do, y",
+  long: "MMMM do, y",
+  medium: "MMM d, y",
+  short: "MM/dd/yyyy"
+};
+const timeFormats = {
+  full: "h:mm:ss a zzzz",
+  long: "h:mm:ss a z",
+  medium: "h:mm:ss a",
+  short: "h:mm a"
+};
+const dateTimeFormats = {
+  full: "{{date}} 'at' {{time}}",
+  long: "{{date}} 'at' {{time}}",
+  medium: "{{date}}, {{time}}",
+  short: "{{date}}, {{time}}"
+};
+const formatLong = {
+  date: buildFormatLongFn({
+    formats: dateFormats,
+    defaultWidth: "full"
+  }),
+  time: buildFormatLongFn({
+    formats: timeFormats,
+    defaultWidth: "full"
+  }),
+  dateTime: buildFormatLongFn({
+    formats: dateTimeFormats,
+    defaultWidth: "full"
+  })
+};
+const formatRelativeLocale = {
+  lastWeek: "'last' eeee 'at' p",
+  yesterday: "'yesterday at' p",
+  today: "'today at' p",
+  tomorrow: "'tomorrow at' p",
+  nextWeek: "eeee 'at' p",
+  other: "P"
+};
+const formatRelative = (token, _date, _baseDate, _options) => formatRelativeLocale[token];
+function buildLocalizeFn(args) {
+  return (value, options) => {
+    const context = options?.context ? String(options.context) : "standalone";
+    let valuesArray;
+    if (context === "formatting" && args.formattingValues) {
+      const defaultWidth = args.defaultFormattingWidth || args.defaultWidth;
+      const width2 = options?.width ? String(options.width) : defaultWidth;
+      valuesArray = args.formattingValues[width2] || args.formattingValues[defaultWidth];
+    } else {
+      const defaultWidth = args.defaultWidth;
+      const width2 = options?.width ? String(options.width) : args.defaultWidth;
+      valuesArray = args.values[width2] || args.values[defaultWidth];
+    }
+    const index = args.argumentCallback ? args.argumentCallback(value) : value;
+    return valuesArray[index];
+  };
+}
+const eraValues = {
+  narrow: ["B", "A"],
+  abbreviated: ["BC", "AD"],
+  wide: ["Before Christ", "Anno Domini"]
+};
+const quarterValues = {
+  narrow: ["1", "2", "3", "4"],
+  abbreviated: ["Q1", "Q2", "Q3", "Q4"],
+  wide: ["1st quarter", "2nd quarter", "3rd quarter", "4th quarter"]
+};
+const monthValues = {
+  narrow: ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
+  abbreviated: [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ],
+  wide: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ]
+};
+const dayValues = {
+  narrow: ["S", "M", "T", "W", "T", "F", "S"],
+  short: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+  abbreviated: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  wide: [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ]
+};
+const dayPeriodValues = {
+  narrow: {
+    am: "a",
+    pm: "p",
+    midnight: "mi",
+    noon: "n",
+    morning: "morning",
+    afternoon: "afternoon",
+    evening: "evening",
+    night: "night"
+  },
+  abbreviated: {
+    am: "AM",
+    pm: "PM",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "morning",
+    afternoon: "afternoon",
+    evening: "evening",
+    night: "night"
+  },
+  wide: {
+    am: "a.m.",
+    pm: "p.m.",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "morning",
+    afternoon: "afternoon",
+    evening: "evening",
+    night: "night"
+  }
+};
+const formattingDayPeriodValues = {
+  narrow: {
+    am: "a",
+    pm: "p",
+    midnight: "mi",
+    noon: "n",
+    morning: "in the morning",
+    afternoon: "in the afternoon",
+    evening: "in the evening",
+    night: "at night"
+  },
+  abbreviated: {
+    am: "AM",
+    pm: "PM",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "in the morning",
+    afternoon: "in the afternoon",
+    evening: "in the evening",
+    night: "at night"
+  },
+  wide: {
+    am: "a.m.",
+    pm: "p.m.",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "in the morning",
+    afternoon: "in the afternoon",
+    evening: "in the evening",
+    night: "at night"
+  }
+};
+const ordinalNumber = (dirtyNumber, _options) => {
+  const number2 = Number(dirtyNumber);
+  const rem100 = number2 % 100;
+  if (rem100 > 20 || rem100 < 10) {
+    switch (rem100 % 10) {
+      case 1:
+        return number2 + "st";
+      case 2:
+        return number2 + "nd";
+      case 3:
+        return number2 + "rd";
+    }
+  }
+  return number2 + "th";
+};
+const localize = {
+  ordinalNumber,
+  era: buildLocalizeFn({
+    values: eraValues,
+    defaultWidth: "wide"
+  }),
+  quarter: buildLocalizeFn({
+    values: quarterValues,
+    defaultWidth: "wide",
+    argumentCallback: (quarter) => quarter - 1
+  }),
+  month: buildLocalizeFn({
+    values: monthValues,
+    defaultWidth: "wide"
+  }),
+  day: buildLocalizeFn({
+    values: dayValues,
+    defaultWidth: "wide"
+  }),
+  dayPeriod: buildLocalizeFn({
+    values: dayPeriodValues,
+    defaultWidth: "wide",
+    formattingValues: formattingDayPeriodValues,
+    defaultFormattingWidth: "wide"
+  })
+};
+function buildMatchFn(args) {
+  return (string, options = {}) => {
+    const width2 = options.width;
+    const matchPattern = width2 && args.matchPatterns[width2] || args.matchPatterns[args.defaultMatchWidth];
+    const matchResult = string.match(matchPattern);
+    if (!matchResult) {
+      return null;
+    }
+    const matchedString = matchResult[0];
+    const parsePatterns = width2 && args.parsePatterns[width2] || args.parsePatterns[args.defaultParseWidth];
+    const key = Array.isArray(parsePatterns) ? findIndex(parsePatterns, (pattern) => pattern.test(matchedString)) : (
+      // [TODO] -- I challenge you to fix the type
+      findKey(parsePatterns, (pattern) => pattern.test(matchedString))
+    );
+    let value;
+    value = args.valueCallback ? args.valueCallback(key) : key;
+    value = options.valueCallback ? (
+      // [TODO] -- I challenge you to fix the type
+      options.valueCallback(value)
+    ) : value;
+    const rest = string.slice(matchedString.length);
+    return { value, rest };
+  };
+}
+function findKey(object, predicate) {
+  for (const key in object) {
+    if (Object.prototype.hasOwnProperty.call(object, key) && predicate(object[key])) {
+      return key;
+    }
+  }
+  return void 0;
+}
+function findIndex(array, predicate) {
+  for (let key = 0; key < array.length; key++) {
+    if (predicate(array[key])) {
+      return key;
+    }
+  }
+  return void 0;
+}
+function buildMatchPatternFn(args) {
+  return (string, options = {}) => {
+    const matchResult = string.match(args.matchPattern);
+    if (!matchResult) return null;
+    const matchedString = matchResult[0];
+    const parseResult = string.match(args.parsePattern);
+    if (!parseResult) return null;
+    let value = args.valueCallback ? args.valueCallback(parseResult[0]) : parseResult[0];
+    value = options.valueCallback ? options.valueCallback(value) : value;
+    const rest = string.slice(matchedString.length);
+    return { value, rest };
+  };
+}
+const matchOrdinalNumberPattern = /^(\d+)(th|st|nd|rd)?/i;
+const parseOrdinalNumberPattern = /\d+/i;
+const matchEraPatterns = {
+  narrow: /^(b|a)/i,
+  abbreviated: /^(b\.?\s?c\.?|b\.?\s?c\.?\s?e\.?|a\.?\s?d\.?|c\.?\s?e\.?)/i,
+  wide: /^(before christ|before common era|anno domini|common era)/i
+};
+const parseEraPatterns = {
+  any: [/^b/i, /^(a|c)/i]
+};
+const matchQuarterPatterns = {
+  narrow: /^[1234]/i,
+  abbreviated: /^q[1234]/i,
+  wide: /^[1234](th|st|nd|rd)? quarter/i
+};
+const parseQuarterPatterns = {
+  any: [/1/i, /2/i, /3/i, /4/i]
+};
+const matchMonthPatterns = {
+  narrow: /^[jfmasond]/i,
+  abbreviated: /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i,
+  wide: /^(january|february|march|april|may|june|july|august|september|october|november|december)/i
+};
+const parseMonthPatterns = {
+  narrow: [
+    /^j/i,
+    /^f/i,
+    /^m/i,
+    /^a/i,
+    /^m/i,
+    /^j/i,
+    /^j/i,
+    /^a/i,
+    /^s/i,
+    /^o/i,
+    /^n/i,
+    /^d/i
+  ],
+  any: [
+    /^ja/i,
+    /^f/i,
+    /^mar/i,
+    /^ap/i,
+    /^may/i,
+    /^jun/i,
+    /^jul/i,
+    /^au/i,
+    /^s/i,
+    /^o/i,
+    /^n/i,
+    /^d/i
+  ]
+};
+const matchDayPatterns = {
+  narrow: /^[smtwf]/i,
+  short: /^(su|mo|tu|we|th|fr|sa)/i,
+  abbreviated: /^(sun|mon|tue|wed|thu|fri|sat)/i,
+  wide: /^(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/i
+};
+const parseDayPatterns = {
+  narrow: [/^s/i, /^m/i, /^t/i, /^w/i, /^t/i, /^f/i, /^s/i],
+  any: [/^su/i, /^m/i, /^tu/i, /^w/i, /^th/i, /^f/i, /^sa/i]
+};
+const matchDayPeriodPatterns = {
+  narrow: /^(a|p|mi|n|(in the|at) (morning|afternoon|evening|night))/i,
+  any: /^([ap]\.?\s?m\.?|midnight|noon|(in the|at) (morning|afternoon|evening|night))/i
+};
+const parseDayPeriodPatterns = {
+  any: {
+    am: /^a/i,
+    pm: /^p/i,
+    midnight: /^mi/i,
+    noon: /^no/i,
+    morning: /morning/i,
+    afternoon: /afternoon/i,
+    evening: /evening/i,
+    night: /night/i
+  }
+};
+const match = {
+  ordinalNumber: buildMatchPatternFn({
+    matchPattern: matchOrdinalNumberPattern,
+    parsePattern: parseOrdinalNumberPattern,
+    valueCallback: (value) => parseInt(value, 10)
+  }),
+  era: buildMatchFn({
+    matchPatterns: matchEraPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseEraPatterns,
+    defaultParseWidth: "any"
+  }),
+  quarter: buildMatchFn({
+    matchPatterns: matchQuarterPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseQuarterPatterns,
+    defaultParseWidth: "any",
+    valueCallback: (index) => index + 1
+  }),
+  month: buildMatchFn({
+    matchPatterns: matchMonthPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseMonthPatterns,
+    defaultParseWidth: "any"
+  }),
+  day: buildMatchFn({
+    matchPatterns: matchDayPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseDayPatterns,
+    defaultParseWidth: "any"
+  }),
+  dayPeriod: buildMatchFn({
+    matchPatterns: matchDayPeriodPatterns,
+    defaultMatchWidth: "any",
+    parsePatterns: parseDayPeriodPatterns,
+    defaultParseWidth: "any"
+  })
+};
+const enUS = {
+  code: "en-US",
+  formatDistance,
+  formatLong,
+  formatRelative,
+  localize,
+  match,
+  options: {
+    weekStartsOn: 0,
+    firstWeekContainsDate: 1
+  }
+};
+function getDayOfYear(date, options) {
+  const _date = toDate(date, options?.in);
+  const diff = differenceInCalendarDays(_date, startOfYear(_date));
+  const dayOfYear = diff + 1;
+  return dayOfYear;
+}
+function getISOWeek(date, options) {
+  const _date = toDate(date, options?.in);
+  const diff = +startOfISOWeek(_date) - +startOfISOWeekYear(_date);
+  return Math.round(diff / millisecondsInWeek) + 1;
+}
+function getWeekYear(date, options) {
+  const _date = toDate(date, options?.in);
+  const year = _date.getFullYear();
+  const defaultOptions2 = getDefaultOptions();
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const firstWeekOfNextYear = constructFrom(options?.in || date, 0);
+  firstWeekOfNextYear.setFullYear(year + 1, 0, firstWeekContainsDate);
+  firstWeekOfNextYear.setHours(0, 0, 0, 0);
+  const startOfNextYear = startOfWeek(firstWeekOfNextYear, options);
+  const firstWeekOfThisYear = constructFrom(options?.in || date, 0);
+  firstWeekOfThisYear.setFullYear(year, 0, firstWeekContainsDate);
+  firstWeekOfThisYear.setHours(0, 0, 0, 0);
+  const startOfThisYear = startOfWeek(firstWeekOfThisYear, options);
+  if (+_date >= +startOfNextYear) {
+    return year + 1;
+  } else if (+_date >= +startOfThisYear) {
+    return year;
+  } else {
+    return year - 1;
+  }
+}
+function startOfWeekYear(date, options) {
+  const defaultOptions2 = getDefaultOptions();
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const year = getWeekYear(date, options);
+  const firstWeek = constructFrom(options?.in || date, 0);
+  firstWeek.setFullYear(year, 0, firstWeekContainsDate);
+  firstWeek.setHours(0, 0, 0, 0);
+  const _date = startOfWeek(firstWeek, options);
+  return _date;
+}
+function getWeek(date, options) {
+  const _date = toDate(date, options?.in);
+  const diff = +startOfWeek(_date, options) - +startOfWeekYear(_date, options);
+  return Math.round(diff / millisecondsInWeek) + 1;
+}
+function addLeadingZeros(number2, targetLength) {
+  const sign = number2 < 0 ? "-" : "";
+  const output = Math.abs(number2).toString().padStart(targetLength, "0");
+  return sign + output;
+}
+const lightFormatters = {
+  // Year
+  y(date, token) {
+    const signedYear = date.getFullYear();
+    const year = signedYear > 0 ? signedYear : 1 - signedYear;
+    return addLeadingZeros(token === "yy" ? year % 100 : year, token.length);
+  },
+  // Month
+  M(date, token) {
+    const month = date.getMonth();
+    return token === "M" ? String(month + 1) : addLeadingZeros(month + 1, 2);
+  },
+  // Day of the month
+  d(date, token) {
+    return addLeadingZeros(date.getDate(), token.length);
+  },
+  // AM or PM
+  a(date, token) {
+    const dayPeriodEnumValue = date.getHours() / 12 >= 1 ? "pm" : "am";
+    switch (token) {
+      case "a":
+      case "aa":
+        return dayPeriodEnumValue.toUpperCase();
+      case "aaa":
+        return dayPeriodEnumValue;
+      case "aaaaa":
+        return dayPeriodEnumValue[0];
+      case "aaaa":
+      default:
+        return dayPeriodEnumValue === "am" ? "a.m." : "p.m.";
+    }
+  },
+  // Hour [1-12]
+  h(date, token) {
+    return addLeadingZeros(date.getHours() % 12 || 12, token.length);
+  },
+  // Hour [0-23]
+  H(date, token) {
+    return addLeadingZeros(date.getHours(), token.length);
+  },
+  // Minute
+  m(date, token) {
+    return addLeadingZeros(date.getMinutes(), token.length);
+  },
+  // Second
+  s(date, token) {
+    return addLeadingZeros(date.getSeconds(), token.length);
+  },
+  // Fraction of second
+  S(date, token) {
+    const numberOfDigits = token.length;
+    const milliseconds = date.getMilliseconds();
+    const fractionalSeconds = Math.trunc(
+      milliseconds * Math.pow(10, numberOfDigits - 3)
+    );
+    return addLeadingZeros(fractionalSeconds, token.length);
+  }
+};
+const dayPeriodEnum = {
+  midnight: "midnight",
+  noon: "noon",
+  morning: "morning",
+  afternoon: "afternoon",
+  evening: "evening",
+  night: "night"
+};
+const formatters = {
+  // Era
+  G: function(date, token, localize2) {
+    const era = date.getFullYear() > 0 ? 1 : 0;
+    switch (token) {
+      // AD, BC
+      case "G":
+      case "GG":
+      case "GGG":
+        return localize2.era(era, { width: "abbreviated" });
+      // A, B
+      case "GGGGG":
+        return localize2.era(era, { width: "narrow" });
+      // Anno Domini, Before Christ
+      case "GGGG":
+      default:
+        return localize2.era(era, { width: "wide" });
+    }
+  },
+  // Year
+  y: function(date, token, localize2) {
+    if (token === "yo") {
+      const signedYear = date.getFullYear();
+      const year = signedYear > 0 ? signedYear : 1 - signedYear;
+      return localize2.ordinalNumber(year, { unit: "year" });
+    }
+    return lightFormatters.y(date, token);
+  },
+  // Local week-numbering year
+  Y: function(date, token, localize2, options) {
+    const signedWeekYear = getWeekYear(date, options);
+    const weekYear = signedWeekYear > 0 ? signedWeekYear : 1 - signedWeekYear;
+    if (token === "YY") {
+      const twoDigitYear = weekYear % 100;
+      return addLeadingZeros(twoDigitYear, 2);
+    }
+    if (token === "Yo") {
+      return localize2.ordinalNumber(weekYear, { unit: "year" });
+    }
+    return addLeadingZeros(weekYear, token.length);
+  },
+  // ISO week-numbering year
+  R: function(date, token) {
+    const isoWeekYear = getISOWeekYear(date);
+    return addLeadingZeros(isoWeekYear, token.length);
+  },
+  // Extended year. This is a single number designating the year of this calendar system.
+  // The main difference between `y` and `u` localizers are B.C. years:
+  // | Year | `y` | `u` |
+  // |------|-----|-----|
+  // | AC 1 |   1 |   1 |
+  // | BC 1 |   1 |   0 |
+  // | BC 2 |   2 |  -1 |
+  // Also `yy` always returns the last two digits of a year,
+  // while `uu` pads single digit years to 2 characters and returns other years unchanged.
+  u: function(date, token) {
+    const year = date.getFullYear();
+    return addLeadingZeros(year, token.length);
+  },
+  // Quarter
+  Q: function(date, token, localize2) {
+    const quarter = Math.ceil((date.getMonth() + 1) / 3);
+    switch (token) {
+      // 1, 2, 3, 4
+      case "Q":
+        return String(quarter);
+      // 01, 02, 03, 04
+      case "QQ":
+        return addLeadingZeros(quarter, 2);
+      // 1st, 2nd, 3rd, 4th
+      case "Qo":
+        return localize2.ordinalNumber(quarter, { unit: "quarter" });
+      // Q1, Q2, Q3, Q4
+      case "QQQ":
+        return localize2.quarter(quarter, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // 1, 2, 3, 4 (narrow quarter; could be not numerical)
+      case "QQQQQ":
+        return localize2.quarter(quarter, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // 1st quarter, 2nd quarter, ...
+      case "QQQQ":
+      default:
+        return localize2.quarter(quarter, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Stand-alone quarter
+  q: function(date, token, localize2) {
+    const quarter = Math.ceil((date.getMonth() + 1) / 3);
+    switch (token) {
+      // 1, 2, 3, 4
+      case "q":
+        return String(quarter);
+      // 01, 02, 03, 04
+      case "qq":
+        return addLeadingZeros(quarter, 2);
+      // 1st, 2nd, 3rd, 4th
+      case "qo":
+        return localize2.ordinalNumber(quarter, { unit: "quarter" });
+      // Q1, Q2, Q3, Q4
+      case "qqq":
+        return localize2.quarter(quarter, {
+          width: "abbreviated",
+          context: "standalone"
+        });
+      // 1, 2, 3, 4 (narrow quarter; could be not numerical)
+      case "qqqqq":
+        return localize2.quarter(quarter, {
+          width: "narrow",
+          context: "standalone"
+        });
+      // 1st quarter, 2nd quarter, ...
+      case "qqqq":
+      default:
+        return localize2.quarter(quarter, {
+          width: "wide",
+          context: "standalone"
+        });
+    }
+  },
+  // Month
+  M: function(date, token, localize2) {
+    const month = date.getMonth();
+    switch (token) {
+      case "M":
+      case "MM":
+        return lightFormatters.M(date, token);
+      // 1st, 2nd, ..., 12th
+      case "Mo":
+        return localize2.ordinalNumber(month + 1, { unit: "month" });
+      // Jan, Feb, ..., Dec
+      case "MMM":
+        return localize2.month(month, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // J, F, ..., D
+      case "MMMMM":
+        return localize2.month(month, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // January, February, ..., December
+      case "MMMM":
+      default:
+        return localize2.month(month, { width: "wide", context: "formatting" });
+    }
+  },
+  // Stand-alone month
+  L: function(date, token, localize2) {
+    const month = date.getMonth();
+    switch (token) {
+      // 1, 2, ..., 12
+      case "L":
+        return String(month + 1);
+      // 01, 02, ..., 12
+      case "LL":
+        return addLeadingZeros(month + 1, 2);
+      // 1st, 2nd, ..., 12th
+      case "Lo":
+        return localize2.ordinalNumber(month + 1, { unit: "month" });
+      // Jan, Feb, ..., Dec
+      case "LLL":
+        return localize2.month(month, {
+          width: "abbreviated",
+          context: "standalone"
+        });
+      // J, F, ..., D
+      case "LLLLL":
+        return localize2.month(month, {
+          width: "narrow",
+          context: "standalone"
+        });
+      // January, February, ..., December
+      case "LLLL":
+      default:
+        return localize2.month(month, { width: "wide", context: "standalone" });
+    }
+  },
+  // Local week of year
+  w: function(date, token, localize2, options) {
+    const week = getWeek(date, options);
+    if (token === "wo") {
+      return localize2.ordinalNumber(week, { unit: "week" });
+    }
+    return addLeadingZeros(week, token.length);
+  },
+  // ISO week of year
+  I: function(date, token, localize2) {
+    const isoWeek = getISOWeek(date);
+    if (token === "Io") {
+      return localize2.ordinalNumber(isoWeek, { unit: "week" });
+    }
+    return addLeadingZeros(isoWeek, token.length);
+  },
+  // Day of the month
+  d: function(date, token, localize2) {
+    if (token === "do") {
+      return localize2.ordinalNumber(date.getDate(), { unit: "date" });
+    }
+    return lightFormatters.d(date, token);
+  },
+  // Day of year
+  D: function(date, token, localize2) {
+    const dayOfYear = getDayOfYear(date);
+    if (token === "Do") {
+      return localize2.ordinalNumber(dayOfYear, { unit: "dayOfYear" });
+    }
+    return addLeadingZeros(dayOfYear, token.length);
+  },
+  // Day of week
+  E: function(date, token, localize2) {
+    const dayOfWeek = date.getDay();
+    switch (token) {
+      // Tue
+      case "E":
+      case "EE":
+      case "EEE":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // T
+      case "EEEEE":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // Tu
+      case "EEEEEE":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "formatting"
+        });
+      // Tuesday
+      case "EEEE":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Local day of week
+  e: function(date, token, localize2, options) {
+    const dayOfWeek = date.getDay();
+    const localDayOfWeek = (dayOfWeek - options.weekStartsOn + 8) % 7 || 7;
+    switch (token) {
+      // Numerical value (Nth day of week with current locale or weekStartsOn)
+      case "e":
+        return String(localDayOfWeek);
+      // Padded numerical value
+      case "ee":
+        return addLeadingZeros(localDayOfWeek, 2);
+      // 1st, 2nd, ..., 7th
+      case "eo":
+        return localize2.ordinalNumber(localDayOfWeek, { unit: "day" });
+      case "eee":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // T
+      case "eeeee":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // Tu
+      case "eeeeee":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "formatting"
+        });
+      // Tuesday
+      case "eeee":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Stand-alone local day of week
+  c: function(date, token, localize2, options) {
+    const dayOfWeek = date.getDay();
+    const localDayOfWeek = (dayOfWeek - options.weekStartsOn + 8) % 7 || 7;
+    switch (token) {
+      // Numerical value (same as in `e`)
+      case "c":
+        return String(localDayOfWeek);
+      // Padded numerical value
+      case "cc":
+        return addLeadingZeros(localDayOfWeek, token.length);
+      // 1st, 2nd, ..., 7th
+      case "co":
+        return localize2.ordinalNumber(localDayOfWeek, { unit: "day" });
+      case "ccc":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "standalone"
+        });
+      // T
+      case "ccccc":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "standalone"
+        });
+      // Tu
+      case "cccccc":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "standalone"
+        });
+      // Tuesday
+      case "cccc":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "standalone"
+        });
+    }
+  },
+  // ISO day of week
+  i: function(date, token, localize2) {
+    const dayOfWeek = date.getDay();
+    const isoDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+    switch (token) {
+      // 2
+      case "i":
+        return String(isoDayOfWeek);
+      // 02
+      case "ii":
+        return addLeadingZeros(isoDayOfWeek, token.length);
+      // 2nd
+      case "io":
+        return localize2.ordinalNumber(isoDayOfWeek, { unit: "day" });
+      // Tue
+      case "iii":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // T
+      case "iiiii":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // Tu
+      case "iiiiii":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "formatting"
+        });
+      // Tuesday
+      case "iiii":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // AM or PM
+  a: function(date, token, localize2) {
+    const hours = date.getHours();
+    const dayPeriodEnumValue = hours / 12 >= 1 ? "pm" : "am";
+    switch (token) {
+      case "a":
+      case "aa":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      case "aaa":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        }).toLowerCase();
+      case "aaaaa":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "narrow",
+          context: "formatting"
+        });
+      case "aaaa":
+      default:
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // AM, PM, midnight, noon
+  b: function(date, token, localize2) {
+    const hours = date.getHours();
+    let dayPeriodEnumValue;
+    if (hours === 12) {
+      dayPeriodEnumValue = dayPeriodEnum.noon;
+    } else if (hours === 0) {
+      dayPeriodEnumValue = dayPeriodEnum.midnight;
+    } else {
+      dayPeriodEnumValue = hours / 12 >= 1 ? "pm" : "am";
+    }
+    switch (token) {
+      case "b":
+      case "bb":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      case "bbb":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        }).toLowerCase();
+      case "bbbbb":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "narrow",
+          context: "formatting"
+        });
+      case "bbbb":
+      default:
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // in the morning, in the afternoon, in the evening, at night
+  B: function(date, token, localize2) {
+    const hours = date.getHours();
+    let dayPeriodEnumValue;
+    if (hours >= 17) {
+      dayPeriodEnumValue = dayPeriodEnum.evening;
+    } else if (hours >= 12) {
+      dayPeriodEnumValue = dayPeriodEnum.afternoon;
+    } else if (hours >= 4) {
+      dayPeriodEnumValue = dayPeriodEnum.morning;
+    } else {
+      dayPeriodEnumValue = dayPeriodEnum.night;
+    }
+    switch (token) {
+      case "B":
+      case "BB":
+      case "BBB":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      case "BBBBB":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "narrow",
+          context: "formatting"
+        });
+      case "BBBB":
+      default:
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Hour [1-12]
+  h: function(date, token, localize2) {
+    if (token === "ho") {
+      let hours = date.getHours() % 12;
+      if (hours === 0) hours = 12;
+      return localize2.ordinalNumber(hours, { unit: "hour" });
+    }
+    return lightFormatters.h(date, token);
+  },
+  // Hour [0-23]
+  H: function(date, token, localize2) {
+    if (token === "Ho") {
+      return localize2.ordinalNumber(date.getHours(), { unit: "hour" });
+    }
+    return lightFormatters.H(date, token);
+  },
+  // Hour [0-11]
+  K: function(date, token, localize2) {
+    const hours = date.getHours() % 12;
+    if (token === "Ko") {
+      return localize2.ordinalNumber(hours, { unit: "hour" });
+    }
+    return addLeadingZeros(hours, token.length);
+  },
+  // Hour [1-24]
+  k: function(date, token, localize2) {
+    let hours = date.getHours();
+    if (hours === 0) hours = 24;
+    if (token === "ko") {
+      return localize2.ordinalNumber(hours, { unit: "hour" });
+    }
+    return addLeadingZeros(hours, token.length);
+  },
+  // Minute
+  m: function(date, token, localize2) {
+    if (token === "mo") {
+      return localize2.ordinalNumber(date.getMinutes(), { unit: "minute" });
+    }
+    return lightFormatters.m(date, token);
+  },
+  // Second
+  s: function(date, token, localize2) {
+    if (token === "so") {
+      return localize2.ordinalNumber(date.getSeconds(), { unit: "second" });
+    }
+    return lightFormatters.s(date, token);
+  },
+  // Fraction of second
+  S: function(date, token) {
+    return lightFormatters.S(date, token);
+  },
+  // Timezone (ISO-8601. If offset is 0, output is always `'Z'`)
+  X: function(date, token, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    if (timezoneOffset === 0) {
+      return "Z";
+    }
+    switch (token) {
+      // Hours and optional minutes
+      case "X":
+        return formatTimezoneWithOptionalMinutes(timezoneOffset);
+      // Hours, minutes and optional seconds without `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `XX`
+      case "XXXX":
+      case "XX":
+        return formatTimezone(timezoneOffset);
+      // Hours, minutes and optional seconds with `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `XXX`
+      case "XXXXX":
+      case "XXX":
+      // Hours and minutes with `:` delimiter
+      default:
+        return formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Timezone (ISO-8601. If offset is 0, output is `'+00:00'` or equivalent)
+  x: function(date, token, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    switch (token) {
+      // Hours and optional minutes
+      case "x":
+        return formatTimezoneWithOptionalMinutes(timezoneOffset);
+      // Hours, minutes and optional seconds without `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `xx`
+      case "xxxx":
+      case "xx":
+        return formatTimezone(timezoneOffset);
+      // Hours, minutes and optional seconds with `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `xxx`
+      case "xxxxx":
+      case "xxx":
+      // Hours and minutes with `:` delimiter
+      default:
+        return formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Timezone (GMT)
+  O: function(date, token, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    switch (token) {
+      // Short
+      case "O":
+      case "OO":
+      case "OOO":
+        return "GMT" + formatTimezoneShort(timezoneOffset, ":");
+      // Long
+      case "OOOO":
+      default:
+        return "GMT" + formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Timezone (specific non-location)
+  z: function(date, token, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    switch (token) {
+      // Short
+      case "z":
+      case "zz":
+      case "zzz":
+        return "GMT" + formatTimezoneShort(timezoneOffset, ":");
+      // Long
+      case "zzzz":
+      default:
+        return "GMT" + formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Seconds timestamp
+  t: function(date, token, _localize) {
+    const timestamp = Math.trunc(+date / 1e3);
+    return addLeadingZeros(timestamp, token.length);
+  },
+  // Milliseconds timestamp
+  T: function(date, token, _localize) {
+    return addLeadingZeros(+date, token.length);
+  }
+};
+function formatTimezoneShort(offset, delimiter = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = Math.trunc(absOffset / 60);
+  const minutes = absOffset % 60;
+  if (minutes === 0) {
+    return sign + String(hours);
+  }
+  return sign + String(hours) + delimiter + addLeadingZeros(minutes, 2);
+}
+function formatTimezoneWithOptionalMinutes(offset, delimiter) {
+  if (offset % 60 === 0) {
+    const sign = offset > 0 ? "-" : "+";
+    return sign + addLeadingZeros(Math.abs(offset) / 60, 2);
+  }
+  return formatTimezone(offset, delimiter);
+}
+function formatTimezone(offset, delimiter = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = addLeadingZeros(Math.trunc(absOffset / 60), 2);
+  const minutes = addLeadingZeros(absOffset % 60, 2);
+  return sign + hours + delimiter + minutes;
+}
+const dateLongFormatter = (pattern, formatLong2) => {
+  switch (pattern) {
+    case "P":
+      return formatLong2.date({ width: "short" });
+    case "PP":
+      return formatLong2.date({ width: "medium" });
+    case "PPP":
+      return formatLong2.date({ width: "long" });
+    case "PPPP":
+    default:
+      return formatLong2.date({ width: "full" });
+  }
+};
+const timeLongFormatter = (pattern, formatLong2) => {
+  switch (pattern) {
+    case "p":
+      return formatLong2.time({ width: "short" });
+    case "pp":
+      return formatLong2.time({ width: "medium" });
+    case "ppp":
+      return formatLong2.time({ width: "long" });
+    case "pppp":
+    default:
+      return formatLong2.time({ width: "full" });
+  }
+};
+const dateTimeLongFormatter = (pattern, formatLong2) => {
+  const matchResult = pattern.match(/(P+)(p+)?/) || [];
+  const datePattern = matchResult[1];
+  const timePattern = matchResult[2];
+  if (!timePattern) {
+    return dateLongFormatter(pattern, formatLong2);
+  }
+  let dateTimeFormat;
+  switch (datePattern) {
+    case "P":
+      dateTimeFormat = formatLong2.dateTime({ width: "short" });
+      break;
+    case "PP":
+      dateTimeFormat = formatLong2.dateTime({ width: "medium" });
+      break;
+    case "PPP":
+      dateTimeFormat = formatLong2.dateTime({ width: "long" });
+      break;
+    case "PPPP":
+    default:
+      dateTimeFormat = formatLong2.dateTime({ width: "full" });
+      break;
+  }
+  return dateTimeFormat.replace("{{date}}", dateLongFormatter(datePattern, formatLong2)).replace("{{time}}", timeLongFormatter(timePattern, formatLong2));
+};
+const longFormatters = {
+  p: timeLongFormatter,
+  P: dateTimeLongFormatter
+};
+const dayOfYearTokenRE = /^D+$/;
+const weekYearTokenRE = /^Y+$/;
+const throwTokens = ["D", "DD", "YY", "YYYY"];
+function isProtectedDayOfYearToken(token) {
+  return dayOfYearTokenRE.test(token);
+}
+function isProtectedWeekYearToken(token) {
+  return weekYearTokenRE.test(token);
+}
+function warnOrThrowProtectedError(token, format2, input) {
+  const _message = message(token, format2, input);
+  console.warn(_message);
+  if (throwTokens.includes(token)) throw new RangeError(_message);
+}
+function message(token, format2, input) {
+  const subject = token[0] === "Y" ? "years" : "days of the month";
+  return `Use \`${token.toLowerCase()}\` instead of \`${token}\` (in \`${format2}\`) for formatting ${subject} to the input \`${input}\`; see: https://github.com/date-fns/date-fns/blob/master/docs/unicodeTokens.md`;
+}
+const formattingTokensRegExp = /[yYQqMLwIdDecihHKkms]o|(\w)\1*|''|'(''|[^'])+('|$)|./g;
+const longFormattingTokensRegExp = /P+p+|P+|p+|''|'(''|[^'])+('|$)|./g;
+const escapedStringRegExp = /^'([^]*?)'?$/;
+const doubleQuoteRegExp = /''/g;
+const unescapedLatinCharacterRegExp = /[a-zA-Z]/;
+function format(date, formatStr, options) {
+  const defaultOptions2 = getDefaultOptions();
+  const locale = defaultOptions2.locale ?? enUS;
+  const firstWeekContainsDate = defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const weekStartsOn = defaultOptions2.weekStartsOn ?? defaultOptions2.locale?.options?.weekStartsOn ?? 0;
+  const originalDate = toDate(date, options?.in);
+  if (!isValid(originalDate)) {
+    throw new RangeError("Invalid time value");
+  }
+  let parts = formatStr.match(longFormattingTokensRegExp).map((substring) => {
+    const firstCharacter = substring[0];
+    if (firstCharacter === "p" || firstCharacter === "P") {
+      const longFormatter = longFormatters[firstCharacter];
+      return longFormatter(substring, locale.formatLong);
+    }
+    return substring;
+  }).join("").match(formattingTokensRegExp).map((substring) => {
+    if (substring === "''") {
+      return { isToken: false, value: "'" };
+    }
+    const firstCharacter = substring[0];
+    if (firstCharacter === "'") {
+      return { isToken: false, value: cleanEscapedString(substring) };
+    }
+    if (formatters[firstCharacter]) {
+      return { isToken: true, value: substring };
+    }
+    if (firstCharacter.match(unescapedLatinCharacterRegExp)) {
+      throw new RangeError(
+        "Format string contains an unescaped latin alphabet character `" + firstCharacter + "`"
+      );
+    }
+    return { isToken: false, value: substring };
+  });
+  if (locale.localize.preprocessor) {
+    parts = locale.localize.preprocessor(originalDate, parts);
+  }
+  const formatterOptions = {
+    firstWeekContainsDate,
+    weekStartsOn,
+    locale
+  };
+  return parts.map((part) => {
+    if (!part.isToken) return part.value;
+    const token = part.value;
+    if (isProtectedWeekYearToken(token) || isProtectedDayOfYearToken(token)) {
+      warnOrThrowProtectedError(token, formatStr, String(date));
+    }
+    const formatter = formatters[token[0]];
+    return formatter(originalDate, token, locale.localize, formatterOptions);
+  }).join("");
+}
+function cleanEscapedString(input) {
+  const matched = input.match(escapedStringRegExp);
+  if (!matched) {
+    return input;
+  }
+  return matched[1].replace(doubleQuoteRegExp, "'");
+}
+const useClockIn = () => {
+  const queryClient2 = useQueryClient();
+  const today = format(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
+  return useMutation({
+    mutationFn: clockIn,
+    onSuccess: (data) => {
+      y.success(data.message);
+      queryClient2.setQueryData(
+        ["attendance", today],
+        data
+      );
+    },
+    onError: (err) => {
+      y.error(err.message);
+    }
+  });
+};
+const useAttendanceToday = () => {
+  const today = format(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
+  return useQuery({
+    queryKey: ["attendance", today],
+    queryFn: fetchTodayAttendance,
+    staleTime: Infinity,
+    retry: false
+  });
+};
 function Header() {
   const userName = useUserStore().user?.name;
+  const { mutate: clockIn2 } = useClockIn();
+  const { data, isLoading } = useAttendanceToday();
+  const attendance = data?.attendance;
+  let clockInOutBtnText = "출근하기";
+  if (attendance) {
+    if (attendance.clockin && !attendance.clockout) {
+      clockInOutBtnText = "퇴근하기";
+    }
+  }
+  console.log(attendance);
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-[60px] flex items-center justify-between px-[20px] bg-white", children: [
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "logo", className: "h-full" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 10,
+      lineNumber: 26,
       columnNumber: 17
     }, this) }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 9,
+      lineNumber: 25,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px]", children: [
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "px-[12px] py-[6px] rounded-[12px] text-sm bg-blue-700 cursor-pointer text-white tracking-[-0.02em]", children: "출근하기" }, void 0, false, {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 13,
-        columnNumber: 17
-      }, this),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+        "button",
+        {
+          onClick: () => clockIn2(),
+          className: "px-[12px] py-[6px] rounded-[12px] text-sm bg-blue-700 cursor-pointer text-white tracking-[-0.02em]",
+          children: isLoading ? "로딩 중" : clockInOutBtnText
+        },
+        void 0,
+        false,
+        {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+          lineNumber: 29,
+          columnNumber: 17
+        },
+        this
+      ),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[12px]", children: [
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "cursor-pointer", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(NotificationsNoneRoundedIcon, { className: "cursor-pointer" }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 16,
+          lineNumber: 35,
           columnNumber: 25
         }, this) }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 15,
+          lineNumber: 34,
           columnNumber: 21
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-sm", children: userName }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 18,
+          lineNumber: 37,
           columnNumber: 21
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 14,
+        lineNumber: 33,
         columnNumber: 17
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 12,
+      lineNumber: 28,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-    lineNumber: 8,
+    lineNumber: 24,
     columnNumber: 9
   }, this);
 }
@@ -52495,14 +56770,19 @@ function App() {
     columnNumber: 5
   }, this);
 }
+const queryClient = new QueryClient();
 clientExports.createRoot(document.getElementById("root")).render(
-  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.BrowserRouter, { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(App, {}, void 0, false, {
+  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.BrowserRouter, { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(App, {}, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/main.tsx",
-    lineNumber: 8,
+    lineNumber: 12,
+    columnNumber: 13
+  }, void 0) }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/main.tsx",
+    lineNumber: 11,
     columnNumber: 9
   }, void 0) }, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/main.tsx",
-    lineNumber: 7,
+    lineNumber: 10,
     columnNumber: 5
   }, void 0)
 );
