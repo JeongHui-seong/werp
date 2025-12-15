@@ -54955,6 +54955,30 @@ const fetchTodayAttendance = async () => {
     console.log("fetchTodayAttendance API 오류 : ", err);
   }
 };
+const clockOut = async (attendanceId) => {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
+  }
+  try {
+    const res = await fetch(`${url}/attendance/clockout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ attendanceId })
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("clockOut API 오류 : ", err);
+  }
+};
 const millisecondsInWeek = 6048e5;
 const millisecondsInDay = 864e5;
 const constructFromSymbol = Symbol.for("constructDateFrom");
@@ -56458,6 +56482,23 @@ const useClockIn = () => {
     }
   });
 };
+const useClockOut = () => {
+  const queryClient2 = useQueryClient();
+  const today = format(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
+  return useMutation({
+    mutationFn: (attendanceId) => clockOut(attendanceId),
+    onSuccess: (data) => {
+      y.success(data.message);
+      queryClient2.setQueryData(
+        ["attendance", today],
+        data
+      );
+    },
+    onError: (err) => {
+      y.error(err.message);
+    }
+  });
+};
 const useAttendanceToday = () => {
   const today = format(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
   return useQuery({
@@ -56470,38 +56511,44 @@ const useAttendanceToday = () => {
 function Header() {
   const userName = useUserStore().user?.name;
   const { mutate: clockIn2 } = useClockIn();
+  const { mutate: clockOut2 } = useClockOut();
   const { data, isLoading } = useAttendanceToday();
   const attendance = data?.attendance;
-  let clockInOutBtnText = "출근하기";
-  if (attendance) {
-    if (attendance.clockin && !attendance.clockout) {
-      clockInOutBtnText = "퇴근하기";
+  const isWorking = attendance?.clockin && !attendance?.clockout;
+  const isDisabled = attendance?.clockin && attendance?.clockout;
+  let clockInOutBtnText = attendance && isWorking ? "퇴근하기" : "출근하기";
+  const handleAttendance = () => {
+    if (attendance && isWorking) {
+      clockOut2(attendance?.id);
+    } else {
+      clockIn2();
     }
-  }
+  };
   console.log(attendance);
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-[60px] flex items-center justify-between px-[20px] bg-white", children: [
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "logo", className: "h-full" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 26,
+      lineNumber: 32,
       columnNumber: 17
     }, this) }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 25,
+      lineNumber: 31,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px]", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
         "button",
         {
-          onClick: () => clockIn2(),
-          className: "px-[12px] py-[6px] rounded-[12px] text-sm bg-blue-700 cursor-pointer text-white tracking-[-0.02em]",
+          disabled: isDisabled,
+          onClick: () => handleAttendance(),
+          className: `px-[12px] py-[6px] rounded-[12px] text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white"}`,
           children: isLoading ? "로딩 중" : clockInOutBtnText
         },
         void 0,
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 29,
+          lineNumber: 35,
           columnNumber: 17
         },
         this
@@ -56509,31 +56556,31 @@ function Header() {
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[12px]", children: [
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "cursor-pointer", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(NotificationsNoneRoundedIcon, { className: "cursor-pointer" }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 35,
+          lineNumber: 42,
           columnNumber: 25
         }, this) }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 34,
+          lineNumber: 41,
           columnNumber: 21
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-sm", children: userName }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 37,
+          lineNumber: 44,
           columnNumber: 21
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 33,
+        lineNumber: 40,
         columnNumber: 17
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 28,
+      lineNumber: 34,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-    lineNumber: 24,
+    lineNumber: 30,
     columnNumber: 9
   }, this);
 }

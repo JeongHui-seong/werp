@@ -2,22 +2,28 @@ import Logo from "../../assets/logo.png"
 import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneRounded';
 import { useUserStore } from "../../hooks/useUserStore";
 import { useClockIn } from "../../hooks/useClockIn";
+import { useClockOut } from "../../hooks/useClockOut";
 import { useAttendanceToday } from "../../hooks/useAttendanceToday";
 
 export function Header(){
     const userName = useUserStore().user?.name;
     const { mutate: clockIn } = useClockIn();
+    const { mutate: clockOut } = useClockOut();
     const { data, isLoading } = useAttendanceToday();
     const attendance = data?.attendance;
+    const isWorking = attendance?.clockin && !attendance?.clockout
+    const isDisabled = attendance?.clockin && attendance?.clockout
 
-    let clockInOutBtnText = "출근하기";
-
-    if (attendance) {
-        if (attendance.clockin && !attendance.clockout) {
-            clockInOutBtnText = "퇴근하기"
+    let clockInOutBtnText = attendance && isWorking ? "퇴근하기" : "출근하기";
+    
+    const handleAttendance = () => {
+        if (attendance && isWorking) {
+            clockOut(attendance?.id);
+        } else {
+            clockIn();
         }
     }
-    
+
     console.log(attendance)
 
     return(
@@ -27,8 +33,9 @@ export function Header(){
             </div>
             <div className="flex items-center justify-center gap-[20px]">
                 <button
-                    onClick={() => clockIn()}
-                    className="px-[12px] py-[6px] rounded-[12px] text-sm bg-blue-700 cursor-pointer text-white tracking-[-0.02em]"
+                    disabled={isDisabled}
+                    onClick={() => handleAttendance()}
+                    className={`px-[12px] py-[6px] rounded-[12px] text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white"}`}
                 >{isLoading ? "로딩 중" : clockInOutBtnText}</button>
                 <div className="flex items-center justify-center gap-[12px]">
                     <div className="cursor-pointer">

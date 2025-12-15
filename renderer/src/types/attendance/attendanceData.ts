@@ -1,4 +1,4 @@
-interface Clockin {
+interface attendance {
     id: string;
     userId: string;
     date: string;
@@ -6,8 +6,8 @@ interface Clockin {
     clockout: string | null;
 }
 
-export interface ClockinResponse{
-    attendance: Clockin;
+export interface attendanceResponse{
+    attendance: attendance;
     success: boolean;
     message: string;
 }
