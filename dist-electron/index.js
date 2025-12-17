@@ -44912,14 +44912,4990 @@ function LoginPage() {
     columnNumber: 9
   }, this);
 }
+var Subscribable = class {
+  constructor() {
+    this.listeners = /* @__PURE__ */ new Set();
+    this.subscribe = this.subscribe.bind(this);
+  }
+  subscribe(listener) {
+    this.listeners.add(listener);
+    this.onSubscribe();
+    return () => {
+      this.listeners.delete(listener);
+      this.onUnsubscribe();
+    };
+  }
+  hasListeners() {
+    return this.listeners.size > 0;
+  }
+  onSubscribe() {
+  }
+  onUnsubscribe() {
+  }
+};
+var defaultTimeoutProvider = {
+  // We need the wrapper function syntax below instead of direct references to
+  // global setTimeout etc.
+  //
+  // BAD: `setTimeout: setTimeout`
+  // GOOD: `setTimeout: (cb, delay) => setTimeout(cb, delay)`
+  //
+  // If we use direct references here, then anything that wants to spy on or
+  // replace the global setTimeout (like tests) won't work since we'll already
+  // have a hard reference to the original implementation at the time when this
+  // file was imported.
+  setTimeout: (callback, delay2) => setTimeout(callback, delay2),
+  clearTimeout: (timeoutId) => clearTimeout(timeoutId),
+  setInterval: (callback, delay2) => setInterval(callback, delay2),
+  clearInterval: (intervalId) => clearInterval(intervalId)
+};
+var TimeoutManager = class {
+  // We cannot have TimeoutManager<T> as we must instantiate it with a concrete
+  // type at app boot; and if we leave that type, then any new timer provider
+  // would need to support ReturnType<typeof setTimeout>, which is infeasible.
+  //
+  // We settle for type safety for the TimeoutProvider type, and accept that
+  // this class is unsafe internally to allow for extension.
+  #provider = defaultTimeoutProvider;
+  #providerCalled = false;
+  setTimeoutProvider(provider) {
+    {
+      if (this.#providerCalled && provider !== this.#provider) {
+        console.error(
+          `[timeoutManager]: Switching provider after calls to previous provider might result in unexpected behavior.`,
+          { previous: this.#provider, provider }
+        );
+      }
+    }
+    this.#provider = provider;
+    {
+      this.#providerCalled = false;
+    }
+  }
+  setTimeout(callback, delay2) {
+    {
+      this.#providerCalled = true;
+    }
+    return this.#provider.setTimeout(callback, delay2);
+  }
+  clearTimeout(timeoutId) {
+    this.#provider.clearTimeout(timeoutId);
+  }
+  setInterval(callback, delay2) {
+    {
+      this.#providerCalled = true;
+    }
+    return this.#provider.setInterval(callback, delay2);
+  }
+  clearInterval(intervalId) {
+    this.#provider.clearInterval(intervalId);
+  }
+};
+var timeoutManager = new TimeoutManager();
+function systemSetTimeoutZero(callback) {
+  setTimeout(callback, 0);
+}
+var isServer = typeof window === "undefined" || "Deno" in globalThis;
+function noop() {
+}
+function functionalUpdate(updater, input) {
+  return typeof updater === "function" ? updater(input) : updater;
+}
+function isValidTimeout(value) {
+  return typeof value === "number" && value >= 0 && value !== Infinity;
+}
+function timeUntilStale(updatedAt, staleTime) {
+  return Math.max(updatedAt + (staleTime || 0) - Date.now(), 0);
+}
+function resolveStaleTime(staleTime, query) {
+  return typeof staleTime === "function" ? staleTime(query) : staleTime;
+}
+function resolveEnabled(enabled, query) {
+  return typeof enabled === "function" ? enabled(query) : enabled;
+}
+function matchQuery(filters, query) {
+  const {
+    type = "all",
+    exact,
+    fetchStatus,
+    predicate,
+    queryKey,
+    stale
+  } = filters;
+  if (queryKey) {
+    if (exact) {
+      if (query.queryHash !== hashQueryKeyByOptions(queryKey, query.options)) {
+        return false;
+      }
+    } else if (!partialMatchKey(query.queryKey, queryKey)) {
+      return false;
+    }
+  }
+  if (type !== "all") {
+    const isActive = query.isActive();
+    if (type === "active" && !isActive) {
+      return false;
+    }
+    if (type === "inactive" && isActive) {
+      return false;
+    }
+  }
+  if (typeof stale === "boolean" && query.isStale() !== stale) {
+    return false;
+  }
+  if (fetchStatus && fetchStatus !== query.state.fetchStatus) {
+    return false;
+  }
+  if (predicate && !predicate(query)) {
+    return false;
+  }
+  return true;
+}
+function matchMutation(filters, mutation) {
+  const { exact, status, predicate, mutationKey } = filters;
+  if (mutationKey) {
+    if (!mutation.options.mutationKey) {
+      return false;
+    }
+    if (exact) {
+      if (hashKey(mutation.options.mutationKey) !== hashKey(mutationKey)) {
+        return false;
+      }
+    } else if (!partialMatchKey(mutation.options.mutationKey, mutationKey)) {
+      return false;
+    }
+  }
+  if (status && mutation.state.status !== status) {
+    return false;
+  }
+  if (predicate && !predicate(mutation)) {
+    return false;
+  }
+  return true;
+}
+function hashQueryKeyByOptions(queryKey, options) {
+  const hashFn = options?.queryKeyHashFn || hashKey;
+  return hashFn(queryKey);
+}
+function hashKey(queryKey) {
+  return JSON.stringify(
+    queryKey,
+    (_, val) => isPlainObject$1(val) ? Object.keys(val).sort().reduce((result, key) => {
+      result[key] = val[key];
+      return result;
+    }, {}) : val
+  );
+}
+function partialMatchKey(a, b) {
+  if (a === b) {
+    return true;
+  }
+  if (typeof a !== typeof b) {
+    return false;
+  }
+  if (a && b && typeof a === "object" && typeof b === "object") {
+    return Object.keys(b).every((key) => partialMatchKey(a[key], b[key]));
+  }
+  return false;
+}
+var hasOwn = Object.prototype.hasOwnProperty;
+function replaceEqualDeep(a, b) {
+  if (a === b) {
+    return a;
+  }
+  const array = isPlainArray(a) && isPlainArray(b);
+  if (!array && !(isPlainObject$1(a) && isPlainObject$1(b))) return b;
+  const aItems = array ? a : Object.keys(a);
+  const aSize = aItems.length;
+  const bItems = array ? b : Object.keys(b);
+  const bSize = bItems.length;
+  const copy = array ? new Array(bSize) : {};
+  let equalItems = 0;
+  for (let i = 0; i < bSize; i++) {
+    const key = array ? i : bItems[i];
+    const aItem = a[key];
+    const bItem = b[key];
+    if (aItem === bItem) {
+      copy[key] = aItem;
+      if (array ? i < aSize : hasOwn.call(a, key)) equalItems++;
+      continue;
+    }
+    if (aItem === null || bItem === null || typeof aItem !== "object" || typeof bItem !== "object") {
+      copy[key] = bItem;
+      continue;
+    }
+    const v = replaceEqualDeep(aItem, bItem);
+    copy[key] = v;
+    if (v === aItem) equalItems++;
+  }
+  return aSize === bSize && equalItems === aSize ? a : copy;
+}
+function shallowEqualObjects(a, b) {
+  if (!b || Object.keys(a).length !== Object.keys(b).length) {
+    return false;
+  }
+  for (const key in a) {
+    if (a[key] !== b[key]) {
+      return false;
+    }
+  }
+  return true;
+}
+function isPlainArray(value) {
+  return Array.isArray(value) && value.length === Object.keys(value).length;
+}
+function isPlainObject$1(o) {
+  if (!hasObjectPrototype(o)) {
+    return false;
+  }
+  const ctor = o.constructor;
+  if (ctor === void 0) {
+    return true;
+  }
+  const prot = ctor.prototype;
+  if (!hasObjectPrototype(prot)) {
+    return false;
+  }
+  if (!prot.hasOwnProperty("isPrototypeOf")) {
+    return false;
+  }
+  if (Object.getPrototypeOf(o) !== Object.prototype) {
+    return false;
+  }
+  return true;
+}
+function hasObjectPrototype(o) {
+  return Object.prototype.toString.call(o) === "[object Object]";
+}
+function sleep(timeout) {
+  return new Promise((resolve) => {
+    timeoutManager.setTimeout(resolve, timeout);
+  });
+}
+function replaceData(prevData, data, options) {
+  if (typeof options.structuralSharing === "function") {
+    return options.structuralSharing(prevData, data);
+  } else if (options.structuralSharing !== false) {
+    {
+      try {
+        return replaceEqualDeep(prevData, data);
+      } catch (error) {
+        console.error(
+          `Structural sharing requires data to be JSON serializable. To fix this, turn off structuralSharing or return JSON-serializable data from your queryFn. [${options.queryHash}]: ${error}`
+        );
+        throw error;
+      }
+    }
+    return replaceEqualDeep(prevData, data);
+  }
+  return data;
+}
+function addToEnd(items, item, max = 0) {
+  const newItems = [...items, item];
+  return max && newItems.length > max ? newItems.slice(1) : newItems;
+}
+function addToStart(items, item, max = 0) {
+  const newItems = [item, ...items];
+  return max && newItems.length > max ? newItems.slice(0, -1) : newItems;
+}
+var skipToken = Symbol();
+function ensureQueryFn(options, fetchOptions) {
+  {
+    if (options.queryFn === skipToken) {
+      console.error(
+        `Attempted to invoke queryFn when set to skipToken. This is likely a configuration error. Query hash: '${options.queryHash}'`
+      );
+    }
+  }
+  if (!options.queryFn && fetchOptions?.initialPromise) {
+    return () => fetchOptions.initialPromise;
+  }
+  if (!options.queryFn || options.queryFn === skipToken) {
+    return () => Promise.reject(new Error(`Missing queryFn: '${options.queryHash}'`));
+  }
+  return options.queryFn;
+}
+function shouldThrowError(throwOnError, params) {
+  if (typeof throwOnError === "function") {
+    return throwOnError(...params);
+  }
+  return !!throwOnError;
+}
+var FocusManager = class extends Subscribable {
+  #focused;
+  #cleanup;
+  #setup;
+  constructor() {
+    super();
+    this.#setup = (onFocus) => {
+      if (!isServer && window.addEventListener) {
+        const listener = () => onFocus();
+        window.addEventListener("visibilitychange", listener, false);
+        return () => {
+          window.removeEventListener("visibilitychange", listener);
+        };
+      }
+      return;
+    };
+  }
+  onSubscribe() {
+    if (!this.#cleanup) {
+      this.setEventListener(this.#setup);
+    }
+  }
+  onUnsubscribe() {
+    if (!this.hasListeners()) {
+      this.#cleanup?.();
+      this.#cleanup = void 0;
+    }
+  }
+  setEventListener(setup) {
+    this.#setup = setup;
+    this.#cleanup?.();
+    this.#cleanup = setup((focused) => {
+      if (typeof focused === "boolean") {
+        this.setFocused(focused);
+      } else {
+        this.onFocus();
+      }
+    });
+  }
+  setFocused(focused) {
+    const changed = this.#focused !== focused;
+    if (changed) {
+      this.#focused = focused;
+      this.onFocus();
+    }
+  }
+  onFocus() {
+    const isFocused = this.isFocused();
+    this.listeners.forEach((listener) => {
+      listener(isFocused);
+    });
+  }
+  isFocused() {
+    if (typeof this.#focused === "boolean") {
+      return this.#focused;
+    }
+    return globalThis.document?.visibilityState !== "hidden";
+  }
+};
+var focusManager = new FocusManager();
+function pendingThenable() {
+  let resolve;
+  let reject;
+  const thenable = new Promise((_resolve, _reject) => {
+    resolve = _resolve;
+    reject = _reject;
+  });
+  thenable.status = "pending";
+  thenable.catch(() => {
+  });
+  function finalize(data) {
+    Object.assign(thenable, data);
+    delete thenable.resolve;
+    delete thenable.reject;
+  }
+  thenable.resolve = (value) => {
+    finalize({
+      status: "fulfilled",
+      value
+    });
+    resolve(value);
+  };
+  thenable.reject = (reason) => {
+    finalize({
+      status: "rejected",
+      reason
+    });
+    reject(reason);
+  };
+  return thenable;
+}
+var defaultScheduler = systemSetTimeoutZero;
+function createNotifyManager() {
+  let queue = [];
+  let transactions = 0;
+  let notifyFn = (callback) => {
+    callback();
+  };
+  let batchNotifyFn = (callback) => {
+    callback();
+  };
+  let scheduleFn = defaultScheduler;
+  const schedule = (callback) => {
+    if (transactions) {
+      queue.push(callback);
+    } else {
+      scheduleFn(() => {
+        notifyFn(callback);
+      });
+    }
+  };
+  const flush = () => {
+    const originalQueue = queue;
+    queue = [];
+    if (originalQueue.length) {
+      scheduleFn(() => {
+        batchNotifyFn(() => {
+          originalQueue.forEach((callback) => {
+            notifyFn(callback);
+          });
+        });
+      });
+    }
+  };
+  return {
+    batch: (callback) => {
+      let result;
+      transactions++;
+      try {
+        result = callback();
+      } finally {
+        transactions--;
+        if (!transactions) {
+          flush();
+        }
+      }
+      return result;
+    },
+    /**
+     * All calls to the wrapped function will be batched.
+     */
+    batchCalls: (callback) => {
+      return (...args) => {
+        schedule(() => {
+          callback(...args);
+        });
+      };
+    },
+    schedule,
+    /**
+     * Use this method to set a custom notify function.
+     * This can be used to for example wrap notifications with `React.act` while running tests.
+     */
+    setNotifyFunction: (fn) => {
+      notifyFn = fn;
+    },
+    /**
+     * Use this method to set a custom function to batch notifications together into a single tick.
+     * By default React Query will use the batch function provided by ReactDOM or React Native.
+     */
+    setBatchNotifyFunction: (fn) => {
+      batchNotifyFn = fn;
+    },
+    setScheduler: (fn) => {
+      scheduleFn = fn;
+    }
+  };
+}
+var notifyManager = createNotifyManager();
+var OnlineManager = class extends Subscribable {
+  #online = true;
+  #cleanup;
+  #setup;
+  constructor() {
+    super();
+    this.#setup = (onOnline) => {
+      if (!isServer && window.addEventListener) {
+        const onlineListener = () => onOnline(true);
+        const offlineListener = () => onOnline(false);
+        window.addEventListener("online", onlineListener, false);
+        window.addEventListener("offline", offlineListener, false);
+        return () => {
+          window.removeEventListener("online", onlineListener);
+          window.removeEventListener("offline", offlineListener);
+        };
+      }
+      return;
+    };
+  }
+  onSubscribe() {
+    if (!this.#cleanup) {
+      this.setEventListener(this.#setup);
+    }
+  }
+  onUnsubscribe() {
+    if (!this.hasListeners()) {
+      this.#cleanup?.();
+      this.#cleanup = void 0;
+    }
+  }
+  setEventListener(setup) {
+    this.#setup = setup;
+    this.#cleanup?.();
+    this.#cleanup = setup(this.setOnline.bind(this));
+  }
+  setOnline(online) {
+    const changed = this.#online !== online;
+    if (changed) {
+      this.#online = online;
+      this.listeners.forEach((listener) => {
+        listener(online);
+      });
+    }
+  }
+  isOnline() {
+    return this.#online;
+  }
+};
+var onlineManager = new OnlineManager();
+function defaultRetryDelay(failureCount) {
+  return Math.min(1e3 * 2 ** failureCount, 3e4);
+}
+function canFetch(networkMode) {
+  return (networkMode ?? "online") === "online" ? onlineManager.isOnline() : true;
+}
+var CancelledError = class extends Error {
+  constructor(options) {
+    super("CancelledError");
+    this.revert = options?.revert;
+    this.silent = options?.silent;
+  }
+};
+function createRetryer(config) {
+  let isRetryCancelled = false;
+  let failureCount = 0;
+  let continueFn;
+  const thenable = pendingThenable();
+  const isResolved = () => thenable.status !== "pending";
+  const cancel = (cancelOptions) => {
+    if (!isResolved()) {
+      const error = new CancelledError(cancelOptions);
+      reject(error);
+      config.onCancel?.(error);
+    }
+  };
+  const cancelRetry = () => {
+    isRetryCancelled = true;
+  };
+  const continueRetry = () => {
+    isRetryCancelled = false;
+  };
+  const canContinue = () => focusManager.isFocused() && (config.networkMode === "always" || onlineManager.isOnline()) && config.canRun();
+  const canStart = () => canFetch(config.networkMode) && config.canRun();
+  const resolve = (value) => {
+    if (!isResolved()) {
+      continueFn?.();
+      thenable.resolve(value);
+    }
+  };
+  const reject = (value) => {
+    if (!isResolved()) {
+      continueFn?.();
+      thenable.reject(value);
+    }
+  };
+  const pause = () => {
+    return new Promise((continueResolve) => {
+      continueFn = (value) => {
+        if (isResolved() || canContinue()) {
+          continueResolve(value);
+        }
+      };
+      config.onPause?.();
+    }).then(() => {
+      continueFn = void 0;
+      if (!isResolved()) {
+        config.onContinue?.();
+      }
+    });
+  };
+  const run = () => {
+    if (isResolved()) {
+      return;
+    }
+    let promiseOrValue;
+    const initialPromise = failureCount === 0 ? config.initialPromise : void 0;
+    try {
+      promiseOrValue = initialPromise ?? config.fn();
+    } catch (error) {
+      promiseOrValue = Promise.reject(error);
+    }
+    Promise.resolve(promiseOrValue).then(resolve).catch((error) => {
+      if (isResolved()) {
+        return;
+      }
+      const retry = config.retry ?? (isServer ? 0 : 3);
+      const retryDelay = config.retryDelay ?? defaultRetryDelay;
+      const delay2 = typeof retryDelay === "function" ? retryDelay(failureCount, error) : retryDelay;
+      const shouldRetry = retry === true || typeof retry === "number" && failureCount < retry || typeof retry === "function" && retry(failureCount, error);
+      if (isRetryCancelled || !shouldRetry) {
+        reject(error);
+        return;
+      }
+      failureCount++;
+      config.onFail?.(failureCount, error);
+      sleep(delay2).then(() => {
+        return canContinue() ? void 0 : pause();
+      }).then(() => {
+        if (isRetryCancelled) {
+          reject(error);
+        } else {
+          run();
+        }
+      });
+    });
+  };
+  return {
+    promise: thenable,
+    status: () => thenable.status,
+    cancel,
+    continue: () => {
+      continueFn?.();
+      return thenable;
+    },
+    cancelRetry,
+    continueRetry,
+    canStart,
+    start: () => {
+      if (canStart()) {
+        run();
+      } else {
+        pause().then(run);
+      }
+      return thenable;
+    }
+  };
+}
+var Removable = class {
+  #gcTimeout;
+  destroy() {
+    this.clearGcTimeout();
+  }
+  scheduleGc() {
+    this.clearGcTimeout();
+    if (isValidTimeout(this.gcTime)) {
+      this.#gcTimeout = timeoutManager.setTimeout(() => {
+        this.optionalRemove();
+      }, this.gcTime);
+    }
+  }
+  updateGcTime(newGcTime) {
+    this.gcTime = Math.max(
+      this.gcTime || 0,
+      newGcTime ?? (isServer ? Infinity : 5 * 60 * 1e3)
+    );
+  }
+  clearGcTimeout() {
+    if (this.#gcTimeout) {
+      timeoutManager.clearTimeout(this.#gcTimeout);
+      this.#gcTimeout = void 0;
+    }
+  }
+};
+var Query = class extends Removable {
+  #initialState;
+  #revertState;
+  #cache;
+  #client;
+  #retryer;
+  #defaultOptions;
+  #abortSignalConsumed;
+  constructor(config) {
+    super();
+    this.#abortSignalConsumed = false;
+    this.#defaultOptions = config.defaultOptions;
+    this.setOptions(config.options);
+    this.observers = [];
+    this.#client = config.client;
+    this.#cache = this.#client.getQueryCache();
+    this.queryKey = config.queryKey;
+    this.queryHash = config.queryHash;
+    this.#initialState = getDefaultState$1(this.options);
+    this.state = config.state ?? this.#initialState;
+    this.scheduleGc();
+  }
+  get meta() {
+    return this.options.meta;
+  }
+  get promise() {
+    return this.#retryer?.promise;
+  }
+  setOptions(options) {
+    this.options = { ...this.#defaultOptions, ...options };
+    this.updateGcTime(this.options.gcTime);
+    if (this.state && this.state.data === void 0) {
+      const defaultState = getDefaultState$1(this.options);
+      if (defaultState.data !== void 0) {
+        this.setState(
+          successState(defaultState.data, defaultState.dataUpdatedAt)
+        );
+        this.#initialState = defaultState;
+      }
+    }
+  }
+  optionalRemove() {
+    if (!this.observers.length && this.state.fetchStatus === "idle") {
+      this.#cache.remove(this);
+    }
+  }
+  setData(newData, options) {
+    const data = replaceData(this.state.data, newData, this.options);
+    this.#dispatch({
+      data,
+      type: "success",
+      dataUpdatedAt: options?.updatedAt,
+      manual: options?.manual
+    });
+    return data;
+  }
+  setState(state, setStateOptions) {
+    this.#dispatch({ type: "setState", state, setStateOptions });
+  }
+  cancel(options) {
+    const promise = this.#retryer?.promise;
+    this.#retryer?.cancel(options);
+    return promise ? promise.then(noop).catch(noop) : Promise.resolve();
+  }
+  destroy() {
+    super.destroy();
+    this.cancel({ silent: true });
+  }
+  reset() {
+    this.destroy();
+    this.setState(this.#initialState);
+  }
+  isActive() {
+    return this.observers.some(
+      (observer) => resolveEnabled(observer.options.enabled, this) !== false
+    );
+  }
+  isDisabled() {
+    if (this.getObserversCount() > 0) {
+      return !this.isActive();
+    }
+    return this.options.queryFn === skipToken || this.state.dataUpdateCount + this.state.errorUpdateCount === 0;
+  }
+  isStatic() {
+    if (this.getObserversCount() > 0) {
+      return this.observers.some(
+        (observer) => resolveStaleTime(observer.options.staleTime, this) === "static"
+      );
+    }
+    return false;
+  }
+  isStale() {
+    if (this.getObserversCount() > 0) {
+      return this.observers.some(
+        (observer) => observer.getCurrentResult().isStale
+      );
+    }
+    return this.state.data === void 0 || this.state.isInvalidated;
+  }
+  isStaleByTime(staleTime = 0) {
+    if (this.state.data === void 0) {
+      return true;
+    }
+    if (staleTime === "static") {
+      return false;
+    }
+    if (this.state.isInvalidated) {
+      return true;
+    }
+    return !timeUntilStale(this.state.dataUpdatedAt, staleTime);
+  }
+  onFocus() {
+    const observer = this.observers.find((x) => x.shouldFetchOnWindowFocus());
+    observer?.refetch({ cancelRefetch: false });
+    this.#retryer?.continue();
+  }
+  onOnline() {
+    const observer = this.observers.find((x) => x.shouldFetchOnReconnect());
+    observer?.refetch({ cancelRefetch: false });
+    this.#retryer?.continue();
+  }
+  addObserver(observer) {
+    if (!this.observers.includes(observer)) {
+      this.observers.push(observer);
+      this.clearGcTimeout();
+      this.#cache.notify({ type: "observerAdded", query: this, observer });
+    }
+  }
+  removeObserver(observer) {
+    if (this.observers.includes(observer)) {
+      this.observers = this.observers.filter((x) => x !== observer);
+      if (!this.observers.length) {
+        if (this.#retryer) {
+          if (this.#abortSignalConsumed) {
+            this.#retryer.cancel({ revert: true });
+          } else {
+            this.#retryer.cancelRetry();
+          }
+        }
+        this.scheduleGc();
+      }
+      this.#cache.notify({ type: "observerRemoved", query: this, observer });
+    }
+  }
+  getObserversCount() {
+    return this.observers.length;
+  }
+  invalidate() {
+    if (!this.state.isInvalidated) {
+      this.#dispatch({ type: "invalidate" });
+    }
+  }
+  async fetch(options, fetchOptions) {
+    if (this.state.fetchStatus !== "idle" && // If the promise in the retyer is already rejected, we have to definitely
+    // re-start the fetch; there is a chance that the query is still in a
+    // pending state when that happens
+    this.#retryer?.status() !== "rejected") {
+      if (this.state.data !== void 0 && fetchOptions?.cancelRefetch) {
+        this.cancel({ silent: true });
+      } else if (this.#retryer) {
+        this.#retryer.continueRetry();
+        return this.#retryer.promise;
+      }
+    }
+    if (options) {
+      this.setOptions(options);
+    }
+    if (!this.options.queryFn) {
+      const observer = this.observers.find((x) => x.options.queryFn);
+      if (observer) {
+        this.setOptions(observer.options);
+      }
+    }
+    {
+      if (!Array.isArray(this.options.queryKey)) {
+        console.error(
+          `As of v4, queryKey needs to be an Array. If you are using a string like 'repoData', please change it to an Array, e.g. ['repoData']`
+        );
+      }
+    }
+    const abortController = new AbortController();
+    const addSignalProperty = (object) => {
+      Object.defineProperty(object, "signal", {
+        enumerable: true,
+        get: () => {
+          this.#abortSignalConsumed = true;
+          return abortController.signal;
+        }
+      });
+    };
+    const fetchFn = () => {
+      const queryFn = ensureQueryFn(this.options, fetchOptions);
+      const createQueryFnContext = () => {
+        const queryFnContext2 = {
+          client: this.#client,
+          queryKey: this.queryKey,
+          meta: this.meta
+        };
+        addSignalProperty(queryFnContext2);
+        return queryFnContext2;
+      };
+      const queryFnContext = createQueryFnContext();
+      this.#abortSignalConsumed = false;
+      if (this.options.persister) {
+        return this.options.persister(
+          queryFn,
+          queryFnContext,
+          this
+        );
+      }
+      return queryFn(queryFnContext);
+    };
+    const createFetchContext = () => {
+      const context2 = {
+        fetchOptions,
+        options: this.options,
+        queryKey: this.queryKey,
+        client: this.#client,
+        state: this.state,
+        fetchFn
+      };
+      addSignalProperty(context2);
+      return context2;
+    };
+    const context = createFetchContext();
+    this.options.behavior?.onFetch(context, this);
+    this.#revertState = this.state;
+    if (this.state.fetchStatus === "idle" || this.state.fetchMeta !== context.fetchOptions?.meta) {
+      this.#dispatch({ type: "fetch", meta: context.fetchOptions?.meta });
+    }
+    this.#retryer = createRetryer({
+      initialPromise: fetchOptions?.initialPromise,
+      fn: context.fetchFn,
+      onCancel: (error) => {
+        if (error instanceof CancelledError && error.revert) {
+          this.setState({
+            ...this.#revertState,
+            fetchStatus: "idle"
+          });
+        }
+        abortController.abort();
+      },
+      onFail: (failureCount, error) => {
+        this.#dispatch({ type: "failed", failureCount, error });
+      },
+      onPause: () => {
+        this.#dispatch({ type: "pause" });
+      },
+      onContinue: () => {
+        this.#dispatch({ type: "continue" });
+      },
+      retry: context.options.retry,
+      retryDelay: context.options.retryDelay,
+      networkMode: context.options.networkMode,
+      canRun: () => true
+    });
+    try {
+      const data = await this.#retryer.start();
+      if (data === void 0) {
+        if (true) {
+          console.error(
+            `Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ${this.queryHash}`
+          );
+        }
+        throw new Error(`${this.queryHash} data is undefined`);
+      }
+      this.setData(data);
+      this.#cache.config.onSuccess?.(data, this);
+      this.#cache.config.onSettled?.(
+        data,
+        this.state.error,
+        this
+      );
+      return data;
+    } catch (error) {
+      if (error instanceof CancelledError) {
+        if (error.silent) {
+          return this.#retryer.promise;
+        } else if (error.revert) {
+          if (this.state.data === void 0) {
+            throw error;
+          }
+          return this.state.data;
+        }
+      }
+      this.#dispatch({
+        type: "error",
+        error
+      });
+      this.#cache.config.onError?.(
+        error,
+        this
+      );
+      this.#cache.config.onSettled?.(
+        this.state.data,
+        error,
+        this
+      );
+      throw error;
+    } finally {
+      this.scheduleGc();
+    }
+  }
+  #dispatch(action) {
+    const reducer = (state) => {
+      switch (action.type) {
+        case "failed":
+          return {
+            ...state,
+            fetchFailureCount: action.failureCount,
+            fetchFailureReason: action.error
+          };
+        case "pause":
+          return {
+            ...state,
+            fetchStatus: "paused"
+          };
+        case "continue":
+          return {
+            ...state,
+            fetchStatus: "fetching"
+          };
+        case "fetch":
+          return {
+            ...state,
+            ...fetchState(state.data, this.options),
+            fetchMeta: action.meta ?? null
+          };
+        case "success":
+          const newState = {
+            ...state,
+            ...successState(action.data, action.dataUpdatedAt),
+            dataUpdateCount: state.dataUpdateCount + 1,
+            ...!action.manual && {
+              fetchStatus: "idle",
+              fetchFailureCount: 0,
+              fetchFailureReason: null
+            }
+          };
+          this.#revertState = action.manual ? newState : void 0;
+          return newState;
+        case "error":
+          const error = action.error;
+          return {
+            ...state,
+            error,
+            errorUpdateCount: state.errorUpdateCount + 1,
+            errorUpdatedAt: Date.now(),
+            fetchFailureCount: state.fetchFailureCount + 1,
+            fetchFailureReason: error,
+            fetchStatus: "idle",
+            status: "error"
+          };
+        case "invalidate":
+          return {
+            ...state,
+            isInvalidated: true
+          };
+        case "setState":
+          return {
+            ...state,
+            ...action.state
+          };
+      }
+    };
+    this.state = reducer(this.state);
+    notifyManager.batch(() => {
+      this.observers.forEach((observer) => {
+        observer.onQueryUpdate();
+      });
+      this.#cache.notify({ query: this, type: "updated", action });
+    });
+  }
+};
+function fetchState(data, options) {
+  return {
+    fetchFailureCount: 0,
+    fetchFailureReason: null,
+    fetchStatus: canFetch(options.networkMode) ? "fetching" : "paused",
+    ...data === void 0 && {
+      error: null,
+      status: "pending"
+    }
+  };
+}
+function successState(data, dataUpdatedAt) {
+  return {
+    data,
+    dataUpdatedAt: dataUpdatedAt ?? Date.now(),
+    error: null,
+    isInvalidated: false,
+    status: "success"
+  };
+}
+function getDefaultState$1(options) {
+  const data = typeof options.initialData === "function" ? options.initialData() : options.initialData;
+  const hasData = data !== void 0;
+  const initialDataUpdatedAt = hasData ? typeof options.initialDataUpdatedAt === "function" ? options.initialDataUpdatedAt() : options.initialDataUpdatedAt : 0;
+  return {
+    data,
+    dataUpdateCount: 0,
+    dataUpdatedAt: hasData ? initialDataUpdatedAt ?? Date.now() : 0,
+    error: null,
+    errorUpdateCount: 0,
+    errorUpdatedAt: 0,
+    fetchFailureCount: 0,
+    fetchFailureReason: null,
+    fetchMeta: null,
+    isInvalidated: false,
+    status: hasData ? "success" : "pending",
+    fetchStatus: "idle"
+  };
+}
+var QueryObserver = class extends Subscribable {
+  constructor(client2, options) {
+    super();
+    this.options = options;
+    this.#client = client2;
+    this.#selectError = null;
+    this.#currentThenable = pendingThenable();
+    this.bindMethods();
+    this.setOptions(options);
+  }
+  #client;
+  #currentQuery = void 0;
+  #currentQueryInitialState = void 0;
+  #currentResult = void 0;
+  #currentResultState;
+  #currentResultOptions;
+  #currentThenable;
+  #selectError;
+  #selectFn;
+  #selectResult;
+  // This property keeps track of the last query with defined data.
+  // It will be used to pass the previous data and query to the placeholder function between renders.
+  #lastQueryWithDefinedData;
+  #staleTimeoutId;
+  #refetchIntervalId;
+  #currentRefetchInterval;
+  #trackedProps = /* @__PURE__ */ new Set();
+  bindMethods() {
+    this.refetch = this.refetch.bind(this);
+  }
+  onSubscribe() {
+    if (this.listeners.size === 1) {
+      this.#currentQuery.addObserver(this);
+      if (shouldFetchOnMount(this.#currentQuery, this.options)) {
+        this.#executeFetch();
+      } else {
+        this.updateResult();
+      }
+      this.#updateTimers();
+    }
+  }
+  onUnsubscribe() {
+    if (!this.hasListeners()) {
+      this.destroy();
+    }
+  }
+  shouldFetchOnReconnect() {
+    return shouldFetchOn(
+      this.#currentQuery,
+      this.options,
+      this.options.refetchOnReconnect
+    );
+  }
+  shouldFetchOnWindowFocus() {
+    return shouldFetchOn(
+      this.#currentQuery,
+      this.options,
+      this.options.refetchOnWindowFocus
+    );
+  }
+  destroy() {
+    this.listeners = /* @__PURE__ */ new Set();
+    this.#clearStaleTimeout();
+    this.#clearRefetchInterval();
+    this.#currentQuery.removeObserver(this);
+  }
+  setOptions(options) {
+    const prevOptions = this.options;
+    const prevQuery = this.#currentQuery;
+    this.options = this.#client.defaultQueryOptions(options);
+    if (this.options.enabled !== void 0 && typeof this.options.enabled !== "boolean" && typeof this.options.enabled !== "function" && typeof resolveEnabled(this.options.enabled, this.#currentQuery) !== "boolean") {
+      throw new Error(
+        "Expected enabled to be a boolean or a callback that returns a boolean"
+      );
+    }
+    this.#updateQuery();
+    this.#currentQuery.setOptions(this.options);
+    if (prevOptions._defaulted && !shallowEqualObjects(this.options, prevOptions)) {
+      this.#client.getQueryCache().notify({
+        type: "observerOptionsUpdated",
+        query: this.#currentQuery,
+        observer: this
+      });
+    }
+    const mounted = this.hasListeners();
+    if (mounted && shouldFetchOptionally(
+      this.#currentQuery,
+      prevQuery,
+      this.options,
+      prevOptions
+    )) {
+      this.#executeFetch();
+    }
+    this.updateResult();
+    if (mounted && (this.#currentQuery !== prevQuery || resolveEnabled(this.options.enabled, this.#currentQuery) !== resolveEnabled(prevOptions.enabled, this.#currentQuery) || resolveStaleTime(this.options.staleTime, this.#currentQuery) !== resolveStaleTime(prevOptions.staleTime, this.#currentQuery))) {
+      this.#updateStaleTimeout();
+    }
+    const nextRefetchInterval = this.#computeRefetchInterval();
+    if (mounted && (this.#currentQuery !== prevQuery || resolveEnabled(this.options.enabled, this.#currentQuery) !== resolveEnabled(prevOptions.enabled, this.#currentQuery) || nextRefetchInterval !== this.#currentRefetchInterval)) {
+      this.#updateRefetchInterval(nextRefetchInterval);
+    }
+  }
+  getOptimisticResult(options) {
+    const query = this.#client.getQueryCache().build(this.#client, options);
+    const result = this.createResult(query, options);
+    if (shouldAssignObserverCurrentProperties(this, result)) {
+      this.#currentResult = result;
+      this.#currentResultOptions = this.options;
+      this.#currentResultState = this.#currentQuery.state;
+    }
+    return result;
+  }
+  getCurrentResult() {
+    return this.#currentResult;
+  }
+  trackResult(result, onPropTracked) {
+    return new Proxy(result, {
+      get: (target, key) => {
+        this.trackProp(key);
+        onPropTracked?.(key);
+        if (key === "promise") {
+          this.trackProp("data");
+          if (!this.options.experimental_prefetchInRender && this.#currentThenable.status === "pending") {
+            this.#currentThenable.reject(
+              new Error(
+                "experimental_prefetchInRender feature flag is not enabled"
+              )
+            );
+          }
+        }
+        return Reflect.get(target, key);
+      }
+    });
+  }
+  trackProp(key) {
+    this.#trackedProps.add(key);
+  }
+  getCurrentQuery() {
+    return this.#currentQuery;
+  }
+  refetch({ ...options } = {}) {
+    return this.fetch({
+      ...options
+    });
+  }
+  fetchOptimistic(options) {
+    const defaultedOptions = this.#client.defaultQueryOptions(options);
+    const query = this.#client.getQueryCache().build(this.#client, defaultedOptions);
+    return query.fetch().then(() => this.createResult(query, defaultedOptions));
+  }
+  fetch(fetchOptions) {
+    return this.#executeFetch({
+      ...fetchOptions,
+      cancelRefetch: fetchOptions.cancelRefetch ?? true
+    }).then(() => {
+      this.updateResult();
+      return this.#currentResult;
+    });
+  }
+  #executeFetch(fetchOptions) {
+    this.#updateQuery();
+    let promise = this.#currentQuery.fetch(
+      this.options,
+      fetchOptions
+    );
+    if (!fetchOptions?.throwOnError) {
+      promise = promise.catch(noop);
+    }
+    return promise;
+  }
+  #updateStaleTimeout() {
+    this.#clearStaleTimeout();
+    const staleTime = resolveStaleTime(
+      this.options.staleTime,
+      this.#currentQuery
+    );
+    if (isServer || this.#currentResult.isStale || !isValidTimeout(staleTime)) {
+      return;
+    }
+    const time2 = timeUntilStale(this.#currentResult.dataUpdatedAt, staleTime);
+    const timeout = time2 + 1;
+    this.#staleTimeoutId = timeoutManager.setTimeout(() => {
+      if (!this.#currentResult.isStale) {
+        this.updateResult();
+      }
+    }, timeout);
+  }
+  #computeRefetchInterval() {
+    return (typeof this.options.refetchInterval === "function" ? this.options.refetchInterval(this.#currentQuery) : this.options.refetchInterval) ?? false;
+  }
+  #updateRefetchInterval(nextInterval) {
+    this.#clearRefetchInterval();
+    this.#currentRefetchInterval = nextInterval;
+    if (isServer || resolveEnabled(this.options.enabled, this.#currentQuery) === false || !isValidTimeout(this.#currentRefetchInterval) || this.#currentRefetchInterval === 0) {
+      return;
+    }
+    this.#refetchIntervalId = timeoutManager.setInterval(() => {
+      if (this.options.refetchIntervalInBackground || focusManager.isFocused()) {
+        this.#executeFetch();
+      }
+    }, this.#currentRefetchInterval);
+  }
+  #updateTimers() {
+    this.#updateStaleTimeout();
+    this.#updateRefetchInterval(this.#computeRefetchInterval());
+  }
+  #clearStaleTimeout() {
+    if (this.#staleTimeoutId) {
+      timeoutManager.clearTimeout(this.#staleTimeoutId);
+      this.#staleTimeoutId = void 0;
+    }
+  }
+  #clearRefetchInterval() {
+    if (this.#refetchIntervalId) {
+      timeoutManager.clearInterval(this.#refetchIntervalId);
+      this.#refetchIntervalId = void 0;
+    }
+  }
+  createResult(query, options) {
+    const prevQuery = this.#currentQuery;
+    const prevOptions = this.options;
+    const prevResult = this.#currentResult;
+    const prevResultState = this.#currentResultState;
+    const prevResultOptions = this.#currentResultOptions;
+    const queryChange = query !== prevQuery;
+    const queryInitialState = queryChange ? query.state : this.#currentQueryInitialState;
+    const { state } = query;
+    let newState = { ...state };
+    let isPlaceholderData = false;
+    let data;
+    if (options._optimisticResults) {
+      const mounted = this.hasListeners();
+      const fetchOnMount = !mounted && shouldFetchOnMount(query, options);
+      const fetchOptionally = mounted && shouldFetchOptionally(query, prevQuery, options, prevOptions);
+      if (fetchOnMount || fetchOptionally) {
+        newState = {
+          ...newState,
+          ...fetchState(state.data, query.options)
+        };
+      }
+      if (options._optimisticResults === "isRestoring") {
+        newState.fetchStatus = "idle";
+      }
+    }
+    let { error, errorUpdatedAt, status } = newState;
+    data = newState.data;
+    let skipSelect = false;
+    if (options.placeholderData !== void 0 && data === void 0 && status === "pending") {
+      let placeholderData;
+      if (prevResult?.isPlaceholderData && options.placeholderData === prevResultOptions?.placeholderData) {
+        placeholderData = prevResult.data;
+        skipSelect = true;
+      } else {
+        placeholderData = typeof options.placeholderData === "function" ? options.placeholderData(
+          this.#lastQueryWithDefinedData?.state.data,
+          this.#lastQueryWithDefinedData
+        ) : options.placeholderData;
+      }
+      if (placeholderData !== void 0) {
+        status = "success";
+        data = replaceData(
+          prevResult?.data,
+          placeholderData,
+          options
+        );
+        isPlaceholderData = true;
+      }
+    }
+    if (options.select && data !== void 0 && !skipSelect) {
+      if (prevResult && data === prevResultState?.data && options.select === this.#selectFn) {
+        data = this.#selectResult;
+      } else {
+        try {
+          this.#selectFn = options.select;
+          data = options.select(data);
+          data = replaceData(prevResult?.data, data, options);
+          this.#selectResult = data;
+          this.#selectError = null;
+        } catch (selectError) {
+          this.#selectError = selectError;
+        }
+      }
+    }
+    if (this.#selectError) {
+      error = this.#selectError;
+      data = this.#selectResult;
+      errorUpdatedAt = Date.now();
+      status = "error";
+    }
+    const isFetching = newState.fetchStatus === "fetching";
+    const isPending = status === "pending";
+    const isError = status === "error";
+    const isLoading = isPending && isFetching;
+    const hasData = data !== void 0;
+    const result = {
+      status,
+      fetchStatus: newState.fetchStatus,
+      isPending,
+      isSuccess: status === "success",
+      isError,
+      isInitialLoading: isLoading,
+      isLoading,
+      data,
+      dataUpdatedAt: newState.dataUpdatedAt,
+      error,
+      errorUpdatedAt,
+      failureCount: newState.fetchFailureCount,
+      failureReason: newState.fetchFailureReason,
+      errorUpdateCount: newState.errorUpdateCount,
+      isFetched: newState.dataUpdateCount > 0 || newState.errorUpdateCount > 0,
+      isFetchedAfterMount: newState.dataUpdateCount > queryInitialState.dataUpdateCount || newState.errorUpdateCount > queryInitialState.errorUpdateCount,
+      isFetching,
+      isRefetching: isFetching && !isPending,
+      isLoadingError: isError && !hasData,
+      isPaused: newState.fetchStatus === "paused",
+      isPlaceholderData,
+      isRefetchError: isError && hasData,
+      isStale: isStale(query, options),
+      refetch: this.refetch,
+      promise: this.#currentThenable,
+      isEnabled: resolveEnabled(options.enabled, query) !== false
+    };
+    const nextResult = result;
+    if (this.options.experimental_prefetchInRender) {
+      const finalizeThenableIfPossible = (thenable) => {
+        if (nextResult.status === "error") {
+          thenable.reject(nextResult.error);
+        } else if (nextResult.data !== void 0) {
+          thenable.resolve(nextResult.data);
+        }
+      };
+      const recreateThenable = () => {
+        const pending = this.#currentThenable = nextResult.promise = pendingThenable();
+        finalizeThenableIfPossible(pending);
+      };
+      const prevThenable = this.#currentThenable;
+      switch (prevThenable.status) {
+        case "pending":
+          if (query.queryHash === prevQuery.queryHash) {
+            finalizeThenableIfPossible(prevThenable);
+          }
+          break;
+        case "fulfilled":
+          if (nextResult.status === "error" || nextResult.data !== prevThenable.value) {
+            recreateThenable();
+          }
+          break;
+        case "rejected":
+          if (nextResult.status !== "error" || nextResult.error !== prevThenable.reason) {
+            recreateThenable();
+          }
+          break;
+      }
+    }
+    return nextResult;
+  }
+  updateResult() {
+    const prevResult = this.#currentResult;
+    const nextResult = this.createResult(this.#currentQuery, this.options);
+    this.#currentResultState = this.#currentQuery.state;
+    this.#currentResultOptions = this.options;
+    if (this.#currentResultState.data !== void 0) {
+      this.#lastQueryWithDefinedData = this.#currentQuery;
+    }
+    if (shallowEqualObjects(nextResult, prevResult)) {
+      return;
+    }
+    this.#currentResult = nextResult;
+    const shouldNotifyListeners = () => {
+      if (!prevResult) {
+        return true;
+      }
+      const { notifyOnChangeProps } = this.options;
+      const notifyOnChangePropsValue = typeof notifyOnChangeProps === "function" ? notifyOnChangeProps() : notifyOnChangeProps;
+      if (notifyOnChangePropsValue === "all" || !notifyOnChangePropsValue && !this.#trackedProps.size) {
+        return true;
+      }
+      const includedProps = new Set(
+        notifyOnChangePropsValue ?? this.#trackedProps
+      );
+      if (this.options.throwOnError) {
+        includedProps.add("error");
+      }
+      return Object.keys(this.#currentResult).some((key) => {
+        const typedKey = key;
+        const changed = this.#currentResult[typedKey] !== prevResult[typedKey];
+        return changed && includedProps.has(typedKey);
+      });
+    };
+    this.#notify({ listeners: shouldNotifyListeners() });
+  }
+  #updateQuery() {
+    const query = this.#client.getQueryCache().build(this.#client, this.options);
+    if (query === this.#currentQuery) {
+      return;
+    }
+    const prevQuery = this.#currentQuery;
+    this.#currentQuery = query;
+    this.#currentQueryInitialState = query.state;
+    if (this.hasListeners()) {
+      prevQuery?.removeObserver(this);
+      query.addObserver(this);
+    }
+  }
+  onQueryUpdate() {
+    this.updateResult();
+    if (this.hasListeners()) {
+      this.#updateTimers();
+    }
+  }
+  #notify(notifyOptions) {
+    notifyManager.batch(() => {
+      if (notifyOptions.listeners) {
+        this.listeners.forEach((listener) => {
+          listener(this.#currentResult);
+        });
+      }
+      this.#client.getQueryCache().notify({
+        query: this.#currentQuery,
+        type: "observerResultsUpdated"
+      });
+    });
+  }
+};
+function shouldLoadOnMount(query, options) {
+  return resolveEnabled(options.enabled, query) !== false && query.state.data === void 0 && !(query.state.status === "error" && options.retryOnMount === false);
+}
+function shouldFetchOnMount(query, options) {
+  return shouldLoadOnMount(query, options) || query.state.data !== void 0 && shouldFetchOn(query, options, options.refetchOnMount);
+}
+function shouldFetchOn(query, options, field) {
+  if (resolveEnabled(options.enabled, query) !== false && resolveStaleTime(options.staleTime, query) !== "static") {
+    const value = typeof field === "function" ? field(query) : field;
+    return value === "always" || value !== false && isStale(query, options);
+  }
+  return false;
+}
+function shouldFetchOptionally(query, prevQuery, options, prevOptions) {
+  return (query !== prevQuery || resolveEnabled(prevOptions.enabled, query) === false) && (!options.suspense || query.state.status !== "error") && isStale(query, options);
+}
+function isStale(query, options) {
+  return resolveEnabled(options.enabled, query) !== false && query.isStaleByTime(resolveStaleTime(options.staleTime, query));
+}
+function shouldAssignObserverCurrentProperties(observer, optimisticResult) {
+  if (!shallowEqualObjects(observer.getCurrentResult(), optimisticResult)) {
+    return true;
+  }
+  return false;
+}
+function infiniteQueryBehavior(pages) {
+  return {
+    onFetch: (context, query) => {
+      const options = context.options;
+      const direction = context.fetchOptions?.meta?.fetchMore?.direction;
+      const oldPages = context.state.data?.pages || [];
+      const oldPageParams = context.state.data?.pageParams || [];
+      let result = { pages: [], pageParams: [] };
+      let currentPage = 0;
+      const fetchFn = async () => {
+        let cancelled = false;
+        const addSignalProperty = (object) => {
+          Object.defineProperty(object, "signal", {
+            enumerable: true,
+            get: () => {
+              if (context.signal.aborted) {
+                cancelled = true;
+              } else {
+                context.signal.addEventListener("abort", () => {
+                  cancelled = true;
+                });
+              }
+              return context.signal;
+            }
+          });
+        };
+        const queryFn = ensureQueryFn(context.options, context.fetchOptions);
+        const fetchPage = async (data, param, previous) => {
+          if (cancelled) {
+            return Promise.reject();
+          }
+          if (param == null && data.pages.length) {
+            return Promise.resolve(data);
+          }
+          const createQueryFnContext = () => {
+            const queryFnContext2 = {
+              client: context.client,
+              queryKey: context.queryKey,
+              pageParam: param,
+              direction: previous ? "backward" : "forward",
+              meta: context.options.meta
+            };
+            addSignalProperty(queryFnContext2);
+            return queryFnContext2;
+          };
+          const queryFnContext = createQueryFnContext();
+          const page = await queryFn(queryFnContext);
+          const { maxPages } = context.options;
+          const addTo = previous ? addToStart : addToEnd;
+          return {
+            pages: addTo(data.pages, page, maxPages),
+            pageParams: addTo(data.pageParams, param, maxPages)
+          };
+        };
+        if (direction && oldPages.length) {
+          const previous = direction === "backward";
+          const pageParamFn = previous ? getPreviousPageParam : getNextPageParam;
+          const oldData = {
+            pages: oldPages,
+            pageParams: oldPageParams
+          };
+          const param = pageParamFn(options, oldData);
+          result = await fetchPage(oldData, param, previous);
+        } else {
+          const remainingPages = pages ?? oldPages.length;
+          do {
+            const param = currentPage === 0 ? oldPageParams[0] ?? options.initialPageParam : getNextPageParam(options, result);
+            if (currentPage > 0 && param == null) {
+              break;
+            }
+            result = await fetchPage(result, param);
+            currentPage++;
+          } while (currentPage < remainingPages);
+        }
+        return result;
+      };
+      if (context.options.persister) {
+        context.fetchFn = () => {
+          return context.options.persister?.(
+            fetchFn,
+            {
+              client: context.client,
+              queryKey: context.queryKey,
+              meta: context.options.meta,
+              signal: context.signal
+            },
+            query
+          );
+        };
+      } else {
+        context.fetchFn = fetchFn;
+      }
+    }
+  };
+}
+function getNextPageParam(options, { pages, pageParams }) {
+  const lastIndex = pages.length - 1;
+  return pages.length > 0 ? options.getNextPageParam(
+    pages[lastIndex],
+    pages,
+    pageParams[lastIndex],
+    pageParams
+  ) : void 0;
+}
+function getPreviousPageParam(options, { pages, pageParams }) {
+  return pages.length > 0 ? options.getPreviousPageParam?.(pages[0], pages, pageParams[0], pageParams) : void 0;
+}
+var Mutation = class extends Removable {
+  #client;
+  #observers;
+  #mutationCache;
+  #retryer;
+  constructor(config) {
+    super();
+    this.#client = config.client;
+    this.mutationId = config.mutationId;
+    this.#mutationCache = config.mutationCache;
+    this.#observers = [];
+    this.state = config.state || getDefaultState();
+    this.setOptions(config.options);
+    this.scheduleGc();
+  }
+  setOptions(options) {
+    this.options = options;
+    this.updateGcTime(this.options.gcTime);
+  }
+  get meta() {
+    return this.options.meta;
+  }
+  addObserver(observer) {
+    if (!this.#observers.includes(observer)) {
+      this.#observers.push(observer);
+      this.clearGcTimeout();
+      this.#mutationCache.notify({
+        type: "observerAdded",
+        mutation: this,
+        observer
+      });
+    }
+  }
+  removeObserver(observer) {
+    this.#observers = this.#observers.filter((x) => x !== observer);
+    this.scheduleGc();
+    this.#mutationCache.notify({
+      type: "observerRemoved",
+      mutation: this,
+      observer
+    });
+  }
+  optionalRemove() {
+    if (!this.#observers.length) {
+      if (this.state.status === "pending") {
+        this.scheduleGc();
+      } else {
+        this.#mutationCache.remove(this);
+      }
+    }
+  }
+  continue() {
+    return this.#retryer?.continue() ?? // continuing a mutation assumes that variables are set, mutation must have been dehydrated before
+    this.execute(this.state.variables);
+  }
+  async execute(variables) {
+    const onContinue = () => {
+      this.#dispatch({ type: "continue" });
+    };
+    const mutationFnContext = {
+      client: this.#client,
+      meta: this.options.meta,
+      mutationKey: this.options.mutationKey
+    };
+    this.#retryer = createRetryer({
+      fn: () => {
+        if (!this.options.mutationFn) {
+          return Promise.reject(new Error("No mutationFn found"));
+        }
+        return this.options.mutationFn(variables, mutationFnContext);
+      },
+      onFail: (failureCount, error) => {
+        this.#dispatch({ type: "failed", failureCount, error });
+      },
+      onPause: () => {
+        this.#dispatch({ type: "pause" });
+      },
+      onContinue,
+      retry: this.options.retry ?? 0,
+      retryDelay: this.options.retryDelay,
+      networkMode: this.options.networkMode,
+      canRun: () => this.#mutationCache.canRun(this)
+    });
+    const restored = this.state.status === "pending";
+    const isPaused = !this.#retryer.canStart();
+    try {
+      if (restored) {
+        onContinue();
+      } else {
+        this.#dispatch({ type: "pending", variables, isPaused });
+        await this.#mutationCache.config.onMutate?.(
+          variables,
+          this,
+          mutationFnContext
+        );
+        const context = await this.options.onMutate?.(
+          variables,
+          mutationFnContext
+        );
+        if (context !== this.state.context) {
+          this.#dispatch({
+            type: "pending",
+            context,
+            variables,
+            isPaused
+          });
+        }
+      }
+      const data = await this.#retryer.start();
+      await this.#mutationCache.config.onSuccess?.(
+        data,
+        variables,
+        this.state.context,
+        this,
+        mutationFnContext
+      );
+      await this.options.onSuccess?.(
+        data,
+        variables,
+        this.state.context,
+        mutationFnContext
+      );
+      await this.#mutationCache.config.onSettled?.(
+        data,
+        null,
+        this.state.variables,
+        this.state.context,
+        this,
+        mutationFnContext
+      );
+      await this.options.onSettled?.(
+        data,
+        null,
+        variables,
+        this.state.context,
+        mutationFnContext
+      );
+      this.#dispatch({ type: "success", data });
+      return data;
+    } catch (error) {
+      try {
+        await this.#mutationCache.config.onError?.(
+          error,
+          variables,
+          this.state.context,
+          this,
+          mutationFnContext
+        );
+        await this.options.onError?.(
+          error,
+          variables,
+          this.state.context,
+          mutationFnContext
+        );
+        await this.#mutationCache.config.onSettled?.(
+          void 0,
+          error,
+          this.state.variables,
+          this.state.context,
+          this,
+          mutationFnContext
+        );
+        await this.options.onSettled?.(
+          void 0,
+          error,
+          variables,
+          this.state.context,
+          mutationFnContext
+        );
+        throw error;
+      } finally {
+        this.#dispatch({ type: "error", error });
+      }
+    } finally {
+      this.#mutationCache.runNext(this);
+    }
+  }
+  #dispatch(action) {
+    const reducer = (state) => {
+      switch (action.type) {
+        case "failed":
+          return {
+            ...state,
+            failureCount: action.failureCount,
+            failureReason: action.error
+          };
+        case "pause":
+          return {
+            ...state,
+            isPaused: true
+          };
+        case "continue":
+          return {
+            ...state,
+            isPaused: false
+          };
+        case "pending":
+          return {
+            ...state,
+            context: action.context,
+            data: void 0,
+            failureCount: 0,
+            failureReason: null,
+            error: null,
+            isPaused: action.isPaused,
+            status: "pending",
+            variables: action.variables,
+            submittedAt: Date.now()
+          };
+        case "success":
+          return {
+            ...state,
+            data: action.data,
+            failureCount: 0,
+            failureReason: null,
+            error: null,
+            status: "success",
+            isPaused: false
+          };
+        case "error":
+          return {
+            ...state,
+            data: void 0,
+            error: action.error,
+            failureCount: state.failureCount + 1,
+            failureReason: action.error,
+            isPaused: false,
+            status: "error"
+          };
+      }
+    };
+    this.state = reducer(this.state);
+    notifyManager.batch(() => {
+      this.#observers.forEach((observer) => {
+        observer.onMutationUpdate(action);
+      });
+      this.#mutationCache.notify({
+        mutation: this,
+        type: "updated",
+        action
+      });
+    });
+  }
+};
+function getDefaultState() {
+  return {
+    context: void 0,
+    data: void 0,
+    error: null,
+    failureCount: 0,
+    failureReason: null,
+    isPaused: false,
+    status: "idle",
+    variables: void 0,
+    submittedAt: 0
+  };
+}
+var MutationCache = class extends Subscribable {
+  constructor(config = {}) {
+    super();
+    this.config = config;
+    this.#mutations = /* @__PURE__ */ new Set();
+    this.#scopes = /* @__PURE__ */ new Map();
+    this.#mutationId = 0;
+  }
+  #mutations;
+  #scopes;
+  #mutationId;
+  build(client2, options, state) {
+    const mutation = new Mutation({
+      client: client2,
+      mutationCache: this,
+      mutationId: ++this.#mutationId,
+      options: client2.defaultMutationOptions(options),
+      state
+    });
+    this.add(mutation);
+    return mutation;
+  }
+  add(mutation) {
+    this.#mutations.add(mutation);
+    const scope = scopeFor(mutation);
+    if (typeof scope === "string") {
+      const scopedMutations = this.#scopes.get(scope);
+      if (scopedMutations) {
+        scopedMutations.push(mutation);
+      } else {
+        this.#scopes.set(scope, [mutation]);
+      }
+    }
+    this.notify({ type: "added", mutation });
+  }
+  remove(mutation) {
+    if (this.#mutations.delete(mutation)) {
+      const scope = scopeFor(mutation);
+      if (typeof scope === "string") {
+        const scopedMutations = this.#scopes.get(scope);
+        if (scopedMutations) {
+          if (scopedMutations.length > 1) {
+            const index = scopedMutations.indexOf(mutation);
+            if (index !== -1) {
+              scopedMutations.splice(index, 1);
+            }
+          } else if (scopedMutations[0] === mutation) {
+            this.#scopes.delete(scope);
+          }
+        }
+      }
+    }
+    this.notify({ type: "removed", mutation });
+  }
+  canRun(mutation) {
+    const scope = scopeFor(mutation);
+    if (typeof scope === "string") {
+      const mutationsWithSameScope = this.#scopes.get(scope);
+      const firstPendingMutation = mutationsWithSameScope?.find(
+        (m) => m.state.status === "pending"
+      );
+      return !firstPendingMutation || firstPendingMutation === mutation;
+    } else {
+      return true;
+    }
+  }
+  runNext(mutation) {
+    const scope = scopeFor(mutation);
+    if (typeof scope === "string") {
+      const foundMutation = this.#scopes.get(scope)?.find((m) => m !== mutation && m.state.isPaused);
+      return foundMutation?.continue() ?? Promise.resolve();
+    } else {
+      return Promise.resolve();
+    }
+  }
+  clear() {
+    notifyManager.batch(() => {
+      this.#mutations.forEach((mutation) => {
+        this.notify({ type: "removed", mutation });
+      });
+      this.#mutations.clear();
+      this.#scopes.clear();
+    });
+  }
+  getAll() {
+    return Array.from(this.#mutations);
+  }
+  find(filters) {
+    const defaultedFilters = { exact: true, ...filters };
+    return this.getAll().find(
+      (mutation) => matchMutation(defaultedFilters, mutation)
+    );
+  }
+  findAll(filters = {}) {
+    return this.getAll().filter((mutation) => matchMutation(filters, mutation));
+  }
+  notify(event) {
+    notifyManager.batch(() => {
+      this.listeners.forEach((listener) => {
+        listener(event);
+      });
+    });
+  }
+  resumePausedMutations() {
+    const pausedMutations = this.getAll().filter((x) => x.state.isPaused);
+    return notifyManager.batch(
+      () => Promise.all(
+        pausedMutations.map((mutation) => mutation.continue().catch(noop))
+      )
+    );
+  }
+};
+function scopeFor(mutation) {
+  return mutation.options.scope?.id;
+}
+var MutationObserver$1 = class MutationObserver2 extends Subscribable {
+  #client;
+  #currentResult = void 0;
+  #currentMutation;
+  #mutateOptions;
+  constructor(client2, options) {
+    super();
+    this.#client = client2;
+    this.setOptions(options);
+    this.bindMethods();
+    this.#updateResult();
+  }
+  bindMethods() {
+    this.mutate = this.mutate.bind(this);
+    this.reset = this.reset.bind(this);
+  }
+  setOptions(options) {
+    const prevOptions = this.options;
+    this.options = this.#client.defaultMutationOptions(options);
+    if (!shallowEqualObjects(this.options, prevOptions)) {
+      this.#client.getMutationCache().notify({
+        type: "observerOptionsUpdated",
+        mutation: this.#currentMutation,
+        observer: this
+      });
+    }
+    if (prevOptions?.mutationKey && this.options.mutationKey && hashKey(prevOptions.mutationKey) !== hashKey(this.options.mutationKey)) {
+      this.reset();
+    } else if (this.#currentMutation?.state.status === "pending") {
+      this.#currentMutation.setOptions(this.options);
+    }
+  }
+  onUnsubscribe() {
+    if (!this.hasListeners()) {
+      this.#currentMutation?.removeObserver(this);
+    }
+  }
+  onMutationUpdate(action) {
+    this.#updateResult();
+    this.#notify(action);
+  }
+  getCurrentResult() {
+    return this.#currentResult;
+  }
+  reset() {
+    this.#currentMutation?.removeObserver(this);
+    this.#currentMutation = void 0;
+    this.#updateResult();
+    this.#notify();
+  }
+  mutate(variables, options) {
+    this.#mutateOptions = options;
+    this.#currentMutation?.removeObserver(this);
+    this.#currentMutation = this.#client.getMutationCache().build(this.#client, this.options);
+    this.#currentMutation.addObserver(this);
+    return this.#currentMutation.execute(variables);
+  }
+  #updateResult() {
+    const state = this.#currentMutation?.state ?? getDefaultState();
+    this.#currentResult = {
+      ...state,
+      isPending: state.status === "pending",
+      isSuccess: state.status === "success",
+      isError: state.status === "error",
+      isIdle: state.status === "idle",
+      mutate: this.mutate,
+      reset: this.reset
+    };
+  }
+  #notify(action) {
+    notifyManager.batch(() => {
+      if (this.#mutateOptions && this.hasListeners()) {
+        const variables = this.#currentResult.variables;
+        const onMutateResult = this.#currentResult.context;
+        const context = {
+          client: this.#client,
+          meta: this.options.meta,
+          mutationKey: this.options.mutationKey
+        };
+        if (action?.type === "success") {
+          this.#mutateOptions.onSuccess?.(
+            action.data,
+            variables,
+            onMutateResult,
+            context
+          );
+          this.#mutateOptions.onSettled?.(
+            action.data,
+            null,
+            variables,
+            onMutateResult,
+            context
+          );
+        } else if (action?.type === "error") {
+          this.#mutateOptions.onError?.(
+            action.error,
+            variables,
+            onMutateResult,
+            context
+          );
+          this.#mutateOptions.onSettled?.(
+            void 0,
+            action.error,
+            variables,
+            onMutateResult,
+            context
+          );
+        }
+      }
+      this.listeners.forEach((listener) => {
+        listener(this.#currentResult);
+      });
+    });
+  }
+};
+var QueryCache = class extends Subscribable {
+  constructor(config = {}) {
+    super();
+    this.config = config;
+    this.#queries = /* @__PURE__ */ new Map();
+  }
+  #queries;
+  build(client2, options, state) {
+    const queryKey = options.queryKey;
+    const queryHash = options.queryHash ?? hashQueryKeyByOptions(queryKey, options);
+    let query = this.get(queryHash);
+    if (!query) {
+      query = new Query({
+        client: client2,
+        queryKey,
+        queryHash,
+        options: client2.defaultQueryOptions(options),
+        state,
+        defaultOptions: client2.getQueryDefaults(queryKey)
+      });
+      this.add(query);
+    }
+    return query;
+  }
+  add(query) {
+    if (!this.#queries.has(query.queryHash)) {
+      this.#queries.set(query.queryHash, query);
+      this.notify({
+        type: "added",
+        query
+      });
+    }
+  }
+  remove(query) {
+    const queryInMap = this.#queries.get(query.queryHash);
+    if (queryInMap) {
+      query.destroy();
+      if (queryInMap === query) {
+        this.#queries.delete(query.queryHash);
+      }
+      this.notify({ type: "removed", query });
+    }
+  }
+  clear() {
+    notifyManager.batch(() => {
+      this.getAll().forEach((query) => {
+        this.remove(query);
+      });
+    });
+  }
+  get(queryHash) {
+    return this.#queries.get(queryHash);
+  }
+  getAll() {
+    return [...this.#queries.values()];
+  }
+  find(filters) {
+    const defaultedFilters = { exact: true, ...filters };
+    return this.getAll().find(
+      (query) => matchQuery(defaultedFilters, query)
+    );
+  }
+  findAll(filters = {}) {
+    const queries = this.getAll();
+    return Object.keys(filters).length > 0 ? queries.filter((query) => matchQuery(filters, query)) : queries;
+  }
+  notify(event) {
+    notifyManager.batch(() => {
+      this.listeners.forEach((listener) => {
+        listener(event);
+      });
+    });
+  }
+  onFocus() {
+    notifyManager.batch(() => {
+      this.getAll().forEach((query) => {
+        query.onFocus();
+      });
+    });
+  }
+  onOnline() {
+    notifyManager.batch(() => {
+      this.getAll().forEach((query) => {
+        query.onOnline();
+      });
+    });
+  }
+};
+var QueryClient = class {
+  #queryCache;
+  #mutationCache;
+  #defaultOptions;
+  #queryDefaults;
+  #mutationDefaults;
+  #mountCount;
+  #unsubscribeFocus;
+  #unsubscribeOnline;
+  constructor(config = {}) {
+    this.#queryCache = config.queryCache || new QueryCache();
+    this.#mutationCache = config.mutationCache || new MutationCache();
+    this.#defaultOptions = config.defaultOptions || {};
+    this.#queryDefaults = /* @__PURE__ */ new Map();
+    this.#mutationDefaults = /* @__PURE__ */ new Map();
+    this.#mountCount = 0;
+  }
+  mount() {
+    this.#mountCount++;
+    if (this.#mountCount !== 1) return;
+    this.#unsubscribeFocus = focusManager.subscribe(async (focused) => {
+      if (focused) {
+        await this.resumePausedMutations();
+        this.#queryCache.onFocus();
+      }
+    });
+    this.#unsubscribeOnline = onlineManager.subscribe(async (online) => {
+      if (online) {
+        await this.resumePausedMutations();
+        this.#queryCache.onOnline();
+      }
+    });
+  }
+  unmount() {
+    this.#mountCount--;
+    if (this.#mountCount !== 0) return;
+    this.#unsubscribeFocus?.();
+    this.#unsubscribeFocus = void 0;
+    this.#unsubscribeOnline?.();
+    this.#unsubscribeOnline = void 0;
+  }
+  isFetching(filters) {
+    return this.#queryCache.findAll({ ...filters, fetchStatus: "fetching" }).length;
+  }
+  isMutating(filters) {
+    return this.#mutationCache.findAll({ ...filters, status: "pending" }).length;
+  }
+  /**
+   * Imperative (non-reactive) way to retrieve data for a QueryKey.
+   * Should only be used in callbacks or functions where reading the latest data is necessary, e.g. for optimistic updates.
+   *
+   * Hint: Do not use this function inside a component, because it won't receive updates.
+   * Use `useQuery` to create a `QueryObserver` that subscribes to changes.
+   */
+  getQueryData(queryKey) {
+    const options = this.defaultQueryOptions({ queryKey });
+    return this.#queryCache.get(options.queryHash)?.state.data;
+  }
+  ensureQueryData(options) {
+    const defaultedOptions = this.defaultQueryOptions(options);
+    const query = this.#queryCache.build(this, defaultedOptions);
+    const cachedData = query.state.data;
+    if (cachedData === void 0) {
+      return this.fetchQuery(options);
+    }
+    if (options.revalidateIfStale && query.isStaleByTime(resolveStaleTime(defaultedOptions.staleTime, query))) {
+      void this.prefetchQuery(defaultedOptions);
+    }
+    return Promise.resolve(cachedData);
+  }
+  getQueriesData(filters) {
+    return this.#queryCache.findAll(filters).map(({ queryKey, state }) => {
+      const data = state.data;
+      return [queryKey, data];
+    });
+  }
+  setQueryData(queryKey, updater, options) {
+    const defaultedOptions = this.defaultQueryOptions({ queryKey });
+    const query = this.#queryCache.get(
+      defaultedOptions.queryHash
+    );
+    const prevData = query?.state.data;
+    const data = functionalUpdate(updater, prevData);
+    if (data === void 0) {
+      return void 0;
+    }
+    return this.#queryCache.build(this, defaultedOptions).setData(data, { ...options, manual: true });
+  }
+  setQueriesData(filters, updater, options) {
+    return notifyManager.batch(
+      () => this.#queryCache.findAll(filters).map(({ queryKey }) => [
+        queryKey,
+        this.setQueryData(queryKey, updater, options)
+      ])
+    );
+  }
+  getQueryState(queryKey) {
+    const options = this.defaultQueryOptions({ queryKey });
+    return this.#queryCache.get(
+      options.queryHash
+    )?.state;
+  }
+  removeQueries(filters) {
+    const queryCache = this.#queryCache;
+    notifyManager.batch(() => {
+      queryCache.findAll(filters).forEach((query) => {
+        queryCache.remove(query);
+      });
+    });
+  }
+  resetQueries(filters, options) {
+    const queryCache = this.#queryCache;
+    return notifyManager.batch(() => {
+      queryCache.findAll(filters).forEach((query) => {
+        query.reset();
+      });
+      return this.refetchQueries(
+        {
+          type: "active",
+          ...filters
+        },
+        options
+      );
+    });
+  }
+  cancelQueries(filters, cancelOptions = {}) {
+    const defaultedCancelOptions = { revert: true, ...cancelOptions };
+    const promises = notifyManager.batch(
+      () => this.#queryCache.findAll(filters).map((query) => query.cancel(defaultedCancelOptions))
+    );
+    return Promise.all(promises).then(noop).catch(noop);
+  }
+  invalidateQueries(filters, options = {}) {
+    return notifyManager.batch(() => {
+      this.#queryCache.findAll(filters).forEach((query) => {
+        query.invalidate();
+      });
+      if (filters?.refetchType === "none") {
+        return Promise.resolve();
+      }
+      return this.refetchQueries(
+        {
+          ...filters,
+          type: filters?.refetchType ?? filters?.type ?? "active"
+        },
+        options
+      );
+    });
+  }
+  refetchQueries(filters, options = {}) {
+    const fetchOptions = {
+      ...options,
+      cancelRefetch: options.cancelRefetch ?? true
+    };
+    const promises = notifyManager.batch(
+      () => this.#queryCache.findAll(filters).filter((query) => !query.isDisabled() && !query.isStatic()).map((query) => {
+        let promise = query.fetch(void 0, fetchOptions);
+        if (!fetchOptions.throwOnError) {
+          promise = promise.catch(noop);
+        }
+        return query.state.fetchStatus === "paused" ? Promise.resolve() : promise;
+      })
+    );
+    return Promise.all(promises).then(noop);
+  }
+  fetchQuery(options) {
+    const defaultedOptions = this.defaultQueryOptions(options);
+    if (defaultedOptions.retry === void 0) {
+      defaultedOptions.retry = false;
+    }
+    const query = this.#queryCache.build(this, defaultedOptions);
+    return query.isStaleByTime(
+      resolveStaleTime(defaultedOptions.staleTime, query)
+    ) ? query.fetch(defaultedOptions) : Promise.resolve(query.state.data);
+  }
+  prefetchQuery(options) {
+    return this.fetchQuery(options).then(noop).catch(noop);
+  }
+  fetchInfiniteQuery(options) {
+    options.behavior = infiniteQueryBehavior(options.pages);
+    return this.fetchQuery(options);
+  }
+  prefetchInfiniteQuery(options) {
+    return this.fetchInfiniteQuery(options).then(noop).catch(noop);
+  }
+  ensureInfiniteQueryData(options) {
+    options.behavior = infiniteQueryBehavior(options.pages);
+    return this.ensureQueryData(options);
+  }
+  resumePausedMutations() {
+    if (onlineManager.isOnline()) {
+      return this.#mutationCache.resumePausedMutations();
+    }
+    return Promise.resolve();
+  }
+  getQueryCache() {
+    return this.#queryCache;
+  }
+  getMutationCache() {
+    return this.#mutationCache;
+  }
+  getDefaultOptions() {
+    return this.#defaultOptions;
+  }
+  setDefaultOptions(options) {
+    this.#defaultOptions = options;
+  }
+  setQueryDefaults(queryKey, options) {
+    this.#queryDefaults.set(hashKey(queryKey), {
+      queryKey,
+      defaultOptions: options
+    });
+  }
+  getQueryDefaults(queryKey) {
+    const defaults = [...this.#queryDefaults.values()];
+    const result = {};
+    defaults.forEach((queryDefault) => {
+      if (partialMatchKey(queryKey, queryDefault.queryKey)) {
+        Object.assign(result, queryDefault.defaultOptions);
+      }
+    });
+    return result;
+  }
+  setMutationDefaults(mutationKey, options) {
+    this.#mutationDefaults.set(hashKey(mutationKey), {
+      mutationKey,
+      defaultOptions: options
+    });
+  }
+  getMutationDefaults(mutationKey) {
+    const defaults = [...this.#mutationDefaults.values()];
+    const result = {};
+    defaults.forEach((queryDefault) => {
+      if (partialMatchKey(mutationKey, queryDefault.mutationKey)) {
+        Object.assign(result, queryDefault.defaultOptions);
+      }
+    });
+    return result;
+  }
+  defaultQueryOptions(options) {
+    if (options._defaulted) {
+      return options;
+    }
+    const defaultedOptions = {
+      ...this.#defaultOptions.queries,
+      ...this.getQueryDefaults(options.queryKey),
+      ...options,
+      _defaulted: true
+    };
+    if (!defaultedOptions.queryHash) {
+      defaultedOptions.queryHash = hashQueryKeyByOptions(
+        defaultedOptions.queryKey,
+        defaultedOptions
+      );
+    }
+    if (defaultedOptions.refetchOnReconnect === void 0) {
+      defaultedOptions.refetchOnReconnect = defaultedOptions.networkMode !== "always";
+    }
+    if (defaultedOptions.throwOnError === void 0) {
+      defaultedOptions.throwOnError = !!defaultedOptions.suspense;
+    }
+    if (!defaultedOptions.networkMode && defaultedOptions.persister) {
+      defaultedOptions.networkMode = "offlineFirst";
+    }
+    if (defaultedOptions.queryFn === skipToken) {
+      defaultedOptions.enabled = false;
+    }
+    return defaultedOptions;
+  }
+  defaultMutationOptions(options) {
+    if (options?._defaulted) {
+      return options;
+    }
+    return {
+      ...this.#defaultOptions.mutations,
+      ...options?.mutationKey && this.getMutationDefaults(options.mutationKey),
+      ...options,
+      _defaulted: true
+    };
+  }
+  clear() {
+    this.#queryCache.clear();
+    this.#mutationCache.clear();
+  }
+};
+var QueryClientContext = reactExports.createContext(
+  void 0
+);
+var useQueryClient = (queryClient2) => {
+  const client2 = reactExports.useContext(QueryClientContext);
+  if (!client2) {
+    throw new Error("No QueryClient set, use QueryClientProvider to set one");
+  }
+  return client2;
+};
+var QueryClientProvider = ({
+  client: client2,
+  children
+}) => {
+  reactExports.useEffect(() => {
+    client2.mount();
+    return () => {
+      client2.unmount();
+    };
+  }, [client2]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientContext.Provider, { value: client2, children });
+};
+var IsRestoringContext = reactExports.createContext(false);
+var useIsRestoring = () => reactExports.useContext(IsRestoringContext);
+IsRestoringContext.Provider;
+function createValue() {
+  let isReset = false;
+  return {
+    clearReset: () => {
+      isReset = false;
+    },
+    reset: () => {
+      isReset = true;
+    },
+    isReset: () => {
+      return isReset;
+    }
+  };
+}
+var QueryErrorResetBoundaryContext = reactExports.createContext(createValue());
+var useQueryErrorResetBoundary = () => reactExports.useContext(QueryErrorResetBoundaryContext);
+var ensurePreventErrorBoundaryRetry = (options, errorResetBoundary) => {
+  if (options.suspense || options.throwOnError || options.experimental_prefetchInRender) {
+    if (!errorResetBoundary.isReset()) {
+      options.retryOnMount = false;
+    }
+  }
+};
+var useClearResetErrorBoundary = (errorResetBoundary) => {
+  reactExports.useEffect(() => {
+    errorResetBoundary.clearReset();
+  }, [errorResetBoundary]);
+};
+var getHasError = ({
+  result,
+  errorResetBoundary,
+  throwOnError,
+  query,
+  suspense
+}) => {
+  return result.isError && !errorResetBoundary.isReset() && !result.isFetching && query && (suspense && result.data === void 0 || shouldThrowError(throwOnError, [result.error, query]));
+};
+var ensureSuspenseTimers = (defaultedOptions) => {
+  if (defaultedOptions.suspense) {
+    const MIN_SUSPENSE_TIME_MS = 1e3;
+    const clamp2 = (value) => value === "static" ? value : Math.max(value ?? MIN_SUSPENSE_TIME_MS, MIN_SUSPENSE_TIME_MS);
+    const originalStaleTime = defaultedOptions.staleTime;
+    defaultedOptions.staleTime = typeof originalStaleTime === "function" ? (...args) => clamp2(originalStaleTime(...args)) : clamp2(originalStaleTime);
+    if (typeof defaultedOptions.gcTime === "number") {
+      defaultedOptions.gcTime = Math.max(
+        defaultedOptions.gcTime,
+        MIN_SUSPENSE_TIME_MS
+      );
+    }
+  }
+};
+var willFetch = (result, isRestoring) => result.isLoading && result.isFetching && !isRestoring;
+var shouldSuspend = (defaultedOptions, result) => defaultedOptions?.suspense && result.isPending;
+var fetchOptimistic = (defaultedOptions, observer, errorResetBoundary) => observer.fetchOptimistic(defaultedOptions).catch(() => {
+  errorResetBoundary.clearReset();
+});
+function useBaseQuery(options, Observer, queryClient2) {
+  {
+    if (typeof options !== "object" || Array.isArray(options)) {
+      throw new Error(
+        'Bad argument type. Starting with v5, only the "Object" form is allowed when calling query related functions. Please use the error stack to find the culprit call. More info here: https://tanstack.com/query/latest/docs/react/guides/migrating-to-v5#supports-a-single-signature-one-object'
+      );
+    }
+  }
+  const isRestoring = useIsRestoring();
+  const errorResetBoundary = useQueryErrorResetBoundary();
+  const client2 = useQueryClient();
+  const defaultedOptions = client2.defaultQueryOptions(options);
+  client2.getDefaultOptions().queries?._experimental_beforeQuery?.(
+    defaultedOptions
+  );
+  {
+    if (!defaultedOptions.queryFn) {
+      console.error(
+        `[${defaultedOptions.queryHash}]: No queryFn was passed as an option, and no default queryFn was found. The queryFn parameter is only optional when using a default queryFn. More info here: https://tanstack.com/query/latest/docs/framework/react/guides/default-query-function`
+      );
+    }
+  }
+  defaultedOptions._optimisticResults = isRestoring ? "isRestoring" : "optimistic";
+  ensureSuspenseTimers(defaultedOptions);
+  ensurePreventErrorBoundaryRetry(defaultedOptions, errorResetBoundary);
+  useClearResetErrorBoundary(errorResetBoundary);
+  const isNewCacheEntry = !client2.getQueryCache().get(defaultedOptions.queryHash);
+  const [observer] = reactExports.useState(
+    () => new Observer(
+      client2,
+      defaultedOptions
+    )
+  );
+  const result = observer.getOptimisticResult(defaultedOptions);
+  const shouldSubscribe = !isRestoring && options.subscribed !== false;
+  reactExports.useSyncExternalStore(
+    reactExports.useCallback(
+      (onStoreChange) => {
+        const unsubscribe = shouldSubscribe ? observer.subscribe(notifyManager.batchCalls(onStoreChange)) : noop;
+        observer.updateResult();
+        return unsubscribe;
+      },
+      [observer, shouldSubscribe]
+    ),
+    () => observer.getCurrentResult(),
+    () => observer.getCurrentResult()
+  );
+  reactExports.useEffect(() => {
+    observer.setOptions(defaultedOptions);
+  }, [defaultedOptions, observer]);
+  if (shouldSuspend(defaultedOptions, result)) {
+    throw fetchOptimistic(defaultedOptions, observer, errorResetBoundary);
+  }
+  if (getHasError({
+    result,
+    errorResetBoundary,
+    throwOnError: defaultedOptions.throwOnError,
+    query: client2.getQueryCache().get(defaultedOptions.queryHash),
+    suspense: defaultedOptions.suspense
+  })) {
+    throw result.error;
+  }
+  client2.getDefaultOptions().queries?._experimental_afterQuery?.(
+    defaultedOptions,
+    result
+  );
+  if (defaultedOptions.experimental_prefetchInRender && !isServer && willFetch(result, isRestoring)) {
+    const promise = isNewCacheEntry ? (
+      // Fetch immediately on render in order to ensure `.promise` is resolved even if the component is unmounted
+      fetchOptimistic(defaultedOptions, observer, errorResetBoundary)
+    ) : (
+      // subscribe to the "cache promise" so that we can finalize the currentThenable once data comes in
+      client2.getQueryCache().get(defaultedOptions.queryHash)?.promise
+    );
+    promise?.catch(noop).finally(() => {
+      observer.updateResult();
+    });
+  }
+  return !defaultedOptions.notifyOnChangeProps ? observer.trackResult(result) : result;
+}
+function useQuery(options, queryClient2) {
+  return useBaseQuery(options, QueryObserver);
+}
+function useMutation(options, queryClient2) {
+  const client2 = useQueryClient();
+  const [observer] = reactExports.useState(
+    () => new MutationObserver$1(
+      client2,
+      options
+    )
+  );
+  reactExports.useEffect(() => {
+    observer.setOptions(options);
+  }, [observer, options]);
+  const result = reactExports.useSyncExternalStore(
+    reactExports.useCallback(
+      (onStoreChange) => observer.subscribe(notifyManager.batchCalls(onStoreChange)),
+      [observer]
+    ),
+    () => observer.getCurrentResult(),
+    () => observer.getCurrentResult()
+  );
+  const mutate = reactExports.useCallback(
+    (variables, mutateOptions) => {
+      observer.mutate(variables, mutateOptions).catch(noop);
+    },
+    [observer]
+  );
+  if (result.error && shouldThrowError(observer.options.throwOnError, [result.error])) {
+    throw result.error;
+  }
+  return { ...result, mutate, mutateAsync: result.mutate };
+}
+const millisecondsInWeek = 6048e5;
+const millisecondsInDay = 864e5;
+const constructFromSymbol = Symbol.for("constructDateFrom");
+function constructFrom(date, value) {
+  if (typeof date === "function") return date(value);
+  if (date && typeof date === "object" && constructFromSymbol in date)
+    return date[constructFromSymbol](value);
+  if (date instanceof Date) return new date.constructor(value);
+  return new Date(value);
+}
+function toDate$1(argument, context) {
+  return constructFrom(context || argument, argument);
+}
+let defaultOptions = {};
+function getDefaultOptions$1() {
+  return defaultOptions;
+}
+function startOfWeek(date, options) {
+  const defaultOptions2 = getDefaultOptions$1();
+  const weekStartsOn = options?.weekStartsOn ?? options?.locale?.options?.weekStartsOn ?? defaultOptions2.weekStartsOn ?? defaultOptions2.locale?.options?.weekStartsOn ?? 0;
+  const _date = toDate$1(date, options?.in);
+  const day = _date.getDay();
+  const diff = (day < weekStartsOn ? 7 : 0) + day - weekStartsOn;
+  _date.setDate(_date.getDate() - diff);
+  _date.setHours(0, 0, 0, 0);
+  return _date;
+}
+function startOfISOWeek(date, options) {
+  return startOfWeek(date, { ...options, weekStartsOn: 1 });
+}
+function getISOWeekYear(date, options) {
+  const _date = toDate$1(date, options?.in);
+  const year = _date.getFullYear();
+  const fourthOfJanuaryOfNextYear = constructFrom(_date, 0);
+  fourthOfJanuaryOfNextYear.setFullYear(year + 1, 0, 4);
+  fourthOfJanuaryOfNextYear.setHours(0, 0, 0, 0);
+  const startOfNextYear = startOfISOWeek(fourthOfJanuaryOfNextYear);
+  const fourthOfJanuaryOfThisYear = constructFrom(_date, 0);
+  fourthOfJanuaryOfThisYear.setFullYear(year, 0, 4);
+  fourthOfJanuaryOfThisYear.setHours(0, 0, 0, 0);
+  const startOfThisYear = startOfISOWeek(fourthOfJanuaryOfThisYear);
+  if (_date.getTime() >= startOfNextYear.getTime()) {
+    return year + 1;
+  } else if (_date.getTime() >= startOfThisYear.getTime()) {
+    return year;
+  } else {
+    return year - 1;
+  }
+}
+function getTimezoneOffsetInMilliseconds$1(date) {
+  const _date = toDate$1(date);
+  const utcDate = new Date(
+    Date.UTC(
+      _date.getFullYear(),
+      _date.getMonth(),
+      _date.getDate(),
+      _date.getHours(),
+      _date.getMinutes(),
+      _date.getSeconds(),
+      _date.getMilliseconds()
+    )
+  );
+  utcDate.setUTCFullYear(_date.getFullYear());
+  return +date - +utcDate;
+}
+function normalizeDates(context, ...dates) {
+  const normalize = constructFrom.bind(
+    null,
+    dates.find((date) => typeof date === "object")
+  );
+  return dates.map(normalize);
+}
+function startOfDay(date, options) {
+  const _date = toDate$1(date, options?.in);
+  _date.setHours(0, 0, 0, 0);
+  return _date;
+}
+function differenceInCalendarDays(laterDate, earlierDate, options) {
+  const [laterDate_, earlierDate_] = normalizeDates(
+    options?.in,
+    laterDate,
+    earlierDate
+  );
+  const laterStartOfDay = startOfDay(laterDate_);
+  const earlierStartOfDay = startOfDay(earlierDate_);
+  const laterTimestamp = +laterStartOfDay - getTimezoneOffsetInMilliseconds$1(laterStartOfDay);
+  const earlierTimestamp = +earlierStartOfDay - getTimezoneOffsetInMilliseconds$1(earlierStartOfDay);
+  return Math.round((laterTimestamp - earlierTimestamp) / millisecondsInDay);
+}
+function startOfISOWeekYear(date, options) {
+  const year = getISOWeekYear(date, options);
+  const fourthOfJanuary = constructFrom(date, 0);
+  fourthOfJanuary.setFullYear(year, 0, 4);
+  fourthOfJanuary.setHours(0, 0, 0, 0);
+  return startOfISOWeek(fourthOfJanuary);
+}
+function isDate(value) {
+  return value instanceof Date || typeof value === "object" && Object.prototype.toString.call(value) === "[object Date]";
+}
+function isValid(date) {
+  return !(!isDate(date) && typeof date !== "number" || isNaN(+toDate$1(date)));
+}
+function startOfYear(date, options) {
+  const date_ = toDate$1(date, options?.in);
+  date_.setFullYear(date_.getFullYear(), 0, 1);
+  date_.setHours(0, 0, 0, 0);
+  return date_;
+}
+const formatDistanceLocale = {
+  lessThanXSeconds: {
+    one: "less than a second",
+    other: "less than {{count}} seconds"
+  },
+  xSeconds: {
+    one: "1 second",
+    other: "{{count}} seconds"
+  },
+  halfAMinute: "half a minute",
+  lessThanXMinutes: {
+    one: "less than a minute",
+    other: "less than {{count}} minutes"
+  },
+  xMinutes: {
+    one: "1 minute",
+    other: "{{count}} minutes"
+  },
+  aboutXHours: {
+    one: "about 1 hour",
+    other: "about {{count}} hours"
+  },
+  xHours: {
+    one: "1 hour",
+    other: "{{count}} hours"
+  },
+  xDays: {
+    one: "1 day",
+    other: "{{count}} days"
+  },
+  aboutXWeeks: {
+    one: "about 1 week",
+    other: "about {{count}} weeks"
+  },
+  xWeeks: {
+    one: "1 week",
+    other: "{{count}} weeks"
+  },
+  aboutXMonths: {
+    one: "about 1 month",
+    other: "about {{count}} months"
+  },
+  xMonths: {
+    one: "1 month",
+    other: "{{count}} months"
+  },
+  aboutXYears: {
+    one: "about 1 year",
+    other: "about {{count}} years"
+  },
+  xYears: {
+    one: "1 year",
+    other: "{{count}} years"
+  },
+  overXYears: {
+    one: "over 1 year",
+    other: "over {{count}} years"
+  },
+  almostXYears: {
+    one: "almost 1 year",
+    other: "almost {{count}} years"
+  }
+};
+const formatDistance = (token, count, options) => {
+  let result;
+  const tokenValue = formatDistanceLocale[token];
+  if (typeof tokenValue === "string") {
+    result = tokenValue;
+  } else if (count === 1) {
+    result = tokenValue.one;
+  } else {
+    result = tokenValue.other.replace("{{count}}", count.toString());
+  }
+  if (options?.addSuffix) {
+    if (options.comparison && options.comparison > 0) {
+      return "in " + result;
+    } else {
+      return result + " ago";
+    }
+  }
+  return result;
+};
+function buildFormatLongFn(args) {
+  return (options = {}) => {
+    const width2 = options.width ? String(options.width) : args.defaultWidth;
+    const format2 = args.formats[width2] || args.formats[args.defaultWidth];
+    return format2;
+  };
+}
+const dateFormats = {
+  full: "EEEE, MMMM do, y",
+  long: "MMMM do, y",
+  medium: "MMM d, y",
+  short: "MM/dd/yyyy"
+};
+const timeFormats = {
+  full: "h:mm:ss a zzzz",
+  long: "h:mm:ss a z",
+  medium: "h:mm:ss a",
+  short: "h:mm a"
+};
+const dateTimeFormats = {
+  full: "{{date}} 'at' {{time}}",
+  long: "{{date}} 'at' {{time}}",
+  medium: "{{date}}, {{time}}",
+  short: "{{date}}, {{time}}"
+};
+const formatLong = {
+  date: buildFormatLongFn({
+    formats: dateFormats,
+    defaultWidth: "full"
+  }),
+  time: buildFormatLongFn({
+    formats: timeFormats,
+    defaultWidth: "full"
+  }),
+  dateTime: buildFormatLongFn({
+    formats: dateTimeFormats,
+    defaultWidth: "full"
+  })
+};
+const formatRelativeLocale = {
+  lastWeek: "'last' eeee 'at' p",
+  yesterday: "'yesterday at' p",
+  today: "'today at' p",
+  tomorrow: "'tomorrow at' p",
+  nextWeek: "eeee 'at' p",
+  other: "P"
+};
+const formatRelative = (token, _date, _baseDate, _options) => formatRelativeLocale[token];
+function buildLocalizeFn(args) {
+  return (value, options) => {
+    const context = options?.context ? String(options.context) : "standalone";
+    let valuesArray;
+    if (context === "formatting" && args.formattingValues) {
+      const defaultWidth = args.defaultFormattingWidth || args.defaultWidth;
+      const width2 = options?.width ? String(options.width) : defaultWidth;
+      valuesArray = args.formattingValues[width2] || args.formattingValues[defaultWidth];
+    } else {
+      const defaultWidth = args.defaultWidth;
+      const width2 = options?.width ? String(options.width) : args.defaultWidth;
+      valuesArray = args.values[width2] || args.values[defaultWidth];
+    }
+    const index = args.argumentCallback ? args.argumentCallback(value) : value;
+    return valuesArray[index];
+  };
+}
+const eraValues = {
+  narrow: ["B", "A"],
+  abbreviated: ["BC", "AD"],
+  wide: ["Before Christ", "Anno Domini"]
+};
+const quarterValues = {
+  narrow: ["1", "2", "3", "4"],
+  abbreviated: ["Q1", "Q2", "Q3", "Q4"],
+  wide: ["1st quarter", "2nd quarter", "3rd quarter", "4th quarter"]
+};
+const monthValues = {
+  narrow: ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
+  abbreviated: [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ],
+  wide: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ]
+};
+const dayValues = {
+  narrow: ["S", "M", "T", "W", "T", "F", "S"],
+  short: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+  abbreviated: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  wide: [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ]
+};
+const dayPeriodValues = {
+  narrow: {
+    am: "a",
+    pm: "p",
+    midnight: "mi",
+    noon: "n",
+    morning: "morning",
+    afternoon: "afternoon",
+    evening: "evening",
+    night: "night"
+  },
+  abbreviated: {
+    am: "AM",
+    pm: "PM",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "morning",
+    afternoon: "afternoon",
+    evening: "evening",
+    night: "night"
+  },
+  wide: {
+    am: "a.m.",
+    pm: "p.m.",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "morning",
+    afternoon: "afternoon",
+    evening: "evening",
+    night: "night"
+  }
+};
+const formattingDayPeriodValues = {
+  narrow: {
+    am: "a",
+    pm: "p",
+    midnight: "mi",
+    noon: "n",
+    morning: "in the morning",
+    afternoon: "in the afternoon",
+    evening: "in the evening",
+    night: "at night"
+  },
+  abbreviated: {
+    am: "AM",
+    pm: "PM",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "in the morning",
+    afternoon: "in the afternoon",
+    evening: "in the evening",
+    night: "at night"
+  },
+  wide: {
+    am: "a.m.",
+    pm: "p.m.",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "in the morning",
+    afternoon: "in the afternoon",
+    evening: "in the evening",
+    night: "at night"
+  }
+};
+const ordinalNumber = (dirtyNumber, _options) => {
+  const number2 = Number(dirtyNumber);
+  const rem100 = number2 % 100;
+  if (rem100 > 20 || rem100 < 10) {
+    switch (rem100 % 10) {
+      case 1:
+        return number2 + "st";
+      case 2:
+        return number2 + "nd";
+      case 3:
+        return number2 + "rd";
+    }
+  }
+  return number2 + "th";
+};
+const localize = {
+  ordinalNumber,
+  era: buildLocalizeFn({
+    values: eraValues,
+    defaultWidth: "wide"
+  }),
+  quarter: buildLocalizeFn({
+    values: quarterValues,
+    defaultWidth: "wide",
+    argumentCallback: (quarter) => quarter - 1
+  }),
+  month: buildLocalizeFn({
+    values: monthValues,
+    defaultWidth: "wide"
+  }),
+  day: buildLocalizeFn({
+    values: dayValues,
+    defaultWidth: "wide"
+  }),
+  dayPeriod: buildLocalizeFn({
+    values: dayPeriodValues,
+    defaultWidth: "wide",
+    formattingValues: formattingDayPeriodValues,
+    defaultFormattingWidth: "wide"
+  })
+};
+function buildMatchFn(args) {
+  return (string, options = {}) => {
+    const width2 = options.width;
+    const matchPattern = width2 && args.matchPatterns[width2] || args.matchPatterns[args.defaultMatchWidth];
+    const matchResult = string.match(matchPattern);
+    if (!matchResult) {
+      return null;
+    }
+    const matchedString = matchResult[0];
+    const parsePatterns = width2 && args.parsePatterns[width2] || args.parsePatterns[args.defaultParseWidth];
+    const key = Array.isArray(parsePatterns) ? findIndex(parsePatterns, (pattern) => pattern.test(matchedString)) : (
+      // [TODO] -- I challenge you to fix the type
+      findKey(parsePatterns, (pattern) => pattern.test(matchedString))
+    );
+    let value;
+    value = args.valueCallback ? args.valueCallback(key) : key;
+    value = options.valueCallback ? (
+      // [TODO] -- I challenge you to fix the type
+      options.valueCallback(value)
+    ) : value;
+    const rest = string.slice(matchedString.length);
+    return { value, rest };
+  };
+}
+function findKey(object, predicate) {
+  for (const key in object) {
+    if (Object.prototype.hasOwnProperty.call(object, key) && predicate(object[key])) {
+      return key;
+    }
+  }
+  return void 0;
+}
+function findIndex(array, predicate) {
+  for (let key = 0; key < array.length; key++) {
+    if (predicate(array[key])) {
+      return key;
+    }
+  }
+  return void 0;
+}
+function buildMatchPatternFn(args) {
+  return (string, options = {}) => {
+    const matchResult = string.match(args.matchPattern);
+    if (!matchResult) return null;
+    const matchedString = matchResult[0];
+    const parseResult = string.match(args.parsePattern);
+    if (!parseResult) return null;
+    let value = args.valueCallback ? args.valueCallback(parseResult[0]) : parseResult[0];
+    value = options.valueCallback ? options.valueCallback(value) : value;
+    const rest = string.slice(matchedString.length);
+    return { value, rest };
+  };
+}
+const matchOrdinalNumberPattern = /^(\d+)(th|st|nd|rd)?/i;
+const parseOrdinalNumberPattern = /\d+/i;
+const matchEraPatterns = {
+  narrow: /^(b|a)/i,
+  abbreviated: /^(b\.?\s?c\.?|b\.?\s?c\.?\s?e\.?|a\.?\s?d\.?|c\.?\s?e\.?)/i,
+  wide: /^(before christ|before common era|anno domini|common era)/i
+};
+const parseEraPatterns = {
+  any: [/^b/i, /^(a|c)/i]
+};
+const matchQuarterPatterns = {
+  narrow: /^[1234]/i,
+  abbreviated: /^q[1234]/i,
+  wide: /^[1234](th|st|nd|rd)? quarter/i
+};
+const parseQuarterPatterns = {
+  any: [/1/i, /2/i, /3/i, /4/i]
+};
+const matchMonthPatterns = {
+  narrow: /^[jfmasond]/i,
+  abbreviated: /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i,
+  wide: /^(january|february|march|april|may|june|july|august|september|october|november|december)/i
+};
+const parseMonthPatterns = {
+  narrow: [
+    /^j/i,
+    /^f/i,
+    /^m/i,
+    /^a/i,
+    /^m/i,
+    /^j/i,
+    /^j/i,
+    /^a/i,
+    /^s/i,
+    /^o/i,
+    /^n/i,
+    /^d/i
+  ],
+  any: [
+    /^ja/i,
+    /^f/i,
+    /^mar/i,
+    /^ap/i,
+    /^may/i,
+    /^jun/i,
+    /^jul/i,
+    /^au/i,
+    /^s/i,
+    /^o/i,
+    /^n/i,
+    /^d/i
+  ]
+};
+const matchDayPatterns = {
+  narrow: /^[smtwf]/i,
+  short: /^(su|mo|tu|we|th|fr|sa)/i,
+  abbreviated: /^(sun|mon|tue|wed|thu|fri|sat)/i,
+  wide: /^(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/i
+};
+const parseDayPatterns = {
+  narrow: [/^s/i, /^m/i, /^t/i, /^w/i, /^t/i, /^f/i, /^s/i],
+  any: [/^su/i, /^m/i, /^tu/i, /^w/i, /^th/i, /^f/i, /^sa/i]
+};
+const matchDayPeriodPatterns = {
+  narrow: /^(a|p|mi|n|(in the|at) (morning|afternoon|evening|night))/i,
+  any: /^([ap]\.?\s?m\.?|midnight|noon|(in the|at) (morning|afternoon|evening|night))/i
+};
+const parseDayPeriodPatterns = {
+  any: {
+    am: /^a/i,
+    pm: /^p/i,
+    midnight: /^mi/i,
+    noon: /^no/i,
+    morning: /morning/i,
+    afternoon: /afternoon/i,
+    evening: /evening/i,
+    night: /night/i
+  }
+};
+const match = {
+  ordinalNumber: buildMatchPatternFn({
+    matchPattern: matchOrdinalNumberPattern,
+    parsePattern: parseOrdinalNumberPattern,
+    valueCallback: (value) => parseInt(value, 10)
+  }),
+  era: buildMatchFn({
+    matchPatterns: matchEraPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseEraPatterns,
+    defaultParseWidth: "any"
+  }),
+  quarter: buildMatchFn({
+    matchPatterns: matchQuarterPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseQuarterPatterns,
+    defaultParseWidth: "any",
+    valueCallback: (index) => index + 1
+  }),
+  month: buildMatchFn({
+    matchPatterns: matchMonthPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseMonthPatterns,
+    defaultParseWidth: "any"
+  }),
+  day: buildMatchFn({
+    matchPatterns: matchDayPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseDayPatterns,
+    defaultParseWidth: "any"
+  }),
+  dayPeriod: buildMatchFn({
+    matchPatterns: matchDayPeriodPatterns,
+    defaultMatchWidth: "any",
+    parsePatterns: parseDayPeriodPatterns,
+    defaultParseWidth: "any"
+  })
+};
+const enUS = {
+  code: "en-US",
+  formatDistance,
+  formatLong,
+  formatRelative,
+  localize,
+  match,
+  options: {
+    weekStartsOn: 0,
+    firstWeekContainsDate: 1
+  }
+};
+function getDayOfYear(date, options) {
+  const _date = toDate$1(date, options?.in);
+  const diff = differenceInCalendarDays(_date, startOfYear(_date));
+  const dayOfYear = diff + 1;
+  return dayOfYear;
+}
+function getISOWeek(date, options) {
+  const _date = toDate$1(date, options?.in);
+  const diff = +startOfISOWeek(_date) - +startOfISOWeekYear(_date);
+  return Math.round(diff / millisecondsInWeek) + 1;
+}
+function getWeekYear(date, options) {
+  const _date = toDate$1(date, options?.in);
+  const year = _date.getFullYear();
+  const defaultOptions2 = getDefaultOptions$1();
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const firstWeekOfNextYear = constructFrom(options?.in || date, 0);
+  firstWeekOfNextYear.setFullYear(year + 1, 0, firstWeekContainsDate);
+  firstWeekOfNextYear.setHours(0, 0, 0, 0);
+  const startOfNextYear = startOfWeek(firstWeekOfNextYear, options);
+  const firstWeekOfThisYear = constructFrom(options?.in || date, 0);
+  firstWeekOfThisYear.setFullYear(year, 0, firstWeekContainsDate);
+  firstWeekOfThisYear.setHours(0, 0, 0, 0);
+  const startOfThisYear = startOfWeek(firstWeekOfThisYear, options);
+  if (+_date >= +startOfNextYear) {
+    return year + 1;
+  } else if (+_date >= +startOfThisYear) {
+    return year;
+  } else {
+    return year - 1;
+  }
+}
+function startOfWeekYear(date, options) {
+  const defaultOptions2 = getDefaultOptions$1();
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const year = getWeekYear(date, options);
+  const firstWeek = constructFrom(options?.in || date, 0);
+  firstWeek.setFullYear(year, 0, firstWeekContainsDate);
+  firstWeek.setHours(0, 0, 0, 0);
+  const _date = startOfWeek(firstWeek, options);
+  return _date;
+}
+function getWeek(date, options) {
+  const _date = toDate$1(date, options?.in);
+  const diff = +startOfWeek(_date, options) - +startOfWeekYear(_date, options);
+  return Math.round(diff / millisecondsInWeek) + 1;
+}
+function addLeadingZeros$1(number2, targetLength) {
+  const sign = number2 < 0 ? "-" : "";
+  const output = Math.abs(number2).toString().padStart(targetLength, "0");
+  return sign + output;
+}
+const lightFormatters = {
+  // Year
+  y(date, token) {
+    const signedYear = date.getFullYear();
+    const year = signedYear > 0 ? signedYear : 1 - signedYear;
+    return addLeadingZeros$1(token === "yy" ? year % 100 : year, token.length);
+  },
+  // Month
+  M(date, token) {
+    const month = date.getMonth();
+    return token === "M" ? String(month + 1) : addLeadingZeros$1(month + 1, 2);
+  },
+  // Day of the month
+  d(date, token) {
+    return addLeadingZeros$1(date.getDate(), token.length);
+  },
+  // AM or PM
+  a(date, token) {
+    const dayPeriodEnumValue = date.getHours() / 12 >= 1 ? "pm" : "am";
+    switch (token) {
+      case "a":
+      case "aa":
+        return dayPeriodEnumValue.toUpperCase();
+      case "aaa":
+        return dayPeriodEnumValue;
+      case "aaaaa":
+        return dayPeriodEnumValue[0];
+      case "aaaa":
+      default:
+        return dayPeriodEnumValue === "am" ? "a.m." : "p.m.";
+    }
+  },
+  // Hour [1-12]
+  h(date, token) {
+    return addLeadingZeros$1(date.getHours() % 12 || 12, token.length);
+  },
+  // Hour [0-23]
+  H(date, token) {
+    return addLeadingZeros$1(date.getHours(), token.length);
+  },
+  // Minute
+  m(date, token) {
+    return addLeadingZeros$1(date.getMinutes(), token.length);
+  },
+  // Second
+  s(date, token) {
+    return addLeadingZeros$1(date.getSeconds(), token.length);
+  },
+  // Fraction of second
+  S(date, token) {
+    const numberOfDigits = token.length;
+    const milliseconds = date.getMilliseconds();
+    const fractionalSeconds = Math.trunc(
+      milliseconds * Math.pow(10, numberOfDigits - 3)
+    );
+    return addLeadingZeros$1(fractionalSeconds, token.length);
+  }
+};
+const dayPeriodEnum = {
+  midnight: "midnight",
+  noon: "noon",
+  morning: "morning",
+  afternoon: "afternoon",
+  evening: "evening",
+  night: "night"
+};
+const formatters$1 = {
+  // Era
+  G: function(date, token, localize2) {
+    const era = date.getFullYear() > 0 ? 1 : 0;
+    switch (token) {
+      // AD, BC
+      case "G":
+      case "GG":
+      case "GGG":
+        return localize2.era(era, { width: "abbreviated" });
+      // A, B
+      case "GGGGG":
+        return localize2.era(era, { width: "narrow" });
+      // Anno Domini, Before Christ
+      case "GGGG":
+      default:
+        return localize2.era(era, { width: "wide" });
+    }
+  },
+  // Year
+  y: function(date, token, localize2) {
+    if (token === "yo") {
+      const signedYear = date.getFullYear();
+      const year = signedYear > 0 ? signedYear : 1 - signedYear;
+      return localize2.ordinalNumber(year, { unit: "year" });
+    }
+    return lightFormatters.y(date, token);
+  },
+  // Local week-numbering year
+  Y: function(date, token, localize2, options) {
+    const signedWeekYear = getWeekYear(date, options);
+    const weekYear = signedWeekYear > 0 ? signedWeekYear : 1 - signedWeekYear;
+    if (token === "YY") {
+      const twoDigitYear = weekYear % 100;
+      return addLeadingZeros$1(twoDigitYear, 2);
+    }
+    if (token === "Yo") {
+      return localize2.ordinalNumber(weekYear, { unit: "year" });
+    }
+    return addLeadingZeros$1(weekYear, token.length);
+  },
+  // ISO week-numbering year
+  R: function(date, token) {
+    const isoWeekYear = getISOWeekYear(date);
+    return addLeadingZeros$1(isoWeekYear, token.length);
+  },
+  // Extended year. This is a single number designating the year of this calendar system.
+  // The main difference between `y` and `u` localizers are B.C. years:
+  // | Year | `y` | `u` |
+  // |------|-----|-----|
+  // | AC 1 |   1 |   1 |
+  // | BC 1 |   1 |   0 |
+  // | BC 2 |   2 |  -1 |
+  // Also `yy` always returns the last two digits of a year,
+  // while `uu` pads single digit years to 2 characters and returns other years unchanged.
+  u: function(date, token) {
+    const year = date.getFullYear();
+    return addLeadingZeros$1(year, token.length);
+  },
+  // Quarter
+  Q: function(date, token, localize2) {
+    const quarter = Math.ceil((date.getMonth() + 1) / 3);
+    switch (token) {
+      // 1, 2, 3, 4
+      case "Q":
+        return String(quarter);
+      // 01, 02, 03, 04
+      case "QQ":
+        return addLeadingZeros$1(quarter, 2);
+      // 1st, 2nd, 3rd, 4th
+      case "Qo":
+        return localize2.ordinalNumber(quarter, { unit: "quarter" });
+      // Q1, Q2, Q3, Q4
+      case "QQQ":
+        return localize2.quarter(quarter, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // 1, 2, 3, 4 (narrow quarter; could be not numerical)
+      case "QQQQQ":
+        return localize2.quarter(quarter, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // 1st quarter, 2nd quarter, ...
+      case "QQQQ":
+      default:
+        return localize2.quarter(quarter, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Stand-alone quarter
+  q: function(date, token, localize2) {
+    const quarter = Math.ceil((date.getMonth() + 1) / 3);
+    switch (token) {
+      // 1, 2, 3, 4
+      case "q":
+        return String(quarter);
+      // 01, 02, 03, 04
+      case "qq":
+        return addLeadingZeros$1(quarter, 2);
+      // 1st, 2nd, 3rd, 4th
+      case "qo":
+        return localize2.ordinalNumber(quarter, { unit: "quarter" });
+      // Q1, Q2, Q3, Q4
+      case "qqq":
+        return localize2.quarter(quarter, {
+          width: "abbreviated",
+          context: "standalone"
+        });
+      // 1, 2, 3, 4 (narrow quarter; could be not numerical)
+      case "qqqqq":
+        return localize2.quarter(quarter, {
+          width: "narrow",
+          context: "standalone"
+        });
+      // 1st quarter, 2nd quarter, ...
+      case "qqqq":
+      default:
+        return localize2.quarter(quarter, {
+          width: "wide",
+          context: "standalone"
+        });
+    }
+  },
+  // Month
+  M: function(date, token, localize2) {
+    const month = date.getMonth();
+    switch (token) {
+      case "M":
+      case "MM":
+        return lightFormatters.M(date, token);
+      // 1st, 2nd, ..., 12th
+      case "Mo":
+        return localize2.ordinalNumber(month + 1, { unit: "month" });
+      // Jan, Feb, ..., Dec
+      case "MMM":
+        return localize2.month(month, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // J, F, ..., D
+      case "MMMMM":
+        return localize2.month(month, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // January, February, ..., December
+      case "MMMM":
+      default:
+        return localize2.month(month, { width: "wide", context: "formatting" });
+    }
+  },
+  // Stand-alone month
+  L: function(date, token, localize2) {
+    const month = date.getMonth();
+    switch (token) {
+      // 1, 2, ..., 12
+      case "L":
+        return String(month + 1);
+      // 01, 02, ..., 12
+      case "LL":
+        return addLeadingZeros$1(month + 1, 2);
+      // 1st, 2nd, ..., 12th
+      case "Lo":
+        return localize2.ordinalNumber(month + 1, { unit: "month" });
+      // Jan, Feb, ..., Dec
+      case "LLL":
+        return localize2.month(month, {
+          width: "abbreviated",
+          context: "standalone"
+        });
+      // J, F, ..., D
+      case "LLLLL":
+        return localize2.month(month, {
+          width: "narrow",
+          context: "standalone"
+        });
+      // January, February, ..., December
+      case "LLLL":
+      default:
+        return localize2.month(month, { width: "wide", context: "standalone" });
+    }
+  },
+  // Local week of year
+  w: function(date, token, localize2, options) {
+    const week = getWeek(date, options);
+    if (token === "wo") {
+      return localize2.ordinalNumber(week, { unit: "week" });
+    }
+    return addLeadingZeros$1(week, token.length);
+  },
+  // ISO week of year
+  I: function(date, token, localize2) {
+    const isoWeek = getISOWeek(date);
+    if (token === "Io") {
+      return localize2.ordinalNumber(isoWeek, { unit: "week" });
+    }
+    return addLeadingZeros$1(isoWeek, token.length);
+  },
+  // Day of the month
+  d: function(date, token, localize2) {
+    if (token === "do") {
+      return localize2.ordinalNumber(date.getDate(), { unit: "date" });
+    }
+    return lightFormatters.d(date, token);
+  },
+  // Day of year
+  D: function(date, token, localize2) {
+    const dayOfYear = getDayOfYear(date);
+    if (token === "Do") {
+      return localize2.ordinalNumber(dayOfYear, { unit: "dayOfYear" });
+    }
+    return addLeadingZeros$1(dayOfYear, token.length);
+  },
+  // Day of week
+  E: function(date, token, localize2) {
+    const dayOfWeek = date.getDay();
+    switch (token) {
+      // Tue
+      case "E":
+      case "EE":
+      case "EEE":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // T
+      case "EEEEE":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // Tu
+      case "EEEEEE":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "formatting"
+        });
+      // Tuesday
+      case "EEEE":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Local day of week
+  e: function(date, token, localize2, options) {
+    const dayOfWeek = date.getDay();
+    const localDayOfWeek = (dayOfWeek - options.weekStartsOn + 8) % 7 || 7;
+    switch (token) {
+      // Numerical value (Nth day of week with current locale or weekStartsOn)
+      case "e":
+        return String(localDayOfWeek);
+      // Padded numerical value
+      case "ee":
+        return addLeadingZeros$1(localDayOfWeek, 2);
+      // 1st, 2nd, ..., 7th
+      case "eo":
+        return localize2.ordinalNumber(localDayOfWeek, { unit: "day" });
+      case "eee":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // T
+      case "eeeee":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // Tu
+      case "eeeeee":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "formatting"
+        });
+      // Tuesday
+      case "eeee":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Stand-alone local day of week
+  c: function(date, token, localize2, options) {
+    const dayOfWeek = date.getDay();
+    const localDayOfWeek = (dayOfWeek - options.weekStartsOn + 8) % 7 || 7;
+    switch (token) {
+      // Numerical value (same as in `e`)
+      case "c":
+        return String(localDayOfWeek);
+      // Padded numerical value
+      case "cc":
+        return addLeadingZeros$1(localDayOfWeek, token.length);
+      // 1st, 2nd, ..., 7th
+      case "co":
+        return localize2.ordinalNumber(localDayOfWeek, { unit: "day" });
+      case "ccc":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "standalone"
+        });
+      // T
+      case "ccccc":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "standalone"
+        });
+      // Tu
+      case "cccccc":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "standalone"
+        });
+      // Tuesday
+      case "cccc":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "standalone"
+        });
+    }
+  },
+  // ISO day of week
+  i: function(date, token, localize2) {
+    const dayOfWeek = date.getDay();
+    const isoDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+    switch (token) {
+      // 2
+      case "i":
+        return String(isoDayOfWeek);
+      // 02
+      case "ii":
+        return addLeadingZeros$1(isoDayOfWeek, token.length);
+      // 2nd
+      case "io":
+        return localize2.ordinalNumber(isoDayOfWeek, { unit: "day" });
+      // Tue
+      case "iii":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // T
+      case "iiiii":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // Tu
+      case "iiiiii":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "formatting"
+        });
+      // Tuesday
+      case "iiii":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // AM or PM
+  a: function(date, token, localize2) {
+    const hours = date.getHours();
+    const dayPeriodEnumValue = hours / 12 >= 1 ? "pm" : "am";
+    switch (token) {
+      case "a":
+      case "aa":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      case "aaa":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        }).toLowerCase();
+      case "aaaaa":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "narrow",
+          context: "formatting"
+        });
+      case "aaaa":
+      default:
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // AM, PM, midnight, noon
+  b: function(date, token, localize2) {
+    const hours = date.getHours();
+    let dayPeriodEnumValue;
+    if (hours === 12) {
+      dayPeriodEnumValue = dayPeriodEnum.noon;
+    } else if (hours === 0) {
+      dayPeriodEnumValue = dayPeriodEnum.midnight;
+    } else {
+      dayPeriodEnumValue = hours / 12 >= 1 ? "pm" : "am";
+    }
+    switch (token) {
+      case "b":
+      case "bb":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      case "bbb":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        }).toLowerCase();
+      case "bbbbb":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "narrow",
+          context: "formatting"
+        });
+      case "bbbb":
+      default:
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // in the morning, in the afternoon, in the evening, at night
+  B: function(date, token, localize2) {
+    const hours = date.getHours();
+    let dayPeriodEnumValue;
+    if (hours >= 17) {
+      dayPeriodEnumValue = dayPeriodEnum.evening;
+    } else if (hours >= 12) {
+      dayPeriodEnumValue = dayPeriodEnum.afternoon;
+    } else if (hours >= 4) {
+      dayPeriodEnumValue = dayPeriodEnum.morning;
+    } else {
+      dayPeriodEnumValue = dayPeriodEnum.night;
+    }
+    switch (token) {
+      case "B":
+      case "BB":
+      case "BBB":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      case "BBBBB":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "narrow",
+          context: "formatting"
+        });
+      case "BBBB":
+      default:
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Hour [1-12]
+  h: function(date, token, localize2) {
+    if (token === "ho") {
+      let hours = date.getHours() % 12;
+      if (hours === 0) hours = 12;
+      return localize2.ordinalNumber(hours, { unit: "hour" });
+    }
+    return lightFormatters.h(date, token);
+  },
+  // Hour [0-23]
+  H: function(date, token, localize2) {
+    if (token === "Ho") {
+      return localize2.ordinalNumber(date.getHours(), { unit: "hour" });
+    }
+    return lightFormatters.H(date, token);
+  },
+  // Hour [0-11]
+  K: function(date, token, localize2) {
+    const hours = date.getHours() % 12;
+    if (token === "Ko") {
+      return localize2.ordinalNumber(hours, { unit: "hour" });
+    }
+    return addLeadingZeros$1(hours, token.length);
+  },
+  // Hour [1-24]
+  k: function(date, token, localize2) {
+    let hours = date.getHours();
+    if (hours === 0) hours = 24;
+    if (token === "ko") {
+      return localize2.ordinalNumber(hours, { unit: "hour" });
+    }
+    return addLeadingZeros$1(hours, token.length);
+  },
+  // Minute
+  m: function(date, token, localize2) {
+    if (token === "mo") {
+      return localize2.ordinalNumber(date.getMinutes(), { unit: "minute" });
+    }
+    return lightFormatters.m(date, token);
+  },
+  // Second
+  s: function(date, token, localize2) {
+    if (token === "so") {
+      return localize2.ordinalNumber(date.getSeconds(), { unit: "second" });
+    }
+    return lightFormatters.s(date, token);
+  },
+  // Fraction of second
+  S: function(date, token) {
+    return lightFormatters.S(date, token);
+  },
+  // Timezone (ISO-8601. If offset is 0, output is always `'Z'`)
+  X: function(date, token, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    if (timezoneOffset === 0) {
+      return "Z";
+    }
+    switch (token) {
+      // Hours and optional minutes
+      case "X":
+        return formatTimezoneWithOptionalMinutes$1(timezoneOffset);
+      // Hours, minutes and optional seconds without `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `XX`
+      case "XXXX":
+      case "XX":
+        return formatTimezone$1(timezoneOffset);
+      // Hours, minutes and optional seconds with `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `XXX`
+      case "XXXXX":
+      case "XXX":
+      // Hours and minutes with `:` delimiter
+      default:
+        return formatTimezone$1(timezoneOffset, ":");
+    }
+  },
+  // Timezone (ISO-8601. If offset is 0, output is `'+00:00'` or equivalent)
+  x: function(date, token, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    switch (token) {
+      // Hours and optional minutes
+      case "x":
+        return formatTimezoneWithOptionalMinutes$1(timezoneOffset);
+      // Hours, minutes and optional seconds without `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `xx`
+      case "xxxx":
+      case "xx":
+        return formatTimezone$1(timezoneOffset);
+      // Hours, minutes and optional seconds with `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `xxx`
+      case "xxxxx":
+      case "xxx":
+      // Hours and minutes with `:` delimiter
+      default:
+        return formatTimezone$1(timezoneOffset, ":");
+    }
+  },
+  // Timezone (GMT)
+  O: function(date, token, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    switch (token) {
+      // Short
+      case "O":
+      case "OO":
+      case "OOO":
+        return "GMT" + formatTimezoneShort$1(timezoneOffset, ":");
+      // Long
+      case "OOOO":
+      default:
+        return "GMT" + formatTimezone$1(timezoneOffset, ":");
+    }
+  },
+  // Timezone (specific non-location)
+  z: function(date, token, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    switch (token) {
+      // Short
+      case "z":
+      case "zz":
+      case "zzz":
+        return "GMT" + formatTimezoneShort$1(timezoneOffset, ":");
+      // Long
+      case "zzzz":
+      default:
+        return "GMT" + formatTimezone$1(timezoneOffset, ":");
+    }
+  },
+  // Seconds timestamp
+  t: function(date, token, _localize) {
+    const timestamp = Math.trunc(+date / 1e3);
+    return addLeadingZeros$1(timestamp, token.length);
+  },
+  // Milliseconds timestamp
+  T: function(date, token, _localize) {
+    return addLeadingZeros$1(+date, token.length);
+  }
+};
+function formatTimezoneShort$1(offset, delimiter = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = Math.trunc(absOffset / 60);
+  const minutes = absOffset % 60;
+  if (minutes === 0) {
+    return sign + String(hours);
+  }
+  return sign + String(hours) + delimiter + addLeadingZeros$1(minutes, 2);
+}
+function formatTimezoneWithOptionalMinutes$1(offset, delimiter) {
+  if (offset % 60 === 0) {
+    const sign = offset > 0 ? "-" : "+";
+    return sign + addLeadingZeros$1(Math.abs(offset) / 60, 2);
+  }
+  return formatTimezone$1(offset, delimiter);
+}
+function formatTimezone$1(offset, delimiter = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = addLeadingZeros$1(Math.trunc(absOffset / 60), 2);
+  const minutes = addLeadingZeros$1(absOffset % 60, 2);
+  return sign + hours + delimiter + minutes;
+}
+const dateLongFormatter = (pattern, formatLong2) => {
+  switch (pattern) {
+    case "P":
+      return formatLong2.date({ width: "short" });
+    case "PP":
+      return formatLong2.date({ width: "medium" });
+    case "PPP":
+      return formatLong2.date({ width: "long" });
+    case "PPPP":
+    default:
+      return formatLong2.date({ width: "full" });
+  }
+};
+const timeLongFormatter = (pattern, formatLong2) => {
+  switch (pattern) {
+    case "p":
+      return formatLong2.time({ width: "short" });
+    case "pp":
+      return formatLong2.time({ width: "medium" });
+    case "ppp":
+      return formatLong2.time({ width: "long" });
+    case "pppp":
+    default:
+      return formatLong2.time({ width: "full" });
+  }
+};
+const dateTimeLongFormatter = (pattern, formatLong2) => {
+  const matchResult = pattern.match(/(P+)(p+)?/) || [];
+  const datePattern = matchResult[1];
+  const timePattern = matchResult[2];
+  if (!timePattern) {
+    return dateLongFormatter(pattern, formatLong2);
+  }
+  let dateTimeFormat;
+  switch (datePattern) {
+    case "P":
+      dateTimeFormat = formatLong2.dateTime({ width: "short" });
+      break;
+    case "PP":
+      dateTimeFormat = formatLong2.dateTime({ width: "medium" });
+      break;
+    case "PPP":
+      dateTimeFormat = formatLong2.dateTime({ width: "long" });
+      break;
+    case "PPPP":
+    default:
+      dateTimeFormat = formatLong2.dateTime({ width: "full" });
+      break;
+  }
+  return dateTimeFormat.replace("{{date}}", dateLongFormatter(datePattern, formatLong2)).replace("{{time}}", timeLongFormatter(timePattern, formatLong2));
+};
+const longFormatters = {
+  p: timeLongFormatter,
+  P: dateTimeLongFormatter
+};
+const dayOfYearTokenRE = /^D+$/;
+const weekYearTokenRE = /^Y+$/;
+const throwTokens = ["D", "DD", "YY", "YYYY"];
+function isProtectedDayOfYearToken(token) {
+  return dayOfYearTokenRE.test(token);
+}
+function isProtectedWeekYearToken(token) {
+  return weekYearTokenRE.test(token);
+}
+function warnOrThrowProtectedError(token, format2, input) {
+  const _message = message(token, format2, input);
+  console.warn(_message);
+  if (throwTokens.includes(token)) throw new RangeError(_message);
+}
+function message(token, format2, input) {
+  const subject = token[0] === "Y" ? "years" : "days of the month";
+  return `Use \`${token.toLowerCase()}\` instead of \`${token}\` (in \`${format2}\`) for formatting ${subject} to the input \`${input}\`; see: https://github.com/date-fns/date-fns/blob/master/docs/unicodeTokens.md`;
+}
+const formattingTokensRegExp = /[yYQqMLwIdDecihHKkms]o|(\w)\1*|''|'(''|[^'])+('|$)|./g;
+const longFormattingTokensRegExp = /P+p+|P+|p+|''|'(''|[^'])+('|$)|./g;
+const escapedStringRegExp = /^'([^]*?)'?$/;
+const doubleQuoteRegExp = /''/g;
+const unescapedLatinCharacterRegExp = /[a-zA-Z]/;
+function format$1(date, formatStr, options) {
+  const defaultOptions2 = getDefaultOptions$1();
+  const locale = options?.locale ?? defaultOptions2.locale ?? enUS;
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const weekStartsOn = options?.weekStartsOn ?? options?.locale?.options?.weekStartsOn ?? defaultOptions2.weekStartsOn ?? defaultOptions2.locale?.options?.weekStartsOn ?? 0;
+  const originalDate = toDate$1(date, options?.in);
+  if (!isValid(originalDate)) {
+    throw new RangeError("Invalid time value");
+  }
+  let parts = formatStr.match(longFormattingTokensRegExp).map((substring) => {
+    const firstCharacter = substring[0];
+    if (firstCharacter === "p" || firstCharacter === "P") {
+      const longFormatter = longFormatters[firstCharacter];
+      return longFormatter(substring, locale.formatLong);
+    }
+    return substring;
+  }).join("").match(formattingTokensRegExp).map((substring) => {
+    if (substring === "''") {
+      return { isToken: false, value: "'" };
+    }
+    const firstCharacter = substring[0];
+    if (firstCharacter === "'") {
+      return { isToken: false, value: cleanEscapedString(substring) };
+    }
+    if (formatters$1[firstCharacter]) {
+      return { isToken: true, value: substring };
+    }
+    if (firstCharacter.match(unescapedLatinCharacterRegExp)) {
+      throw new RangeError(
+        "Format string contains an unescaped latin alphabet character `" + firstCharacter + "`"
+      );
+    }
+    return { isToken: false, value: substring };
+  });
+  if (locale.localize.preprocessor) {
+    parts = locale.localize.preprocessor(originalDate, parts);
+  }
+  const formatterOptions = {
+    firstWeekContainsDate,
+    weekStartsOn,
+    locale
+  };
+  return parts.map((part) => {
+    if (!part.isToken) return part.value;
+    const token = part.value;
+    if (!options?.useAdditionalWeekYearTokens && isProtectedWeekYearToken(token) || !options?.useAdditionalDayOfYearTokens && isProtectedDayOfYearToken(token)) {
+      warnOrThrowProtectedError(token, formatStr, String(date));
+    }
+    const formatter = formatters$1[token[0]];
+    return formatter(originalDate, token, locale.localize, formatterOptions);
+  }).join("");
+}
+function cleanEscapedString(input) {
+  const matched = input.match(escapedStringRegExp);
+  if (!matched) {
+    return input;
+  }
+  return matched[1].replace(doubleQuoteRegExp, "'");
+}
+function getDefaultOptions() {
+  return Object.assign({}, getDefaultOptions$1());
+}
+const url = "http://localhost:4000/api";
+const clockIn = async () => {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
+  }
+  try {
+    const res = await fetch(`${url}/attendance/clockin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("clockIn API 오류 : ", err);
+  }
+};
+const fetchTodayAttendance = async () => {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
+  }
+  try {
+    const res = await fetch(`${url}/attendance/today`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application-json",
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("fetchTodayAttendance API 오류 : ", err);
+  }
+};
+const clockOut = async (attendanceId) => {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
+  }
+  try {
+    const res = await fetch(`${url}/attendance/clockout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ attendanceId })
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("clockOut API 오류 : ", err);
+  }
+};
+const useAttendanceToday = () => {
+  const today = format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
+  return useQuery({
+    queryKey: ["attendance", today],
+    queryFn: fetchTodayAttendance,
+    staleTime: Infinity,
+    retry: false
+  });
+};
+function tzIntlTimeZoneName(length, date, options) {
+  const defaultOptions2 = getDefaultOptions();
+  const dtf = getDTF(length, options.timeZone, options.locale ?? defaultOptions2.locale);
+  return "formatToParts" in dtf ? partsTimeZone(dtf, date) : hackyTimeZone(dtf, date);
+}
+function partsTimeZone(dtf, date) {
+  const formatted = dtf.formatToParts(date);
+  for (let i = formatted.length - 1; i >= 0; --i) {
+    if (formatted[i].type === "timeZoneName") {
+      return formatted[i].value;
+    }
+  }
+  return void 0;
+}
+function hackyTimeZone(dtf, date) {
+  const formatted = dtf.format(date).replace(/\u200E/g, "");
+  const tzNameMatch = / [\w-+ ]+$/.exec(formatted);
+  return tzNameMatch ? tzNameMatch[0].substr(1) : "";
+}
+function getDTF(length, timeZone, locale) {
+  return new Intl.DateTimeFormat(locale ? [locale.code, "en-US"] : void 0, {
+    timeZone,
+    timeZoneName: length
+  });
+}
+function tzTokenizeDate(date, timeZone) {
+  const dtf = getDateTimeFormat(timeZone);
+  return "formatToParts" in dtf ? partsOffset(dtf, date) : hackyOffset(dtf, date);
+}
+const typeToPos = {
+  year: 0,
+  month: 1,
+  day: 2,
+  hour: 3,
+  minute: 4,
+  second: 5
+};
+function partsOffset(dtf, date) {
+  try {
+    const formatted = dtf.formatToParts(date);
+    const filled = [];
+    for (let i = 0; i < formatted.length; i++) {
+      const pos = typeToPos[formatted[i].type];
+      if (pos !== void 0) {
+        filled[pos] = parseInt(formatted[i].value, 10);
+      }
+    }
+    return filled;
+  } catch (error) {
+    if (error instanceof RangeError) {
+      return [NaN];
+    }
+    throw error;
+  }
+}
+function hackyOffset(dtf, date) {
+  const formatted = dtf.format(date);
+  const parsed = /(\d+)\/(\d+)\/(\d+),? (\d+):(\d+):(\d+)/.exec(formatted);
+  return [
+    parseInt(parsed[3], 10),
+    parseInt(parsed[1], 10),
+    parseInt(parsed[2], 10),
+    parseInt(parsed[4], 10),
+    parseInt(parsed[5], 10),
+    parseInt(parsed[6], 10)
+  ];
+}
+const dtfCache = {};
+const testDateFormatted = new Intl.DateTimeFormat("en-US", {
+  hourCycle: "h23",
+  timeZone: "America/New_York",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit"
+}).format(/* @__PURE__ */ new Date("2014-06-25T04:00:00.123Z"));
+const hourCycleSupported = testDateFormatted === "06/25/2014, 00:00:00" || testDateFormatted === "‎06‎/‎25‎/‎2014‎ ‎00‎:‎00‎:‎00";
+function getDateTimeFormat(timeZone) {
+  if (!dtfCache[timeZone]) {
+    dtfCache[timeZone] = hourCycleSupported ? new Intl.DateTimeFormat("en-US", {
+      hourCycle: "h23",
+      timeZone,
+      year: "numeric",
+      month: "numeric",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    }) : new Intl.DateTimeFormat("en-US", {
+      hour12: false,
+      timeZone,
+      year: "numeric",
+      month: "numeric",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+  }
+  return dtfCache[timeZone];
+}
+function newDateUTC(fullYear, month, day, hour, minute, second, millisecond) {
+  const utcDate = /* @__PURE__ */ new Date(0);
+  utcDate.setUTCFullYear(fullYear, month, day);
+  utcDate.setUTCHours(hour, minute, second, millisecond);
+  return utcDate;
+}
+const MILLISECONDS_IN_HOUR$1 = 36e5;
+const MILLISECONDS_IN_MINUTE$2 = 6e4;
+const patterns$1 = {
+  timezoneZ: /^(Z)$/,
+  timezoneHH: /^([+-]\d{2})$/,
+  timezoneHHMM: /^([+-])(\d{2}):?(\d{2})$/
+};
+function tzParseTimezone(timezoneString, date, isUtcDate) {
+  if (!timezoneString) {
+    return 0;
+  }
+  let token = patterns$1.timezoneZ.exec(timezoneString);
+  if (token) {
+    return 0;
+  }
+  let hours;
+  let absoluteOffset;
+  token = patterns$1.timezoneHH.exec(timezoneString);
+  if (token) {
+    hours = parseInt(token[1], 10);
+    if (!validateTimezone(hours)) {
+      return NaN;
+    }
+    return -(hours * MILLISECONDS_IN_HOUR$1);
+  }
+  token = patterns$1.timezoneHHMM.exec(timezoneString);
+  if (token) {
+    hours = parseInt(token[2], 10);
+    const minutes = parseInt(token[3], 10);
+    if (!validateTimezone(hours, minutes)) {
+      return NaN;
+    }
+    absoluteOffset = Math.abs(hours) * MILLISECONDS_IN_HOUR$1 + minutes * MILLISECONDS_IN_MINUTE$2;
+    return token[1] === "+" ? -absoluteOffset : absoluteOffset;
+  }
+  if (isValidTimezoneIANAString(timezoneString)) {
+    date = new Date(date || Date.now());
+    const utcDate = isUtcDate ? date : toUtcDate(date);
+    const offset = calcOffset(utcDate, timezoneString);
+    const fixedOffset = isUtcDate ? offset : fixOffset(date, offset, timezoneString);
+    return -fixedOffset;
+  }
+  return NaN;
+}
+function toUtcDate(date) {
+  return newDateUTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
+}
+function calcOffset(date, timezoneString) {
+  const tokens = tzTokenizeDate(date, timezoneString);
+  const asUTC = newDateUTC(tokens[0], tokens[1] - 1, tokens[2], tokens[3] % 24, tokens[4], tokens[5], 0).getTime();
+  let asTS = date.getTime();
+  const over = asTS % 1e3;
+  asTS -= over >= 0 ? over : 1e3 + over;
+  return asUTC - asTS;
+}
+function fixOffset(date, offset, timezoneString) {
+  const localTS = date.getTime();
+  let utcGuess = localTS - offset;
+  const o2 = calcOffset(new Date(utcGuess), timezoneString);
+  if (offset === o2) {
+    return offset;
+  }
+  utcGuess -= o2 - offset;
+  const o3 = calcOffset(new Date(utcGuess), timezoneString);
+  if (o2 === o3) {
+    return o2;
+  }
+  return Math.max(o2, o3);
+}
+function validateTimezone(hours, minutes) {
+  return -23 <= hours && hours <= 23 && (minutes == null || 0 <= minutes && minutes <= 59);
+}
+const validIANATimezoneCache = {};
+function isValidTimezoneIANAString(timeZoneString) {
+  if (validIANATimezoneCache[timeZoneString])
+    return true;
+  try {
+    new Intl.DateTimeFormat(void 0, { timeZone: timeZoneString });
+    validIANATimezoneCache[timeZoneString] = true;
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+const MILLISECONDS_IN_MINUTE$1 = 60 * 1e3;
+const formatters = {
+  // Timezone (ISO-8601. If offset is 0, output is always `'Z'`)
+  X: function(date, token, options) {
+    const timezoneOffset = getTimeZoneOffset(options.timeZone, date);
+    if (timezoneOffset === 0) {
+      return "Z";
+    }
+    switch (token) {
+      // Hours and optional minutes
+      case "X":
+        return formatTimezoneWithOptionalMinutes(timezoneOffset);
+      // Hours, minutes and optional seconds without `:` delimeter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `XX`
+      case "XXXX":
+      case "XX":
+        return formatTimezone(timezoneOffset);
+      // Hours, minutes and optional seconds with `:` delimeter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `XXX`
+      case "XXXXX":
+      case "XXX":
+      // Hours and minutes with `:` delimeter
+      default:
+        return formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Timezone (ISO-8601. If offset is 0, output is `'+00:00'` or equivalent)
+  x: function(date, token, options) {
+    const timezoneOffset = getTimeZoneOffset(options.timeZone, date);
+    switch (token) {
+      // Hours and optional minutes
+      case "x":
+        return formatTimezoneWithOptionalMinutes(timezoneOffset);
+      // Hours, minutes and optional seconds without `:` delimeter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `xx`
+      case "xxxx":
+      case "xx":
+        return formatTimezone(timezoneOffset);
+      // Hours, minutes and optional seconds with `:` delimeter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `xxx`
+      case "xxxxx":
+      case "xxx":
+      // Hours and minutes with `:` delimeter
+      default:
+        return formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Timezone (GMT)
+  O: function(date, token, options) {
+    const timezoneOffset = getTimeZoneOffset(options.timeZone, date);
+    switch (token) {
+      // Short
+      case "O":
+      case "OO":
+      case "OOO":
+        return "GMT" + formatTimezoneShort(timezoneOffset, ":");
+      // Long
+      case "OOOO":
+      default:
+        return "GMT" + formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Timezone (specific non-location)
+  z: function(date, token, options) {
+    switch (token) {
+      // Short
+      case "z":
+      case "zz":
+      case "zzz":
+        return tzIntlTimeZoneName("short", date, options);
+      // Long
+      case "zzzz":
+      default:
+        return tzIntlTimeZoneName("long", date, options);
+    }
+  }
+};
+function getTimeZoneOffset(timeZone, originalDate) {
+  const timeZoneOffset = timeZone ? tzParseTimezone(timeZone, originalDate, true) / MILLISECONDS_IN_MINUTE$1 : originalDate?.getTimezoneOffset() ?? 0;
+  if (Number.isNaN(timeZoneOffset)) {
+    throw new RangeError("Invalid time zone specified: " + timeZone);
+  }
+  return timeZoneOffset;
+}
+function addLeadingZeros(number2, targetLength) {
+  const sign = number2 < 0 ? "-" : "";
+  let output = Math.abs(number2).toString();
+  while (output.length < targetLength) {
+    output = "0" + output;
+  }
+  return sign + output;
+}
+function formatTimezone(offset, delimiter = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = addLeadingZeros(Math.floor(absOffset / 60), 2);
+  const minutes = addLeadingZeros(Math.floor(absOffset % 60), 2);
+  return sign + hours + delimiter + minutes;
+}
+function formatTimezoneWithOptionalMinutes(offset, delimiter) {
+  if (offset % 60 === 0) {
+    const sign = offset > 0 ? "-" : "+";
+    return sign + addLeadingZeros(Math.abs(offset) / 60, 2);
+  }
+  return formatTimezone(offset, delimiter);
+}
+function formatTimezoneShort(offset, delimiter = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = Math.floor(absOffset / 60);
+  const minutes = absOffset % 60;
+  if (minutes === 0) {
+    return sign + String(hours);
+  }
+  return sign + String(hours) + delimiter + addLeadingZeros(minutes, 2);
+}
+function getTimezoneOffsetInMilliseconds(date) {
+  const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds()));
+  utcDate.setUTCFullYear(date.getFullYear());
+  return +date - +utcDate;
+}
+const tzPattern = /(Z|[+-]\d{2}(?::?\d{2})?| UTC| [a-zA-Z]+\/[a-zA-Z_]+(?:\/[a-zA-Z_]+)?)$/;
+const MILLISECONDS_IN_HOUR = 36e5;
+const MILLISECONDS_IN_MINUTE = 6e4;
+const DEFAULT_ADDITIONAL_DIGITS = 2;
+const patterns = {
+  dateTimePattern: /^([0-9W+-]+)(T| )(.*)/,
+  datePattern: /^([0-9W+-]+)(.*)/,
+  // year tokens
+  YY: /^(\d{2})$/,
+  YYY: [
+    /^([+-]\d{2})$/,
+    // 0 additional digits
+    /^([+-]\d{3})$/,
+    // 1 additional digit
+    /^([+-]\d{4})$/
+    // 2 additional digits
+  ],
+  YYYY: /^(\d{4})/,
+  YYYYY: [
+    /^([+-]\d{4})/,
+    // 0 additional digits
+    /^([+-]\d{5})/,
+    // 1 additional digit
+    /^([+-]\d{6})/
+    // 2 additional digits
+  ],
+  // date tokens
+  MM: /^-(\d{2})$/,
+  DDD: /^-?(\d{3})$/,
+  MMDD: /^-?(\d{2})-?(\d{2})$/,
+  Www: /^-?W(\d{2})$/,
+  WwwD: /^-?W(\d{2})-?(\d{1})$/,
+  HH: /^(\d{2}([.,]\d*)?)$/,
+  HHMM: /^(\d{2}):?(\d{2}([.,]\d*)?)$/,
+  HHMMSS: /^(\d{2}):?(\d{2}):?(\d{2}([.,]\d*)?)$/,
+  // time zone tokens (to identify the presence of a tz)
+  timeZone: tzPattern
+};
+function toDate(argument, options = {}) {
+  if (arguments.length < 1) {
+    throw new TypeError("1 argument required, but only " + arguments.length + " present");
+  }
+  if (argument === null) {
+    return /* @__PURE__ */ new Date(NaN);
+  }
+  const additionalDigits = options.additionalDigits == null ? DEFAULT_ADDITIONAL_DIGITS : Number(options.additionalDigits);
+  if (additionalDigits !== 2 && additionalDigits !== 1 && additionalDigits !== 0) {
+    throw new RangeError("additionalDigits must be 0, 1 or 2");
+  }
+  if (argument instanceof Date || typeof argument === "object" && Object.prototype.toString.call(argument) === "[object Date]") {
+    return new Date(argument.getTime());
+  } else if (typeof argument === "number" || Object.prototype.toString.call(argument) === "[object Number]") {
+    return new Date(argument);
+  } else if (!(Object.prototype.toString.call(argument) === "[object String]")) {
+    return /* @__PURE__ */ new Date(NaN);
+  }
+  const dateStrings = splitDateString(argument);
+  const { year, restDateString } = parseYear(dateStrings.date, additionalDigits);
+  const date = parseDate(restDateString, year);
+  if (date === null || isNaN(date.getTime())) {
+    return /* @__PURE__ */ new Date(NaN);
+  }
+  if (date) {
+    const timestamp = date.getTime();
+    let time2 = 0;
+    let offset;
+    if (dateStrings.time) {
+      time2 = parseTime(dateStrings.time);
+      if (time2 === null || isNaN(time2)) {
+        return /* @__PURE__ */ new Date(NaN);
+      }
+    }
+    if (dateStrings.timeZone || options.timeZone) {
+      offset = tzParseTimezone(dateStrings.timeZone || options.timeZone, new Date(timestamp + time2));
+      if (isNaN(offset)) {
+        return /* @__PURE__ */ new Date(NaN);
+      }
+    } else {
+      offset = getTimezoneOffsetInMilliseconds(new Date(timestamp + time2));
+      offset = getTimezoneOffsetInMilliseconds(new Date(timestamp + time2 + offset));
+    }
+    return new Date(timestamp + time2 + offset);
+  } else {
+    return /* @__PURE__ */ new Date(NaN);
+  }
+}
+function splitDateString(dateString) {
+  const dateStrings = {};
+  let parts = patterns.dateTimePattern.exec(dateString);
+  let timeString;
+  if (!parts) {
+    parts = patterns.datePattern.exec(dateString);
+    if (parts) {
+      dateStrings.date = parts[1];
+      timeString = parts[2];
+    } else {
+      dateStrings.date = null;
+      timeString = dateString;
+    }
+  } else {
+    dateStrings.date = parts[1];
+    timeString = parts[3];
+  }
+  if (timeString) {
+    const token = patterns.timeZone.exec(timeString);
+    if (token) {
+      dateStrings.time = timeString.replace(token[1], "");
+      dateStrings.timeZone = token[1].trim();
+    } else {
+      dateStrings.time = timeString;
+    }
+  }
+  return dateStrings;
+}
+function parseYear(dateString, additionalDigits) {
+  if (dateString) {
+    const patternYYY = patterns.YYY[additionalDigits];
+    const patternYYYYY = patterns.YYYYY[additionalDigits];
+    let token = patterns.YYYY.exec(dateString) || patternYYYYY.exec(dateString);
+    if (token) {
+      const yearString = token[1];
+      return {
+        year: parseInt(yearString, 10),
+        restDateString: dateString.slice(yearString.length)
+      };
+    }
+    token = patterns.YY.exec(dateString) || patternYYY.exec(dateString);
+    if (token) {
+      const centuryString = token[1];
+      return {
+        year: parseInt(centuryString, 10) * 100,
+        restDateString: dateString.slice(centuryString.length)
+      };
+    }
+  }
+  return {
+    year: null
+  };
+}
+function parseDate(dateString, year) {
+  if (year === null) {
+    return null;
+  }
+  let date;
+  let month;
+  let week;
+  if (!dateString || !dateString.length) {
+    date = /* @__PURE__ */ new Date(0);
+    date.setUTCFullYear(year);
+    return date;
+  }
+  let token = patterns.MM.exec(dateString);
+  if (token) {
+    date = /* @__PURE__ */ new Date(0);
+    month = parseInt(token[1], 10) - 1;
+    if (!validateDate(year, month)) {
+      return /* @__PURE__ */ new Date(NaN);
+    }
+    date.setUTCFullYear(year, month);
+    return date;
+  }
+  token = patterns.DDD.exec(dateString);
+  if (token) {
+    date = /* @__PURE__ */ new Date(0);
+    const dayOfYear = parseInt(token[1], 10);
+    if (!validateDayOfYearDate(year, dayOfYear)) {
+      return /* @__PURE__ */ new Date(NaN);
+    }
+    date.setUTCFullYear(year, 0, dayOfYear);
+    return date;
+  }
+  token = patterns.MMDD.exec(dateString);
+  if (token) {
+    date = /* @__PURE__ */ new Date(0);
+    month = parseInt(token[1], 10) - 1;
+    const day = parseInt(token[2], 10);
+    if (!validateDate(year, month, day)) {
+      return /* @__PURE__ */ new Date(NaN);
+    }
+    date.setUTCFullYear(year, month, day);
+    return date;
+  }
+  token = patterns.Www.exec(dateString);
+  if (token) {
+    week = parseInt(token[1], 10) - 1;
+    if (!validateWeekDate(week)) {
+      return /* @__PURE__ */ new Date(NaN);
+    }
+    return dayOfISOWeekYear(year, week);
+  }
+  token = patterns.WwwD.exec(dateString);
+  if (token) {
+    week = parseInt(token[1], 10) - 1;
+    const dayOfWeek = parseInt(token[2], 10) - 1;
+    if (!validateWeekDate(week, dayOfWeek)) {
+      return /* @__PURE__ */ new Date(NaN);
+    }
+    return dayOfISOWeekYear(year, week, dayOfWeek);
+  }
+  return null;
+}
+function parseTime(timeString) {
+  let hours;
+  let minutes;
+  let token = patterns.HH.exec(timeString);
+  if (token) {
+    hours = parseFloat(token[1].replace(",", "."));
+    if (!validateTime(hours)) {
+      return NaN;
+    }
+    return hours % 24 * MILLISECONDS_IN_HOUR;
+  }
+  token = patterns.HHMM.exec(timeString);
+  if (token) {
+    hours = parseInt(token[1], 10);
+    minutes = parseFloat(token[2].replace(",", "."));
+    if (!validateTime(hours, minutes)) {
+      return NaN;
+    }
+    return hours % 24 * MILLISECONDS_IN_HOUR + minutes * MILLISECONDS_IN_MINUTE;
+  }
+  token = patterns.HHMMSS.exec(timeString);
+  if (token) {
+    hours = parseInt(token[1], 10);
+    minutes = parseInt(token[2], 10);
+    const seconds = parseFloat(token[3].replace(",", "."));
+    if (!validateTime(hours, minutes, seconds)) {
+      return NaN;
+    }
+    return hours % 24 * MILLISECONDS_IN_HOUR + minutes * MILLISECONDS_IN_MINUTE + seconds * 1e3;
+  }
+  return null;
+}
+function dayOfISOWeekYear(isoWeekYear, week, day) {
+  week = week || 0;
+  day = day || 0;
+  const date = /* @__PURE__ */ new Date(0);
+  date.setUTCFullYear(isoWeekYear, 0, 4);
+  const fourthOfJanuaryDay = date.getUTCDay() || 7;
+  const diff = week * 7 + day + 1 - fourthOfJanuaryDay;
+  date.setUTCDate(date.getUTCDate() + diff);
+  return date;
+}
+const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const DAYS_IN_MONTH_LEAP_YEAR = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+function isLeapYearIndex(year) {
+  return year % 400 === 0 || year % 4 === 0 && year % 100 !== 0;
+}
+function validateDate(year, month, date) {
+  if (month < 0 || month > 11) {
+    return false;
+  }
+  if (date != null) {
+    if (date < 1) {
+      return false;
+    }
+    const isLeapYear = isLeapYearIndex(year);
+    if (isLeapYear && date > DAYS_IN_MONTH_LEAP_YEAR[month]) {
+      return false;
+    }
+    if (!isLeapYear && date > DAYS_IN_MONTH[month]) {
+      return false;
+    }
+  }
+  return true;
+}
+function validateDayOfYearDate(year, dayOfYear) {
+  if (dayOfYear < 1) {
+    return false;
+  }
+  const isLeapYear = isLeapYearIndex(year);
+  if (isLeapYear && dayOfYear > 366) {
+    return false;
+  }
+  if (!isLeapYear && dayOfYear > 365) {
+    return false;
+  }
+  return true;
+}
+function validateWeekDate(week, day) {
+  if (week < 0 || week > 52) {
+    return false;
+  }
+  if (day != null && (day < 0 || day > 6)) {
+    return false;
+  }
+  return true;
+}
+function validateTime(hours, minutes, seconds) {
+  if (hours < 0 || hours >= 25) {
+    return false;
+  }
+  if (minutes != null && (minutes < 0 || minutes >= 60)) {
+    return false;
+  }
+  if (seconds != null && (seconds < 0 || seconds >= 60)) {
+    return false;
+  }
+  return true;
+}
+const tzFormattingTokensRegExp = /([xXOz]+)|''|'(''|[^'])+('|$)/g;
+function format(date, formatStr, options = {}) {
+  formatStr = String(formatStr);
+  const matches = formatStr.match(tzFormattingTokensRegExp);
+  if (matches) {
+    const d = toDate(options.originalDate || date, options);
+    formatStr = matches.reduce(function(result, token) {
+      if (token[0] === "'") {
+        return result;
+      }
+      const pos = result.indexOf(token);
+      const precededByQuotedSection = result[pos - 1] === "'";
+      const replaced = result.replace(token, "'" + formatters[token[0]](d, token, options) + "'");
+      return precededByQuotedSection ? replaced.substring(0, pos - 1) + replaced.substring(pos + 1) : replaced;
+    }, formatStr);
+  }
+  return format$1(date, formatStr, options);
+}
+function toZonedTime(date, timeZone, options) {
+  date = toDate(date, options);
+  const offsetMilliseconds = tzParseTimezone(timeZone, date, true);
+  const d = new Date(date.getTime() - offsetMilliseconds);
+  const resultDate = /* @__PURE__ */ new Date(0);
+  resultDate.setFullYear(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  resultDate.setHours(d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds());
+  return resultDate;
+}
+function formatInTimeZone(date, timeZone, formatStr, options) {
+  options = {
+    ...options,
+    timeZone,
+    originalDate: date
+  };
+  return format(toZonedTime(date, timeZone, { timeZone: options.timeZone }), formatStr, options);
+}
+function AttendanceCard() {
+  const { data } = useAttendanceToday();
+  const attendance = data?.attendance;
+  const clockinTime = attendance?.clockin ? formatInTimeZone(new Date(attendance?.clockin), "Asia/Seoul", "HH시 mm분") : "-";
+  const clockoutTime = attendance?.clockout ? formatInTimeZone(new Date(attendance?.clockout), "Asia/Seoul", "HH시 mm분") : "-";
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "max-w-[360px] rounded-2xl bg-white", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full p-[20px]", children: [
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "text-base font-bold", children: "금일 출 / 퇴근 시간" }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/dashboard/AttendanceCard.tsx",
+      lineNumber: 13,
+      columnNumber: 17
+    }, this),
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex flex-wrap gap-[20px] mt-[20px]", children: [
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex-1", children: [
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-sm", children: "출근 시간" }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/dashboard/AttendanceCard.tsx",
+          lineNumber: 16,
+          columnNumber: 25
+        }, this),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-lg", children: clockinTime }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/dashboard/AttendanceCard.tsx",
+          lineNumber: 17,
+          columnNumber: 25
+        }, this)
+      ] }, void 0, true, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/dashboard/AttendanceCard.tsx",
+        lineNumber: 15,
+        columnNumber: 21
+      }, this),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex-1", children: [
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-sm", children: "퇴근 시간" }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/dashboard/AttendanceCard.tsx",
+          lineNumber: 20,
+          columnNumber: 25
+        }, this),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-lg", children: clockoutTime }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/dashboard/AttendanceCard.tsx",
+          lineNumber: 21,
+          columnNumber: 25
+        }, this)
+      ] }, void 0, true, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/dashboard/AttendanceCard.tsx",
+        lineNumber: 19,
+        columnNumber: 21
+      }, this)
+    ] }, void 0, true, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/dashboard/AttendanceCard.tsx",
+      lineNumber: 14,
+      columnNumber: 17
+    }, this)
+  ] }, void 0, true, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/dashboard/AttendanceCard.tsx",
+    lineNumber: 12,
+    columnNumber: 13
+  }, this) }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/dashboard/AttendanceCard.tsx",
+    lineNumber: 11,
+    columnNumber: 9
+  }, this);
+}
 function DashboardPage() {
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-[calc(100%-240px)] h-full", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h1", { children: "Dashboard" }, void 0, false, {
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-[calc(100%-240px)] h-full", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(AttendanceCard, {}, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/pages/dashboard.tsx",
-    lineNumber: 4,
+    lineNumber: 6,
     columnNumber: 13
   }, this) }, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/pages/dashboard.tsx",
-    lineNumber: 3,
+    lineNumber: 5,
     columnNumber: 9
   }, this);
 }
@@ -45840,7 +50816,7 @@ function requireReactIs$1() {
   return reactIs$1.exports;
 }
 var reactIsExports = /* @__PURE__ */ requireReactIs$1();
-function isPlainObject$1(item) {
+function isPlainObject(item) {
   if (typeof item !== "object" || item === null) {
     return false;
   }
@@ -45848,7 +50824,7 @@ function isPlainObject$1(item) {
   return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(Symbol.toStringTag in item) && !(Symbol.iterator in item);
 }
 function deepClone(source) {
-  if (/* @__PURE__ */ reactExports.isValidElement(source) || reactIsExports.isValidElementType(source) || !isPlainObject$1(source)) {
+  if (/* @__PURE__ */ reactExports.isValidElement(source) || reactIsExports.isValidElementType(source) || !isPlainObject(source)) {
     return source;
   }
   const output = {};
@@ -45863,15 +50839,15 @@ function deepmerge(target, source, options = {
   const output = options.clone ? {
     ...target
   } : target;
-  if (isPlainObject$1(target) && isPlainObject$1(source)) {
+  if (isPlainObject(target) && isPlainObject(source)) {
     Object.keys(source).forEach((key) => {
       if (/* @__PURE__ */ reactExports.isValidElement(source[key]) || reactIsExports.isValidElementType(source[key])) {
         output[key] = source[key];
-      } else if (isPlainObject$1(source[key]) && // Avoid prototype pollution
-      Object.prototype.hasOwnProperty.call(target, key) && isPlainObject$1(target[key])) {
+      } else if (isPlainObject(source[key]) && // Avoid prototype pollution
+      Object.prototype.hasOwnProperty.call(target, key) && isPlainObject(target[key])) {
         output[key] = deepmerge(target[key], source[key], options);
       } else if (options.clone) {
-        output[key] = isPlainObject$1(source[key]) ? deepClone(source[key]) : source[key];
+        output[key] = isPlainObject(source[key]) ? deepClone(source[key]) : source[key];
       } else {
         output[key] = source[key];
       }
@@ -49905,7 +54881,7 @@ function createStyled(input = {}) {
           return processStyle(props, style2, props.theme.modularCssLayers ? layerName : void 0);
         };
       }
-      if (isPlainObject$1(style2)) {
+      if (isPlainObject(style2)) {
         const serialized = preprocessStyles(style2);
         return function styleObjectProcessor(props) {
           if (!serialized.variants) {
@@ -51212,7 +56188,7 @@ const zIndex = {
   tooltip: 1500
 };
 function isSerializable(val) {
-  return isPlainObject$1(val) || typeof val === "undefined" || typeof val === "string" || typeof val === "boolean" || typeof val === "number" || Array.isArray(val);
+  return isPlainObject(val) || typeof val === "undefined" || typeof val === "string" || typeof val === "boolean" || typeof val === "number" || Array.isArray(val);
 }
 function stringifyTheme(baseTheme = {}) {
   const serializableTheme = {
@@ -51224,7 +56200,7 @@ function stringifyTheme(baseTheme = {}) {
       const [key, value] = array[index];
       if (!isSerializable(value) || key.startsWith("unstable_")) {
         delete object[key];
-      } else if (isPlainObject$1(value)) {
+      } else if (isPlainObject(value)) {
         object[key] = {
           ...value
         };
@@ -52213,4261 +57189,9 @@ function createSvgIcon(path, displayName) {
 const NotificationsNoneRoundedIcon = createSvgIcon(/* @__PURE__ */ jsxRuntimeExports.jsx("path", {
   d: "M19.29 17.29 18 16v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-1.29 1.29c-.63.63-.19 1.71.7 1.71h13.17c.9 0 1.34-1.08.71-1.71M16 17H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5zm-4 5c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2"
 }), "NotificationsNoneRounded");
-var Subscribable = class {
-  constructor() {
-    this.listeners = /* @__PURE__ */ new Set();
-    this.subscribe = this.subscribe.bind(this);
-  }
-  subscribe(listener) {
-    this.listeners.add(listener);
-    this.onSubscribe();
-    return () => {
-      this.listeners.delete(listener);
-      this.onUnsubscribe();
-    };
-  }
-  hasListeners() {
-    return this.listeners.size > 0;
-  }
-  onSubscribe() {
-  }
-  onUnsubscribe() {
-  }
-};
-var defaultTimeoutProvider = {
-  // We need the wrapper function syntax below instead of direct references to
-  // global setTimeout etc.
-  //
-  // BAD: `setTimeout: setTimeout`
-  // GOOD: `setTimeout: (cb, delay) => setTimeout(cb, delay)`
-  //
-  // If we use direct references here, then anything that wants to spy on or
-  // replace the global setTimeout (like tests) won't work since we'll already
-  // have a hard reference to the original implementation at the time when this
-  // file was imported.
-  setTimeout: (callback, delay2) => setTimeout(callback, delay2),
-  clearTimeout: (timeoutId) => clearTimeout(timeoutId),
-  setInterval: (callback, delay2) => setInterval(callback, delay2),
-  clearInterval: (intervalId) => clearInterval(intervalId)
-};
-var TimeoutManager = class {
-  // We cannot have TimeoutManager<T> as we must instantiate it with a concrete
-  // type at app boot; and if we leave that type, then any new timer provider
-  // would need to support ReturnType<typeof setTimeout>, which is infeasible.
-  //
-  // We settle for type safety for the TimeoutProvider type, and accept that
-  // this class is unsafe internally to allow for extension.
-  #provider = defaultTimeoutProvider;
-  #providerCalled = false;
-  setTimeoutProvider(provider) {
-    {
-      if (this.#providerCalled && provider !== this.#provider) {
-        console.error(
-          `[timeoutManager]: Switching provider after calls to previous provider might result in unexpected behavior.`,
-          { previous: this.#provider, provider }
-        );
-      }
-    }
-    this.#provider = provider;
-    {
-      this.#providerCalled = false;
-    }
-  }
-  setTimeout(callback, delay2) {
-    {
-      this.#providerCalled = true;
-    }
-    return this.#provider.setTimeout(callback, delay2);
-  }
-  clearTimeout(timeoutId) {
-    this.#provider.clearTimeout(timeoutId);
-  }
-  setInterval(callback, delay2) {
-    {
-      this.#providerCalled = true;
-    }
-    return this.#provider.setInterval(callback, delay2);
-  }
-  clearInterval(intervalId) {
-    this.#provider.clearInterval(intervalId);
-  }
-};
-var timeoutManager = new TimeoutManager();
-function systemSetTimeoutZero(callback) {
-  setTimeout(callback, 0);
-}
-var isServer = typeof window === "undefined" || "Deno" in globalThis;
-function noop() {
-}
-function functionalUpdate(updater, input) {
-  return typeof updater === "function" ? updater(input) : updater;
-}
-function isValidTimeout(value) {
-  return typeof value === "number" && value >= 0 && value !== Infinity;
-}
-function timeUntilStale(updatedAt, staleTime) {
-  return Math.max(updatedAt + (staleTime || 0) - Date.now(), 0);
-}
-function resolveStaleTime(staleTime, query) {
-  return typeof staleTime === "function" ? staleTime(query) : staleTime;
-}
-function resolveEnabled(enabled, query) {
-  return typeof enabled === "function" ? enabled(query) : enabled;
-}
-function matchQuery(filters, query) {
-  const {
-    type = "all",
-    exact,
-    fetchStatus,
-    predicate,
-    queryKey,
-    stale
-  } = filters;
-  if (queryKey) {
-    if (exact) {
-      if (query.queryHash !== hashQueryKeyByOptions(queryKey, query.options)) {
-        return false;
-      }
-    } else if (!partialMatchKey(query.queryKey, queryKey)) {
-      return false;
-    }
-  }
-  if (type !== "all") {
-    const isActive = query.isActive();
-    if (type === "active" && !isActive) {
-      return false;
-    }
-    if (type === "inactive" && isActive) {
-      return false;
-    }
-  }
-  if (typeof stale === "boolean" && query.isStale() !== stale) {
-    return false;
-  }
-  if (fetchStatus && fetchStatus !== query.state.fetchStatus) {
-    return false;
-  }
-  if (predicate && !predicate(query)) {
-    return false;
-  }
-  return true;
-}
-function matchMutation(filters, mutation) {
-  const { exact, status, predicate, mutationKey } = filters;
-  if (mutationKey) {
-    if (!mutation.options.mutationKey) {
-      return false;
-    }
-    if (exact) {
-      if (hashKey(mutation.options.mutationKey) !== hashKey(mutationKey)) {
-        return false;
-      }
-    } else if (!partialMatchKey(mutation.options.mutationKey, mutationKey)) {
-      return false;
-    }
-  }
-  if (status && mutation.state.status !== status) {
-    return false;
-  }
-  if (predicate && !predicate(mutation)) {
-    return false;
-  }
-  return true;
-}
-function hashQueryKeyByOptions(queryKey, options) {
-  const hashFn = options?.queryKeyHashFn || hashKey;
-  return hashFn(queryKey);
-}
-function hashKey(queryKey) {
-  return JSON.stringify(
-    queryKey,
-    (_, val) => isPlainObject(val) ? Object.keys(val).sort().reduce((result, key) => {
-      result[key] = val[key];
-      return result;
-    }, {}) : val
-  );
-}
-function partialMatchKey(a, b) {
-  if (a === b) {
-    return true;
-  }
-  if (typeof a !== typeof b) {
-    return false;
-  }
-  if (a && b && typeof a === "object" && typeof b === "object") {
-    return Object.keys(b).every((key) => partialMatchKey(a[key], b[key]));
-  }
-  return false;
-}
-var hasOwn = Object.prototype.hasOwnProperty;
-function replaceEqualDeep(a, b) {
-  if (a === b) {
-    return a;
-  }
-  const array = isPlainArray(a) && isPlainArray(b);
-  if (!array && !(isPlainObject(a) && isPlainObject(b))) return b;
-  const aItems = array ? a : Object.keys(a);
-  const aSize = aItems.length;
-  const bItems = array ? b : Object.keys(b);
-  const bSize = bItems.length;
-  const copy = array ? new Array(bSize) : {};
-  let equalItems = 0;
-  for (let i = 0; i < bSize; i++) {
-    const key = array ? i : bItems[i];
-    const aItem = a[key];
-    const bItem = b[key];
-    if (aItem === bItem) {
-      copy[key] = aItem;
-      if (array ? i < aSize : hasOwn.call(a, key)) equalItems++;
-      continue;
-    }
-    if (aItem === null || bItem === null || typeof aItem !== "object" || typeof bItem !== "object") {
-      copy[key] = bItem;
-      continue;
-    }
-    const v = replaceEqualDeep(aItem, bItem);
-    copy[key] = v;
-    if (v === aItem) equalItems++;
-  }
-  return aSize === bSize && equalItems === aSize ? a : copy;
-}
-function shallowEqualObjects(a, b) {
-  if (!b || Object.keys(a).length !== Object.keys(b).length) {
-    return false;
-  }
-  for (const key in a) {
-    if (a[key] !== b[key]) {
-      return false;
-    }
-  }
-  return true;
-}
-function isPlainArray(value) {
-  return Array.isArray(value) && value.length === Object.keys(value).length;
-}
-function isPlainObject(o) {
-  if (!hasObjectPrototype(o)) {
-    return false;
-  }
-  const ctor = o.constructor;
-  if (ctor === void 0) {
-    return true;
-  }
-  const prot = ctor.prototype;
-  if (!hasObjectPrototype(prot)) {
-    return false;
-  }
-  if (!prot.hasOwnProperty("isPrototypeOf")) {
-    return false;
-  }
-  if (Object.getPrototypeOf(o) !== Object.prototype) {
-    return false;
-  }
-  return true;
-}
-function hasObjectPrototype(o) {
-  return Object.prototype.toString.call(o) === "[object Object]";
-}
-function sleep(timeout) {
-  return new Promise((resolve) => {
-    timeoutManager.setTimeout(resolve, timeout);
-  });
-}
-function replaceData(prevData, data, options) {
-  if (typeof options.structuralSharing === "function") {
-    return options.structuralSharing(prevData, data);
-  } else if (options.structuralSharing !== false) {
-    {
-      try {
-        return replaceEqualDeep(prevData, data);
-      } catch (error) {
-        console.error(
-          `Structural sharing requires data to be JSON serializable. To fix this, turn off structuralSharing or return JSON-serializable data from your queryFn. [${options.queryHash}]: ${error}`
-        );
-        throw error;
-      }
-    }
-    return replaceEqualDeep(prevData, data);
-  }
-  return data;
-}
-function addToEnd(items, item, max = 0) {
-  const newItems = [...items, item];
-  return max && newItems.length > max ? newItems.slice(1) : newItems;
-}
-function addToStart(items, item, max = 0) {
-  const newItems = [item, ...items];
-  return max && newItems.length > max ? newItems.slice(0, -1) : newItems;
-}
-var skipToken = Symbol();
-function ensureQueryFn(options, fetchOptions) {
-  {
-    if (options.queryFn === skipToken) {
-      console.error(
-        `Attempted to invoke queryFn when set to skipToken. This is likely a configuration error. Query hash: '${options.queryHash}'`
-      );
-    }
-  }
-  if (!options.queryFn && fetchOptions?.initialPromise) {
-    return () => fetchOptions.initialPromise;
-  }
-  if (!options.queryFn || options.queryFn === skipToken) {
-    return () => Promise.reject(new Error(`Missing queryFn: '${options.queryHash}'`));
-  }
-  return options.queryFn;
-}
-function shouldThrowError(throwOnError, params) {
-  if (typeof throwOnError === "function") {
-    return throwOnError(...params);
-  }
-  return !!throwOnError;
-}
-var FocusManager = class extends Subscribable {
-  #focused;
-  #cleanup;
-  #setup;
-  constructor() {
-    super();
-    this.#setup = (onFocus) => {
-      if (!isServer && window.addEventListener) {
-        const listener = () => onFocus();
-        window.addEventListener("visibilitychange", listener, false);
-        return () => {
-          window.removeEventListener("visibilitychange", listener);
-        };
-      }
-      return;
-    };
-  }
-  onSubscribe() {
-    if (!this.#cleanup) {
-      this.setEventListener(this.#setup);
-    }
-  }
-  onUnsubscribe() {
-    if (!this.hasListeners()) {
-      this.#cleanup?.();
-      this.#cleanup = void 0;
-    }
-  }
-  setEventListener(setup) {
-    this.#setup = setup;
-    this.#cleanup?.();
-    this.#cleanup = setup((focused) => {
-      if (typeof focused === "boolean") {
-        this.setFocused(focused);
-      } else {
-        this.onFocus();
-      }
-    });
-  }
-  setFocused(focused) {
-    const changed = this.#focused !== focused;
-    if (changed) {
-      this.#focused = focused;
-      this.onFocus();
-    }
-  }
-  onFocus() {
-    const isFocused = this.isFocused();
-    this.listeners.forEach((listener) => {
-      listener(isFocused);
-    });
-  }
-  isFocused() {
-    if (typeof this.#focused === "boolean") {
-      return this.#focused;
-    }
-    return globalThis.document?.visibilityState !== "hidden";
-  }
-};
-var focusManager = new FocusManager();
-function pendingThenable() {
-  let resolve;
-  let reject;
-  const thenable = new Promise((_resolve, _reject) => {
-    resolve = _resolve;
-    reject = _reject;
-  });
-  thenable.status = "pending";
-  thenable.catch(() => {
-  });
-  function finalize(data) {
-    Object.assign(thenable, data);
-    delete thenable.resolve;
-    delete thenable.reject;
-  }
-  thenable.resolve = (value) => {
-    finalize({
-      status: "fulfilled",
-      value
-    });
-    resolve(value);
-  };
-  thenable.reject = (reason) => {
-    finalize({
-      status: "rejected",
-      reason
-    });
-    reject(reason);
-  };
-  return thenable;
-}
-var defaultScheduler = systemSetTimeoutZero;
-function createNotifyManager() {
-  let queue = [];
-  let transactions = 0;
-  let notifyFn = (callback) => {
-    callback();
-  };
-  let batchNotifyFn = (callback) => {
-    callback();
-  };
-  let scheduleFn = defaultScheduler;
-  const schedule = (callback) => {
-    if (transactions) {
-      queue.push(callback);
-    } else {
-      scheduleFn(() => {
-        notifyFn(callback);
-      });
-    }
-  };
-  const flush = () => {
-    const originalQueue = queue;
-    queue = [];
-    if (originalQueue.length) {
-      scheduleFn(() => {
-        batchNotifyFn(() => {
-          originalQueue.forEach((callback) => {
-            notifyFn(callback);
-          });
-        });
-      });
-    }
-  };
-  return {
-    batch: (callback) => {
-      let result;
-      transactions++;
-      try {
-        result = callback();
-      } finally {
-        transactions--;
-        if (!transactions) {
-          flush();
-        }
-      }
-      return result;
-    },
-    /**
-     * All calls to the wrapped function will be batched.
-     */
-    batchCalls: (callback) => {
-      return (...args) => {
-        schedule(() => {
-          callback(...args);
-        });
-      };
-    },
-    schedule,
-    /**
-     * Use this method to set a custom notify function.
-     * This can be used to for example wrap notifications with `React.act` while running tests.
-     */
-    setNotifyFunction: (fn) => {
-      notifyFn = fn;
-    },
-    /**
-     * Use this method to set a custom function to batch notifications together into a single tick.
-     * By default React Query will use the batch function provided by ReactDOM or React Native.
-     */
-    setBatchNotifyFunction: (fn) => {
-      batchNotifyFn = fn;
-    },
-    setScheduler: (fn) => {
-      scheduleFn = fn;
-    }
-  };
-}
-var notifyManager = createNotifyManager();
-var OnlineManager = class extends Subscribable {
-  #online = true;
-  #cleanup;
-  #setup;
-  constructor() {
-    super();
-    this.#setup = (onOnline) => {
-      if (!isServer && window.addEventListener) {
-        const onlineListener = () => onOnline(true);
-        const offlineListener = () => onOnline(false);
-        window.addEventListener("online", onlineListener, false);
-        window.addEventListener("offline", offlineListener, false);
-        return () => {
-          window.removeEventListener("online", onlineListener);
-          window.removeEventListener("offline", offlineListener);
-        };
-      }
-      return;
-    };
-  }
-  onSubscribe() {
-    if (!this.#cleanup) {
-      this.setEventListener(this.#setup);
-    }
-  }
-  onUnsubscribe() {
-    if (!this.hasListeners()) {
-      this.#cleanup?.();
-      this.#cleanup = void 0;
-    }
-  }
-  setEventListener(setup) {
-    this.#setup = setup;
-    this.#cleanup?.();
-    this.#cleanup = setup(this.setOnline.bind(this));
-  }
-  setOnline(online) {
-    const changed = this.#online !== online;
-    if (changed) {
-      this.#online = online;
-      this.listeners.forEach((listener) => {
-        listener(online);
-      });
-    }
-  }
-  isOnline() {
-    return this.#online;
-  }
-};
-var onlineManager = new OnlineManager();
-function defaultRetryDelay(failureCount) {
-  return Math.min(1e3 * 2 ** failureCount, 3e4);
-}
-function canFetch(networkMode) {
-  return (networkMode ?? "online") === "online" ? onlineManager.isOnline() : true;
-}
-var CancelledError = class extends Error {
-  constructor(options) {
-    super("CancelledError");
-    this.revert = options?.revert;
-    this.silent = options?.silent;
-  }
-};
-function createRetryer(config) {
-  let isRetryCancelled = false;
-  let failureCount = 0;
-  let continueFn;
-  const thenable = pendingThenable();
-  const isResolved = () => thenable.status !== "pending";
-  const cancel = (cancelOptions) => {
-    if (!isResolved()) {
-      const error = new CancelledError(cancelOptions);
-      reject(error);
-      config.onCancel?.(error);
-    }
-  };
-  const cancelRetry = () => {
-    isRetryCancelled = true;
-  };
-  const continueRetry = () => {
-    isRetryCancelled = false;
-  };
-  const canContinue = () => focusManager.isFocused() && (config.networkMode === "always" || onlineManager.isOnline()) && config.canRun();
-  const canStart = () => canFetch(config.networkMode) && config.canRun();
-  const resolve = (value) => {
-    if (!isResolved()) {
-      continueFn?.();
-      thenable.resolve(value);
-    }
-  };
-  const reject = (value) => {
-    if (!isResolved()) {
-      continueFn?.();
-      thenable.reject(value);
-    }
-  };
-  const pause = () => {
-    return new Promise((continueResolve) => {
-      continueFn = (value) => {
-        if (isResolved() || canContinue()) {
-          continueResolve(value);
-        }
-      };
-      config.onPause?.();
-    }).then(() => {
-      continueFn = void 0;
-      if (!isResolved()) {
-        config.onContinue?.();
-      }
-    });
-  };
-  const run = () => {
-    if (isResolved()) {
-      return;
-    }
-    let promiseOrValue;
-    const initialPromise = failureCount === 0 ? config.initialPromise : void 0;
-    try {
-      promiseOrValue = initialPromise ?? config.fn();
-    } catch (error) {
-      promiseOrValue = Promise.reject(error);
-    }
-    Promise.resolve(promiseOrValue).then(resolve).catch((error) => {
-      if (isResolved()) {
-        return;
-      }
-      const retry = config.retry ?? (isServer ? 0 : 3);
-      const retryDelay = config.retryDelay ?? defaultRetryDelay;
-      const delay2 = typeof retryDelay === "function" ? retryDelay(failureCount, error) : retryDelay;
-      const shouldRetry = retry === true || typeof retry === "number" && failureCount < retry || typeof retry === "function" && retry(failureCount, error);
-      if (isRetryCancelled || !shouldRetry) {
-        reject(error);
-        return;
-      }
-      failureCount++;
-      config.onFail?.(failureCount, error);
-      sleep(delay2).then(() => {
-        return canContinue() ? void 0 : pause();
-      }).then(() => {
-        if (isRetryCancelled) {
-          reject(error);
-        } else {
-          run();
-        }
-      });
-    });
-  };
-  return {
-    promise: thenable,
-    status: () => thenable.status,
-    cancel,
-    continue: () => {
-      continueFn?.();
-      return thenable;
-    },
-    cancelRetry,
-    continueRetry,
-    canStart,
-    start: () => {
-      if (canStart()) {
-        run();
-      } else {
-        pause().then(run);
-      }
-      return thenable;
-    }
-  };
-}
-var Removable = class {
-  #gcTimeout;
-  destroy() {
-    this.clearGcTimeout();
-  }
-  scheduleGc() {
-    this.clearGcTimeout();
-    if (isValidTimeout(this.gcTime)) {
-      this.#gcTimeout = timeoutManager.setTimeout(() => {
-        this.optionalRemove();
-      }, this.gcTime);
-    }
-  }
-  updateGcTime(newGcTime) {
-    this.gcTime = Math.max(
-      this.gcTime || 0,
-      newGcTime ?? (isServer ? Infinity : 5 * 60 * 1e3)
-    );
-  }
-  clearGcTimeout() {
-    if (this.#gcTimeout) {
-      timeoutManager.clearTimeout(this.#gcTimeout);
-      this.#gcTimeout = void 0;
-    }
-  }
-};
-var Query = class extends Removable {
-  #initialState;
-  #revertState;
-  #cache;
-  #client;
-  #retryer;
-  #defaultOptions;
-  #abortSignalConsumed;
-  constructor(config) {
-    super();
-    this.#abortSignalConsumed = false;
-    this.#defaultOptions = config.defaultOptions;
-    this.setOptions(config.options);
-    this.observers = [];
-    this.#client = config.client;
-    this.#cache = this.#client.getQueryCache();
-    this.queryKey = config.queryKey;
-    this.queryHash = config.queryHash;
-    this.#initialState = getDefaultState$1(this.options);
-    this.state = config.state ?? this.#initialState;
-    this.scheduleGc();
-  }
-  get meta() {
-    return this.options.meta;
-  }
-  get promise() {
-    return this.#retryer?.promise;
-  }
-  setOptions(options) {
-    this.options = { ...this.#defaultOptions, ...options };
-    this.updateGcTime(this.options.gcTime);
-    if (this.state && this.state.data === void 0) {
-      const defaultState = getDefaultState$1(this.options);
-      if (defaultState.data !== void 0) {
-        this.setState(
-          successState(defaultState.data, defaultState.dataUpdatedAt)
-        );
-        this.#initialState = defaultState;
-      }
-    }
-  }
-  optionalRemove() {
-    if (!this.observers.length && this.state.fetchStatus === "idle") {
-      this.#cache.remove(this);
-    }
-  }
-  setData(newData, options) {
-    const data = replaceData(this.state.data, newData, this.options);
-    this.#dispatch({
-      data,
-      type: "success",
-      dataUpdatedAt: options?.updatedAt,
-      manual: options?.manual
-    });
-    return data;
-  }
-  setState(state, setStateOptions) {
-    this.#dispatch({ type: "setState", state, setStateOptions });
-  }
-  cancel(options) {
-    const promise = this.#retryer?.promise;
-    this.#retryer?.cancel(options);
-    return promise ? promise.then(noop).catch(noop) : Promise.resolve();
-  }
-  destroy() {
-    super.destroy();
-    this.cancel({ silent: true });
-  }
-  reset() {
-    this.destroy();
-    this.setState(this.#initialState);
-  }
-  isActive() {
-    return this.observers.some(
-      (observer) => resolveEnabled(observer.options.enabled, this) !== false
-    );
-  }
-  isDisabled() {
-    if (this.getObserversCount() > 0) {
-      return !this.isActive();
-    }
-    return this.options.queryFn === skipToken || this.state.dataUpdateCount + this.state.errorUpdateCount === 0;
-  }
-  isStatic() {
-    if (this.getObserversCount() > 0) {
-      return this.observers.some(
-        (observer) => resolveStaleTime(observer.options.staleTime, this) === "static"
-      );
-    }
-    return false;
-  }
-  isStale() {
-    if (this.getObserversCount() > 0) {
-      return this.observers.some(
-        (observer) => observer.getCurrentResult().isStale
-      );
-    }
-    return this.state.data === void 0 || this.state.isInvalidated;
-  }
-  isStaleByTime(staleTime = 0) {
-    if (this.state.data === void 0) {
-      return true;
-    }
-    if (staleTime === "static") {
-      return false;
-    }
-    if (this.state.isInvalidated) {
-      return true;
-    }
-    return !timeUntilStale(this.state.dataUpdatedAt, staleTime);
-  }
-  onFocus() {
-    const observer = this.observers.find((x) => x.shouldFetchOnWindowFocus());
-    observer?.refetch({ cancelRefetch: false });
-    this.#retryer?.continue();
-  }
-  onOnline() {
-    const observer = this.observers.find((x) => x.shouldFetchOnReconnect());
-    observer?.refetch({ cancelRefetch: false });
-    this.#retryer?.continue();
-  }
-  addObserver(observer) {
-    if (!this.observers.includes(observer)) {
-      this.observers.push(observer);
-      this.clearGcTimeout();
-      this.#cache.notify({ type: "observerAdded", query: this, observer });
-    }
-  }
-  removeObserver(observer) {
-    if (this.observers.includes(observer)) {
-      this.observers = this.observers.filter((x) => x !== observer);
-      if (!this.observers.length) {
-        if (this.#retryer) {
-          if (this.#abortSignalConsumed) {
-            this.#retryer.cancel({ revert: true });
-          } else {
-            this.#retryer.cancelRetry();
-          }
-        }
-        this.scheduleGc();
-      }
-      this.#cache.notify({ type: "observerRemoved", query: this, observer });
-    }
-  }
-  getObserversCount() {
-    return this.observers.length;
-  }
-  invalidate() {
-    if (!this.state.isInvalidated) {
-      this.#dispatch({ type: "invalidate" });
-    }
-  }
-  async fetch(options, fetchOptions) {
-    if (this.state.fetchStatus !== "idle" && // If the promise in the retyer is already rejected, we have to definitely
-    // re-start the fetch; there is a chance that the query is still in a
-    // pending state when that happens
-    this.#retryer?.status() !== "rejected") {
-      if (this.state.data !== void 0 && fetchOptions?.cancelRefetch) {
-        this.cancel({ silent: true });
-      } else if (this.#retryer) {
-        this.#retryer.continueRetry();
-        return this.#retryer.promise;
-      }
-    }
-    if (options) {
-      this.setOptions(options);
-    }
-    if (!this.options.queryFn) {
-      const observer = this.observers.find((x) => x.options.queryFn);
-      if (observer) {
-        this.setOptions(observer.options);
-      }
-    }
-    {
-      if (!Array.isArray(this.options.queryKey)) {
-        console.error(
-          `As of v4, queryKey needs to be an Array. If you are using a string like 'repoData', please change it to an Array, e.g. ['repoData']`
-        );
-      }
-    }
-    const abortController = new AbortController();
-    const addSignalProperty = (object) => {
-      Object.defineProperty(object, "signal", {
-        enumerable: true,
-        get: () => {
-          this.#abortSignalConsumed = true;
-          return abortController.signal;
-        }
-      });
-    };
-    const fetchFn = () => {
-      const queryFn = ensureQueryFn(this.options, fetchOptions);
-      const createQueryFnContext = () => {
-        const queryFnContext2 = {
-          client: this.#client,
-          queryKey: this.queryKey,
-          meta: this.meta
-        };
-        addSignalProperty(queryFnContext2);
-        return queryFnContext2;
-      };
-      const queryFnContext = createQueryFnContext();
-      this.#abortSignalConsumed = false;
-      if (this.options.persister) {
-        return this.options.persister(
-          queryFn,
-          queryFnContext,
-          this
-        );
-      }
-      return queryFn(queryFnContext);
-    };
-    const createFetchContext = () => {
-      const context2 = {
-        fetchOptions,
-        options: this.options,
-        queryKey: this.queryKey,
-        client: this.#client,
-        state: this.state,
-        fetchFn
-      };
-      addSignalProperty(context2);
-      return context2;
-    };
-    const context = createFetchContext();
-    this.options.behavior?.onFetch(context, this);
-    this.#revertState = this.state;
-    if (this.state.fetchStatus === "idle" || this.state.fetchMeta !== context.fetchOptions?.meta) {
-      this.#dispatch({ type: "fetch", meta: context.fetchOptions?.meta });
-    }
-    this.#retryer = createRetryer({
-      initialPromise: fetchOptions?.initialPromise,
-      fn: context.fetchFn,
-      onCancel: (error) => {
-        if (error instanceof CancelledError && error.revert) {
-          this.setState({
-            ...this.#revertState,
-            fetchStatus: "idle"
-          });
-        }
-        abortController.abort();
-      },
-      onFail: (failureCount, error) => {
-        this.#dispatch({ type: "failed", failureCount, error });
-      },
-      onPause: () => {
-        this.#dispatch({ type: "pause" });
-      },
-      onContinue: () => {
-        this.#dispatch({ type: "continue" });
-      },
-      retry: context.options.retry,
-      retryDelay: context.options.retryDelay,
-      networkMode: context.options.networkMode,
-      canRun: () => true
-    });
-    try {
-      const data = await this.#retryer.start();
-      if (data === void 0) {
-        if (true) {
-          console.error(
-            `Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ${this.queryHash}`
-          );
-        }
-        throw new Error(`${this.queryHash} data is undefined`);
-      }
-      this.setData(data);
-      this.#cache.config.onSuccess?.(data, this);
-      this.#cache.config.onSettled?.(
-        data,
-        this.state.error,
-        this
-      );
-      return data;
-    } catch (error) {
-      if (error instanceof CancelledError) {
-        if (error.silent) {
-          return this.#retryer.promise;
-        } else if (error.revert) {
-          if (this.state.data === void 0) {
-            throw error;
-          }
-          return this.state.data;
-        }
-      }
-      this.#dispatch({
-        type: "error",
-        error
-      });
-      this.#cache.config.onError?.(
-        error,
-        this
-      );
-      this.#cache.config.onSettled?.(
-        this.state.data,
-        error,
-        this
-      );
-      throw error;
-    } finally {
-      this.scheduleGc();
-    }
-  }
-  #dispatch(action) {
-    const reducer = (state) => {
-      switch (action.type) {
-        case "failed":
-          return {
-            ...state,
-            fetchFailureCount: action.failureCount,
-            fetchFailureReason: action.error
-          };
-        case "pause":
-          return {
-            ...state,
-            fetchStatus: "paused"
-          };
-        case "continue":
-          return {
-            ...state,
-            fetchStatus: "fetching"
-          };
-        case "fetch":
-          return {
-            ...state,
-            ...fetchState(state.data, this.options),
-            fetchMeta: action.meta ?? null
-          };
-        case "success":
-          const newState = {
-            ...state,
-            ...successState(action.data, action.dataUpdatedAt),
-            dataUpdateCount: state.dataUpdateCount + 1,
-            ...!action.manual && {
-              fetchStatus: "idle",
-              fetchFailureCount: 0,
-              fetchFailureReason: null
-            }
-          };
-          this.#revertState = action.manual ? newState : void 0;
-          return newState;
-        case "error":
-          const error = action.error;
-          return {
-            ...state,
-            error,
-            errorUpdateCount: state.errorUpdateCount + 1,
-            errorUpdatedAt: Date.now(),
-            fetchFailureCount: state.fetchFailureCount + 1,
-            fetchFailureReason: error,
-            fetchStatus: "idle",
-            status: "error"
-          };
-        case "invalidate":
-          return {
-            ...state,
-            isInvalidated: true
-          };
-        case "setState":
-          return {
-            ...state,
-            ...action.state
-          };
-      }
-    };
-    this.state = reducer(this.state);
-    notifyManager.batch(() => {
-      this.observers.forEach((observer) => {
-        observer.onQueryUpdate();
-      });
-      this.#cache.notify({ query: this, type: "updated", action });
-    });
-  }
-};
-function fetchState(data, options) {
-  return {
-    fetchFailureCount: 0,
-    fetchFailureReason: null,
-    fetchStatus: canFetch(options.networkMode) ? "fetching" : "paused",
-    ...data === void 0 && {
-      error: null,
-      status: "pending"
-    }
-  };
-}
-function successState(data, dataUpdatedAt) {
-  return {
-    data,
-    dataUpdatedAt: dataUpdatedAt ?? Date.now(),
-    error: null,
-    isInvalidated: false,
-    status: "success"
-  };
-}
-function getDefaultState$1(options) {
-  const data = typeof options.initialData === "function" ? options.initialData() : options.initialData;
-  const hasData = data !== void 0;
-  const initialDataUpdatedAt = hasData ? typeof options.initialDataUpdatedAt === "function" ? options.initialDataUpdatedAt() : options.initialDataUpdatedAt : 0;
-  return {
-    data,
-    dataUpdateCount: 0,
-    dataUpdatedAt: hasData ? initialDataUpdatedAt ?? Date.now() : 0,
-    error: null,
-    errorUpdateCount: 0,
-    errorUpdatedAt: 0,
-    fetchFailureCount: 0,
-    fetchFailureReason: null,
-    fetchMeta: null,
-    isInvalidated: false,
-    status: hasData ? "success" : "pending",
-    fetchStatus: "idle"
-  };
-}
-var QueryObserver = class extends Subscribable {
-  constructor(client2, options) {
-    super();
-    this.options = options;
-    this.#client = client2;
-    this.#selectError = null;
-    this.#currentThenable = pendingThenable();
-    this.bindMethods();
-    this.setOptions(options);
-  }
-  #client;
-  #currentQuery = void 0;
-  #currentQueryInitialState = void 0;
-  #currentResult = void 0;
-  #currentResultState;
-  #currentResultOptions;
-  #currentThenable;
-  #selectError;
-  #selectFn;
-  #selectResult;
-  // This property keeps track of the last query with defined data.
-  // It will be used to pass the previous data and query to the placeholder function between renders.
-  #lastQueryWithDefinedData;
-  #staleTimeoutId;
-  #refetchIntervalId;
-  #currentRefetchInterval;
-  #trackedProps = /* @__PURE__ */ new Set();
-  bindMethods() {
-    this.refetch = this.refetch.bind(this);
-  }
-  onSubscribe() {
-    if (this.listeners.size === 1) {
-      this.#currentQuery.addObserver(this);
-      if (shouldFetchOnMount(this.#currentQuery, this.options)) {
-        this.#executeFetch();
-      } else {
-        this.updateResult();
-      }
-      this.#updateTimers();
-    }
-  }
-  onUnsubscribe() {
-    if (!this.hasListeners()) {
-      this.destroy();
-    }
-  }
-  shouldFetchOnReconnect() {
-    return shouldFetchOn(
-      this.#currentQuery,
-      this.options,
-      this.options.refetchOnReconnect
-    );
-  }
-  shouldFetchOnWindowFocus() {
-    return shouldFetchOn(
-      this.#currentQuery,
-      this.options,
-      this.options.refetchOnWindowFocus
-    );
-  }
-  destroy() {
-    this.listeners = /* @__PURE__ */ new Set();
-    this.#clearStaleTimeout();
-    this.#clearRefetchInterval();
-    this.#currentQuery.removeObserver(this);
-  }
-  setOptions(options) {
-    const prevOptions = this.options;
-    const prevQuery = this.#currentQuery;
-    this.options = this.#client.defaultQueryOptions(options);
-    if (this.options.enabled !== void 0 && typeof this.options.enabled !== "boolean" && typeof this.options.enabled !== "function" && typeof resolveEnabled(this.options.enabled, this.#currentQuery) !== "boolean") {
-      throw new Error(
-        "Expected enabled to be a boolean or a callback that returns a boolean"
-      );
-    }
-    this.#updateQuery();
-    this.#currentQuery.setOptions(this.options);
-    if (prevOptions._defaulted && !shallowEqualObjects(this.options, prevOptions)) {
-      this.#client.getQueryCache().notify({
-        type: "observerOptionsUpdated",
-        query: this.#currentQuery,
-        observer: this
-      });
-    }
-    const mounted = this.hasListeners();
-    if (mounted && shouldFetchOptionally(
-      this.#currentQuery,
-      prevQuery,
-      this.options,
-      prevOptions
-    )) {
-      this.#executeFetch();
-    }
-    this.updateResult();
-    if (mounted && (this.#currentQuery !== prevQuery || resolveEnabled(this.options.enabled, this.#currentQuery) !== resolveEnabled(prevOptions.enabled, this.#currentQuery) || resolveStaleTime(this.options.staleTime, this.#currentQuery) !== resolveStaleTime(prevOptions.staleTime, this.#currentQuery))) {
-      this.#updateStaleTimeout();
-    }
-    const nextRefetchInterval = this.#computeRefetchInterval();
-    if (mounted && (this.#currentQuery !== prevQuery || resolveEnabled(this.options.enabled, this.#currentQuery) !== resolveEnabled(prevOptions.enabled, this.#currentQuery) || nextRefetchInterval !== this.#currentRefetchInterval)) {
-      this.#updateRefetchInterval(nextRefetchInterval);
-    }
-  }
-  getOptimisticResult(options) {
-    const query = this.#client.getQueryCache().build(this.#client, options);
-    const result = this.createResult(query, options);
-    if (shouldAssignObserverCurrentProperties(this, result)) {
-      this.#currentResult = result;
-      this.#currentResultOptions = this.options;
-      this.#currentResultState = this.#currentQuery.state;
-    }
-    return result;
-  }
-  getCurrentResult() {
-    return this.#currentResult;
-  }
-  trackResult(result, onPropTracked) {
-    return new Proxy(result, {
-      get: (target, key) => {
-        this.trackProp(key);
-        onPropTracked?.(key);
-        if (key === "promise") {
-          this.trackProp("data");
-          if (!this.options.experimental_prefetchInRender && this.#currentThenable.status === "pending") {
-            this.#currentThenable.reject(
-              new Error(
-                "experimental_prefetchInRender feature flag is not enabled"
-              )
-            );
-          }
-        }
-        return Reflect.get(target, key);
-      }
-    });
-  }
-  trackProp(key) {
-    this.#trackedProps.add(key);
-  }
-  getCurrentQuery() {
-    return this.#currentQuery;
-  }
-  refetch({ ...options } = {}) {
-    return this.fetch({
-      ...options
-    });
-  }
-  fetchOptimistic(options) {
-    const defaultedOptions = this.#client.defaultQueryOptions(options);
-    const query = this.#client.getQueryCache().build(this.#client, defaultedOptions);
-    return query.fetch().then(() => this.createResult(query, defaultedOptions));
-  }
-  fetch(fetchOptions) {
-    return this.#executeFetch({
-      ...fetchOptions,
-      cancelRefetch: fetchOptions.cancelRefetch ?? true
-    }).then(() => {
-      this.updateResult();
-      return this.#currentResult;
-    });
-  }
-  #executeFetch(fetchOptions) {
-    this.#updateQuery();
-    let promise = this.#currentQuery.fetch(
-      this.options,
-      fetchOptions
-    );
-    if (!fetchOptions?.throwOnError) {
-      promise = promise.catch(noop);
-    }
-    return promise;
-  }
-  #updateStaleTimeout() {
-    this.#clearStaleTimeout();
-    const staleTime = resolveStaleTime(
-      this.options.staleTime,
-      this.#currentQuery
-    );
-    if (isServer || this.#currentResult.isStale || !isValidTimeout(staleTime)) {
-      return;
-    }
-    const time2 = timeUntilStale(this.#currentResult.dataUpdatedAt, staleTime);
-    const timeout = time2 + 1;
-    this.#staleTimeoutId = timeoutManager.setTimeout(() => {
-      if (!this.#currentResult.isStale) {
-        this.updateResult();
-      }
-    }, timeout);
-  }
-  #computeRefetchInterval() {
-    return (typeof this.options.refetchInterval === "function" ? this.options.refetchInterval(this.#currentQuery) : this.options.refetchInterval) ?? false;
-  }
-  #updateRefetchInterval(nextInterval) {
-    this.#clearRefetchInterval();
-    this.#currentRefetchInterval = nextInterval;
-    if (isServer || resolveEnabled(this.options.enabled, this.#currentQuery) === false || !isValidTimeout(this.#currentRefetchInterval) || this.#currentRefetchInterval === 0) {
-      return;
-    }
-    this.#refetchIntervalId = timeoutManager.setInterval(() => {
-      if (this.options.refetchIntervalInBackground || focusManager.isFocused()) {
-        this.#executeFetch();
-      }
-    }, this.#currentRefetchInterval);
-  }
-  #updateTimers() {
-    this.#updateStaleTimeout();
-    this.#updateRefetchInterval(this.#computeRefetchInterval());
-  }
-  #clearStaleTimeout() {
-    if (this.#staleTimeoutId) {
-      timeoutManager.clearTimeout(this.#staleTimeoutId);
-      this.#staleTimeoutId = void 0;
-    }
-  }
-  #clearRefetchInterval() {
-    if (this.#refetchIntervalId) {
-      timeoutManager.clearInterval(this.#refetchIntervalId);
-      this.#refetchIntervalId = void 0;
-    }
-  }
-  createResult(query, options) {
-    const prevQuery = this.#currentQuery;
-    const prevOptions = this.options;
-    const prevResult = this.#currentResult;
-    const prevResultState = this.#currentResultState;
-    const prevResultOptions = this.#currentResultOptions;
-    const queryChange = query !== prevQuery;
-    const queryInitialState = queryChange ? query.state : this.#currentQueryInitialState;
-    const { state } = query;
-    let newState = { ...state };
-    let isPlaceholderData = false;
-    let data;
-    if (options._optimisticResults) {
-      const mounted = this.hasListeners();
-      const fetchOnMount = !mounted && shouldFetchOnMount(query, options);
-      const fetchOptionally = mounted && shouldFetchOptionally(query, prevQuery, options, prevOptions);
-      if (fetchOnMount || fetchOptionally) {
-        newState = {
-          ...newState,
-          ...fetchState(state.data, query.options)
-        };
-      }
-      if (options._optimisticResults === "isRestoring") {
-        newState.fetchStatus = "idle";
-      }
-    }
-    let { error, errorUpdatedAt, status } = newState;
-    data = newState.data;
-    let skipSelect = false;
-    if (options.placeholderData !== void 0 && data === void 0 && status === "pending") {
-      let placeholderData;
-      if (prevResult?.isPlaceholderData && options.placeholderData === prevResultOptions?.placeholderData) {
-        placeholderData = prevResult.data;
-        skipSelect = true;
-      } else {
-        placeholderData = typeof options.placeholderData === "function" ? options.placeholderData(
-          this.#lastQueryWithDefinedData?.state.data,
-          this.#lastQueryWithDefinedData
-        ) : options.placeholderData;
-      }
-      if (placeholderData !== void 0) {
-        status = "success";
-        data = replaceData(
-          prevResult?.data,
-          placeholderData,
-          options
-        );
-        isPlaceholderData = true;
-      }
-    }
-    if (options.select && data !== void 0 && !skipSelect) {
-      if (prevResult && data === prevResultState?.data && options.select === this.#selectFn) {
-        data = this.#selectResult;
-      } else {
-        try {
-          this.#selectFn = options.select;
-          data = options.select(data);
-          data = replaceData(prevResult?.data, data, options);
-          this.#selectResult = data;
-          this.#selectError = null;
-        } catch (selectError) {
-          this.#selectError = selectError;
-        }
-      }
-    }
-    if (this.#selectError) {
-      error = this.#selectError;
-      data = this.#selectResult;
-      errorUpdatedAt = Date.now();
-      status = "error";
-    }
-    const isFetching = newState.fetchStatus === "fetching";
-    const isPending = status === "pending";
-    const isError = status === "error";
-    const isLoading = isPending && isFetching;
-    const hasData = data !== void 0;
-    const result = {
-      status,
-      fetchStatus: newState.fetchStatus,
-      isPending,
-      isSuccess: status === "success",
-      isError,
-      isInitialLoading: isLoading,
-      isLoading,
-      data,
-      dataUpdatedAt: newState.dataUpdatedAt,
-      error,
-      errorUpdatedAt,
-      failureCount: newState.fetchFailureCount,
-      failureReason: newState.fetchFailureReason,
-      errorUpdateCount: newState.errorUpdateCount,
-      isFetched: newState.dataUpdateCount > 0 || newState.errorUpdateCount > 0,
-      isFetchedAfterMount: newState.dataUpdateCount > queryInitialState.dataUpdateCount || newState.errorUpdateCount > queryInitialState.errorUpdateCount,
-      isFetching,
-      isRefetching: isFetching && !isPending,
-      isLoadingError: isError && !hasData,
-      isPaused: newState.fetchStatus === "paused",
-      isPlaceholderData,
-      isRefetchError: isError && hasData,
-      isStale: isStale(query, options),
-      refetch: this.refetch,
-      promise: this.#currentThenable,
-      isEnabled: resolveEnabled(options.enabled, query) !== false
-    };
-    const nextResult = result;
-    if (this.options.experimental_prefetchInRender) {
-      const finalizeThenableIfPossible = (thenable) => {
-        if (nextResult.status === "error") {
-          thenable.reject(nextResult.error);
-        } else if (nextResult.data !== void 0) {
-          thenable.resolve(nextResult.data);
-        }
-      };
-      const recreateThenable = () => {
-        const pending = this.#currentThenable = nextResult.promise = pendingThenable();
-        finalizeThenableIfPossible(pending);
-      };
-      const prevThenable = this.#currentThenable;
-      switch (prevThenable.status) {
-        case "pending":
-          if (query.queryHash === prevQuery.queryHash) {
-            finalizeThenableIfPossible(prevThenable);
-          }
-          break;
-        case "fulfilled":
-          if (nextResult.status === "error" || nextResult.data !== prevThenable.value) {
-            recreateThenable();
-          }
-          break;
-        case "rejected":
-          if (nextResult.status !== "error" || nextResult.error !== prevThenable.reason) {
-            recreateThenable();
-          }
-          break;
-      }
-    }
-    return nextResult;
-  }
-  updateResult() {
-    const prevResult = this.#currentResult;
-    const nextResult = this.createResult(this.#currentQuery, this.options);
-    this.#currentResultState = this.#currentQuery.state;
-    this.#currentResultOptions = this.options;
-    if (this.#currentResultState.data !== void 0) {
-      this.#lastQueryWithDefinedData = this.#currentQuery;
-    }
-    if (shallowEqualObjects(nextResult, prevResult)) {
-      return;
-    }
-    this.#currentResult = nextResult;
-    const shouldNotifyListeners = () => {
-      if (!prevResult) {
-        return true;
-      }
-      const { notifyOnChangeProps } = this.options;
-      const notifyOnChangePropsValue = typeof notifyOnChangeProps === "function" ? notifyOnChangeProps() : notifyOnChangeProps;
-      if (notifyOnChangePropsValue === "all" || !notifyOnChangePropsValue && !this.#trackedProps.size) {
-        return true;
-      }
-      const includedProps = new Set(
-        notifyOnChangePropsValue ?? this.#trackedProps
-      );
-      if (this.options.throwOnError) {
-        includedProps.add("error");
-      }
-      return Object.keys(this.#currentResult).some((key) => {
-        const typedKey = key;
-        const changed = this.#currentResult[typedKey] !== prevResult[typedKey];
-        return changed && includedProps.has(typedKey);
-      });
-    };
-    this.#notify({ listeners: shouldNotifyListeners() });
-  }
-  #updateQuery() {
-    const query = this.#client.getQueryCache().build(this.#client, this.options);
-    if (query === this.#currentQuery) {
-      return;
-    }
-    const prevQuery = this.#currentQuery;
-    this.#currentQuery = query;
-    this.#currentQueryInitialState = query.state;
-    if (this.hasListeners()) {
-      prevQuery?.removeObserver(this);
-      query.addObserver(this);
-    }
-  }
-  onQueryUpdate() {
-    this.updateResult();
-    if (this.hasListeners()) {
-      this.#updateTimers();
-    }
-  }
-  #notify(notifyOptions) {
-    notifyManager.batch(() => {
-      if (notifyOptions.listeners) {
-        this.listeners.forEach((listener) => {
-          listener(this.#currentResult);
-        });
-      }
-      this.#client.getQueryCache().notify({
-        query: this.#currentQuery,
-        type: "observerResultsUpdated"
-      });
-    });
-  }
-};
-function shouldLoadOnMount(query, options) {
-  return resolveEnabled(options.enabled, query) !== false && query.state.data === void 0 && !(query.state.status === "error" && options.retryOnMount === false);
-}
-function shouldFetchOnMount(query, options) {
-  return shouldLoadOnMount(query, options) || query.state.data !== void 0 && shouldFetchOn(query, options, options.refetchOnMount);
-}
-function shouldFetchOn(query, options, field) {
-  if (resolveEnabled(options.enabled, query) !== false && resolveStaleTime(options.staleTime, query) !== "static") {
-    const value = typeof field === "function" ? field(query) : field;
-    return value === "always" || value !== false && isStale(query, options);
-  }
-  return false;
-}
-function shouldFetchOptionally(query, prevQuery, options, prevOptions) {
-  return (query !== prevQuery || resolveEnabled(prevOptions.enabled, query) === false) && (!options.suspense || query.state.status !== "error") && isStale(query, options);
-}
-function isStale(query, options) {
-  return resolveEnabled(options.enabled, query) !== false && query.isStaleByTime(resolveStaleTime(options.staleTime, query));
-}
-function shouldAssignObserverCurrentProperties(observer, optimisticResult) {
-  if (!shallowEqualObjects(observer.getCurrentResult(), optimisticResult)) {
-    return true;
-  }
-  return false;
-}
-function infiniteQueryBehavior(pages) {
-  return {
-    onFetch: (context, query) => {
-      const options = context.options;
-      const direction = context.fetchOptions?.meta?.fetchMore?.direction;
-      const oldPages = context.state.data?.pages || [];
-      const oldPageParams = context.state.data?.pageParams || [];
-      let result = { pages: [], pageParams: [] };
-      let currentPage = 0;
-      const fetchFn = async () => {
-        let cancelled = false;
-        const addSignalProperty = (object) => {
-          Object.defineProperty(object, "signal", {
-            enumerable: true,
-            get: () => {
-              if (context.signal.aborted) {
-                cancelled = true;
-              } else {
-                context.signal.addEventListener("abort", () => {
-                  cancelled = true;
-                });
-              }
-              return context.signal;
-            }
-          });
-        };
-        const queryFn = ensureQueryFn(context.options, context.fetchOptions);
-        const fetchPage = async (data, param, previous) => {
-          if (cancelled) {
-            return Promise.reject();
-          }
-          if (param == null && data.pages.length) {
-            return Promise.resolve(data);
-          }
-          const createQueryFnContext = () => {
-            const queryFnContext2 = {
-              client: context.client,
-              queryKey: context.queryKey,
-              pageParam: param,
-              direction: previous ? "backward" : "forward",
-              meta: context.options.meta
-            };
-            addSignalProperty(queryFnContext2);
-            return queryFnContext2;
-          };
-          const queryFnContext = createQueryFnContext();
-          const page = await queryFn(queryFnContext);
-          const { maxPages } = context.options;
-          const addTo = previous ? addToStart : addToEnd;
-          return {
-            pages: addTo(data.pages, page, maxPages),
-            pageParams: addTo(data.pageParams, param, maxPages)
-          };
-        };
-        if (direction && oldPages.length) {
-          const previous = direction === "backward";
-          const pageParamFn = previous ? getPreviousPageParam : getNextPageParam;
-          const oldData = {
-            pages: oldPages,
-            pageParams: oldPageParams
-          };
-          const param = pageParamFn(options, oldData);
-          result = await fetchPage(oldData, param, previous);
-        } else {
-          const remainingPages = pages ?? oldPages.length;
-          do {
-            const param = currentPage === 0 ? oldPageParams[0] ?? options.initialPageParam : getNextPageParam(options, result);
-            if (currentPage > 0 && param == null) {
-              break;
-            }
-            result = await fetchPage(result, param);
-            currentPage++;
-          } while (currentPage < remainingPages);
-        }
-        return result;
-      };
-      if (context.options.persister) {
-        context.fetchFn = () => {
-          return context.options.persister?.(
-            fetchFn,
-            {
-              client: context.client,
-              queryKey: context.queryKey,
-              meta: context.options.meta,
-              signal: context.signal
-            },
-            query
-          );
-        };
-      } else {
-        context.fetchFn = fetchFn;
-      }
-    }
-  };
-}
-function getNextPageParam(options, { pages, pageParams }) {
-  const lastIndex = pages.length - 1;
-  return pages.length > 0 ? options.getNextPageParam(
-    pages[lastIndex],
-    pages,
-    pageParams[lastIndex],
-    pageParams
-  ) : void 0;
-}
-function getPreviousPageParam(options, { pages, pageParams }) {
-  return pages.length > 0 ? options.getPreviousPageParam?.(pages[0], pages, pageParams[0], pageParams) : void 0;
-}
-var Mutation = class extends Removable {
-  #client;
-  #observers;
-  #mutationCache;
-  #retryer;
-  constructor(config) {
-    super();
-    this.#client = config.client;
-    this.mutationId = config.mutationId;
-    this.#mutationCache = config.mutationCache;
-    this.#observers = [];
-    this.state = config.state || getDefaultState();
-    this.setOptions(config.options);
-    this.scheduleGc();
-  }
-  setOptions(options) {
-    this.options = options;
-    this.updateGcTime(this.options.gcTime);
-  }
-  get meta() {
-    return this.options.meta;
-  }
-  addObserver(observer) {
-    if (!this.#observers.includes(observer)) {
-      this.#observers.push(observer);
-      this.clearGcTimeout();
-      this.#mutationCache.notify({
-        type: "observerAdded",
-        mutation: this,
-        observer
-      });
-    }
-  }
-  removeObserver(observer) {
-    this.#observers = this.#observers.filter((x) => x !== observer);
-    this.scheduleGc();
-    this.#mutationCache.notify({
-      type: "observerRemoved",
-      mutation: this,
-      observer
-    });
-  }
-  optionalRemove() {
-    if (!this.#observers.length) {
-      if (this.state.status === "pending") {
-        this.scheduleGc();
-      } else {
-        this.#mutationCache.remove(this);
-      }
-    }
-  }
-  continue() {
-    return this.#retryer?.continue() ?? // continuing a mutation assumes that variables are set, mutation must have been dehydrated before
-    this.execute(this.state.variables);
-  }
-  async execute(variables) {
-    const onContinue = () => {
-      this.#dispatch({ type: "continue" });
-    };
-    const mutationFnContext = {
-      client: this.#client,
-      meta: this.options.meta,
-      mutationKey: this.options.mutationKey
-    };
-    this.#retryer = createRetryer({
-      fn: () => {
-        if (!this.options.mutationFn) {
-          return Promise.reject(new Error("No mutationFn found"));
-        }
-        return this.options.mutationFn(variables, mutationFnContext);
-      },
-      onFail: (failureCount, error) => {
-        this.#dispatch({ type: "failed", failureCount, error });
-      },
-      onPause: () => {
-        this.#dispatch({ type: "pause" });
-      },
-      onContinue,
-      retry: this.options.retry ?? 0,
-      retryDelay: this.options.retryDelay,
-      networkMode: this.options.networkMode,
-      canRun: () => this.#mutationCache.canRun(this)
-    });
-    const restored = this.state.status === "pending";
-    const isPaused = !this.#retryer.canStart();
-    try {
-      if (restored) {
-        onContinue();
-      } else {
-        this.#dispatch({ type: "pending", variables, isPaused });
-        await this.#mutationCache.config.onMutate?.(
-          variables,
-          this,
-          mutationFnContext
-        );
-        const context = await this.options.onMutate?.(
-          variables,
-          mutationFnContext
-        );
-        if (context !== this.state.context) {
-          this.#dispatch({
-            type: "pending",
-            context,
-            variables,
-            isPaused
-          });
-        }
-      }
-      const data = await this.#retryer.start();
-      await this.#mutationCache.config.onSuccess?.(
-        data,
-        variables,
-        this.state.context,
-        this,
-        mutationFnContext
-      );
-      await this.options.onSuccess?.(
-        data,
-        variables,
-        this.state.context,
-        mutationFnContext
-      );
-      await this.#mutationCache.config.onSettled?.(
-        data,
-        null,
-        this.state.variables,
-        this.state.context,
-        this,
-        mutationFnContext
-      );
-      await this.options.onSettled?.(
-        data,
-        null,
-        variables,
-        this.state.context,
-        mutationFnContext
-      );
-      this.#dispatch({ type: "success", data });
-      return data;
-    } catch (error) {
-      try {
-        await this.#mutationCache.config.onError?.(
-          error,
-          variables,
-          this.state.context,
-          this,
-          mutationFnContext
-        );
-        await this.options.onError?.(
-          error,
-          variables,
-          this.state.context,
-          mutationFnContext
-        );
-        await this.#mutationCache.config.onSettled?.(
-          void 0,
-          error,
-          this.state.variables,
-          this.state.context,
-          this,
-          mutationFnContext
-        );
-        await this.options.onSettled?.(
-          void 0,
-          error,
-          variables,
-          this.state.context,
-          mutationFnContext
-        );
-        throw error;
-      } finally {
-        this.#dispatch({ type: "error", error });
-      }
-    } finally {
-      this.#mutationCache.runNext(this);
-    }
-  }
-  #dispatch(action) {
-    const reducer = (state) => {
-      switch (action.type) {
-        case "failed":
-          return {
-            ...state,
-            failureCount: action.failureCount,
-            failureReason: action.error
-          };
-        case "pause":
-          return {
-            ...state,
-            isPaused: true
-          };
-        case "continue":
-          return {
-            ...state,
-            isPaused: false
-          };
-        case "pending":
-          return {
-            ...state,
-            context: action.context,
-            data: void 0,
-            failureCount: 0,
-            failureReason: null,
-            error: null,
-            isPaused: action.isPaused,
-            status: "pending",
-            variables: action.variables,
-            submittedAt: Date.now()
-          };
-        case "success":
-          return {
-            ...state,
-            data: action.data,
-            failureCount: 0,
-            failureReason: null,
-            error: null,
-            status: "success",
-            isPaused: false
-          };
-        case "error":
-          return {
-            ...state,
-            data: void 0,
-            error: action.error,
-            failureCount: state.failureCount + 1,
-            failureReason: action.error,
-            isPaused: false,
-            status: "error"
-          };
-      }
-    };
-    this.state = reducer(this.state);
-    notifyManager.batch(() => {
-      this.#observers.forEach((observer) => {
-        observer.onMutationUpdate(action);
-      });
-      this.#mutationCache.notify({
-        mutation: this,
-        type: "updated",
-        action
-      });
-    });
-  }
-};
-function getDefaultState() {
-  return {
-    context: void 0,
-    data: void 0,
-    error: null,
-    failureCount: 0,
-    failureReason: null,
-    isPaused: false,
-    status: "idle",
-    variables: void 0,
-    submittedAt: 0
-  };
-}
-var MutationCache = class extends Subscribable {
-  constructor(config = {}) {
-    super();
-    this.config = config;
-    this.#mutations = /* @__PURE__ */ new Set();
-    this.#scopes = /* @__PURE__ */ new Map();
-    this.#mutationId = 0;
-  }
-  #mutations;
-  #scopes;
-  #mutationId;
-  build(client2, options, state) {
-    const mutation = new Mutation({
-      client: client2,
-      mutationCache: this,
-      mutationId: ++this.#mutationId,
-      options: client2.defaultMutationOptions(options),
-      state
-    });
-    this.add(mutation);
-    return mutation;
-  }
-  add(mutation) {
-    this.#mutations.add(mutation);
-    const scope = scopeFor(mutation);
-    if (typeof scope === "string") {
-      const scopedMutations = this.#scopes.get(scope);
-      if (scopedMutations) {
-        scopedMutations.push(mutation);
-      } else {
-        this.#scopes.set(scope, [mutation]);
-      }
-    }
-    this.notify({ type: "added", mutation });
-  }
-  remove(mutation) {
-    if (this.#mutations.delete(mutation)) {
-      const scope = scopeFor(mutation);
-      if (typeof scope === "string") {
-        const scopedMutations = this.#scopes.get(scope);
-        if (scopedMutations) {
-          if (scopedMutations.length > 1) {
-            const index = scopedMutations.indexOf(mutation);
-            if (index !== -1) {
-              scopedMutations.splice(index, 1);
-            }
-          } else if (scopedMutations[0] === mutation) {
-            this.#scopes.delete(scope);
-          }
-        }
-      }
-    }
-    this.notify({ type: "removed", mutation });
-  }
-  canRun(mutation) {
-    const scope = scopeFor(mutation);
-    if (typeof scope === "string") {
-      const mutationsWithSameScope = this.#scopes.get(scope);
-      const firstPendingMutation = mutationsWithSameScope?.find(
-        (m) => m.state.status === "pending"
-      );
-      return !firstPendingMutation || firstPendingMutation === mutation;
-    } else {
-      return true;
-    }
-  }
-  runNext(mutation) {
-    const scope = scopeFor(mutation);
-    if (typeof scope === "string") {
-      const foundMutation = this.#scopes.get(scope)?.find((m) => m !== mutation && m.state.isPaused);
-      return foundMutation?.continue() ?? Promise.resolve();
-    } else {
-      return Promise.resolve();
-    }
-  }
-  clear() {
-    notifyManager.batch(() => {
-      this.#mutations.forEach((mutation) => {
-        this.notify({ type: "removed", mutation });
-      });
-      this.#mutations.clear();
-      this.#scopes.clear();
-    });
-  }
-  getAll() {
-    return Array.from(this.#mutations);
-  }
-  find(filters) {
-    const defaultedFilters = { exact: true, ...filters };
-    return this.getAll().find(
-      (mutation) => matchMutation(defaultedFilters, mutation)
-    );
-  }
-  findAll(filters = {}) {
-    return this.getAll().filter((mutation) => matchMutation(filters, mutation));
-  }
-  notify(event) {
-    notifyManager.batch(() => {
-      this.listeners.forEach((listener) => {
-        listener(event);
-      });
-    });
-  }
-  resumePausedMutations() {
-    const pausedMutations = this.getAll().filter((x) => x.state.isPaused);
-    return notifyManager.batch(
-      () => Promise.all(
-        pausedMutations.map((mutation) => mutation.continue().catch(noop))
-      )
-    );
-  }
-};
-function scopeFor(mutation) {
-  return mutation.options.scope?.id;
-}
-var MutationObserver$1 = class MutationObserver2 extends Subscribable {
-  #client;
-  #currentResult = void 0;
-  #currentMutation;
-  #mutateOptions;
-  constructor(client2, options) {
-    super();
-    this.#client = client2;
-    this.setOptions(options);
-    this.bindMethods();
-    this.#updateResult();
-  }
-  bindMethods() {
-    this.mutate = this.mutate.bind(this);
-    this.reset = this.reset.bind(this);
-  }
-  setOptions(options) {
-    const prevOptions = this.options;
-    this.options = this.#client.defaultMutationOptions(options);
-    if (!shallowEqualObjects(this.options, prevOptions)) {
-      this.#client.getMutationCache().notify({
-        type: "observerOptionsUpdated",
-        mutation: this.#currentMutation,
-        observer: this
-      });
-    }
-    if (prevOptions?.mutationKey && this.options.mutationKey && hashKey(prevOptions.mutationKey) !== hashKey(this.options.mutationKey)) {
-      this.reset();
-    } else if (this.#currentMutation?.state.status === "pending") {
-      this.#currentMutation.setOptions(this.options);
-    }
-  }
-  onUnsubscribe() {
-    if (!this.hasListeners()) {
-      this.#currentMutation?.removeObserver(this);
-    }
-  }
-  onMutationUpdate(action) {
-    this.#updateResult();
-    this.#notify(action);
-  }
-  getCurrentResult() {
-    return this.#currentResult;
-  }
-  reset() {
-    this.#currentMutation?.removeObserver(this);
-    this.#currentMutation = void 0;
-    this.#updateResult();
-    this.#notify();
-  }
-  mutate(variables, options) {
-    this.#mutateOptions = options;
-    this.#currentMutation?.removeObserver(this);
-    this.#currentMutation = this.#client.getMutationCache().build(this.#client, this.options);
-    this.#currentMutation.addObserver(this);
-    return this.#currentMutation.execute(variables);
-  }
-  #updateResult() {
-    const state = this.#currentMutation?.state ?? getDefaultState();
-    this.#currentResult = {
-      ...state,
-      isPending: state.status === "pending",
-      isSuccess: state.status === "success",
-      isError: state.status === "error",
-      isIdle: state.status === "idle",
-      mutate: this.mutate,
-      reset: this.reset
-    };
-  }
-  #notify(action) {
-    notifyManager.batch(() => {
-      if (this.#mutateOptions && this.hasListeners()) {
-        const variables = this.#currentResult.variables;
-        const onMutateResult = this.#currentResult.context;
-        const context = {
-          client: this.#client,
-          meta: this.options.meta,
-          mutationKey: this.options.mutationKey
-        };
-        if (action?.type === "success") {
-          this.#mutateOptions.onSuccess?.(
-            action.data,
-            variables,
-            onMutateResult,
-            context
-          );
-          this.#mutateOptions.onSettled?.(
-            action.data,
-            null,
-            variables,
-            onMutateResult,
-            context
-          );
-        } else if (action?.type === "error") {
-          this.#mutateOptions.onError?.(
-            action.error,
-            variables,
-            onMutateResult,
-            context
-          );
-          this.#mutateOptions.onSettled?.(
-            void 0,
-            action.error,
-            variables,
-            onMutateResult,
-            context
-          );
-        }
-      }
-      this.listeners.forEach((listener) => {
-        listener(this.#currentResult);
-      });
-    });
-  }
-};
-var QueryCache = class extends Subscribable {
-  constructor(config = {}) {
-    super();
-    this.config = config;
-    this.#queries = /* @__PURE__ */ new Map();
-  }
-  #queries;
-  build(client2, options, state) {
-    const queryKey = options.queryKey;
-    const queryHash = options.queryHash ?? hashQueryKeyByOptions(queryKey, options);
-    let query = this.get(queryHash);
-    if (!query) {
-      query = new Query({
-        client: client2,
-        queryKey,
-        queryHash,
-        options: client2.defaultQueryOptions(options),
-        state,
-        defaultOptions: client2.getQueryDefaults(queryKey)
-      });
-      this.add(query);
-    }
-    return query;
-  }
-  add(query) {
-    if (!this.#queries.has(query.queryHash)) {
-      this.#queries.set(query.queryHash, query);
-      this.notify({
-        type: "added",
-        query
-      });
-    }
-  }
-  remove(query) {
-    const queryInMap = this.#queries.get(query.queryHash);
-    if (queryInMap) {
-      query.destroy();
-      if (queryInMap === query) {
-        this.#queries.delete(query.queryHash);
-      }
-      this.notify({ type: "removed", query });
-    }
-  }
-  clear() {
-    notifyManager.batch(() => {
-      this.getAll().forEach((query) => {
-        this.remove(query);
-      });
-    });
-  }
-  get(queryHash) {
-    return this.#queries.get(queryHash);
-  }
-  getAll() {
-    return [...this.#queries.values()];
-  }
-  find(filters) {
-    const defaultedFilters = { exact: true, ...filters };
-    return this.getAll().find(
-      (query) => matchQuery(defaultedFilters, query)
-    );
-  }
-  findAll(filters = {}) {
-    const queries = this.getAll();
-    return Object.keys(filters).length > 0 ? queries.filter((query) => matchQuery(filters, query)) : queries;
-  }
-  notify(event) {
-    notifyManager.batch(() => {
-      this.listeners.forEach((listener) => {
-        listener(event);
-      });
-    });
-  }
-  onFocus() {
-    notifyManager.batch(() => {
-      this.getAll().forEach((query) => {
-        query.onFocus();
-      });
-    });
-  }
-  onOnline() {
-    notifyManager.batch(() => {
-      this.getAll().forEach((query) => {
-        query.onOnline();
-      });
-    });
-  }
-};
-var QueryClient = class {
-  #queryCache;
-  #mutationCache;
-  #defaultOptions;
-  #queryDefaults;
-  #mutationDefaults;
-  #mountCount;
-  #unsubscribeFocus;
-  #unsubscribeOnline;
-  constructor(config = {}) {
-    this.#queryCache = config.queryCache || new QueryCache();
-    this.#mutationCache = config.mutationCache || new MutationCache();
-    this.#defaultOptions = config.defaultOptions || {};
-    this.#queryDefaults = /* @__PURE__ */ new Map();
-    this.#mutationDefaults = /* @__PURE__ */ new Map();
-    this.#mountCount = 0;
-  }
-  mount() {
-    this.#mountCount++;
-    if (this.#mountCount !== 1) return;
-    this.#unsubscribeFocus = focusManager.subscribe(async (focused) => {
-      if (focused) {
-        await this.resumePausedMutations();
-        this.#queryCache.onFocus();
-      }
-    });
-    this.#unsubscribeOnline = onlineManager.subscribe(async (online) => {
-      if (online) {
-        await this.resumePausedMutations();
-        this.#queryCache.onOnline();
-      }
-    });
-  }
-  unmount() {
-    this.#mountCount--;
-    if (this.#mountCount !== 0) return;
-    this.#unsubscribeFocus?.();
-    this.#unsubscribeFocus = void 0;
-    this.#unsubscribeOnline?.();
-    this.#unsubscribeOnline = void 0;
-  }
-  isFetching(filters) {
-    return this.#queryCache.findAll({ ...filters, fetchStatus: "fetching" }).length;
-  }
-  isMutating(filters) {
-    return this.#mutationCache.findAll({ ...filters, status: "pending" }).length;
-  }
-  /**
-   * Imperative (non-reactive) way to retrieve data for a QueryKey.
-   * Should only be used in callbacks or functions where reading the latest data is necessary, e.g. for optimistic updates.
-   *
-   * Hint: Do not use this function inside a component, because it won't receive updates.
-   * Use `useQuery` to create a `QueryObserver` that subscribes to changes.
-   */
-  getQueryData(queryKey) {
-    const options = this.defaultQueryOptions({ queryKey });
-    return this.#queryCache.get(options.queryHash)?.state.data;
-  }
-  ensureQueryData(options) {
-    const defaultedOptions = this.defaultQueryOptions(options);
-    const query = this.#queryCache.build(this, defaultedOptions);
-    const cachedData = query.state.data;
-    if (cachedData === void 0) {
-      return this.fetchQuery(options);
-    }
-    if (options.revalidateIfStale && query.isStaleByTime(resolveStaleTime(defaultedOptions.staleTime, query))) {
-      void this.prefetchQuery(defaultedOptions);
-    }
-    return Promise.resolve(cachedData);
-  }
-  getQueriesData(filters) {
-    return this.#queryCache.findAll(filters).map(({ queryKey, state }) => {
-      const data = state.data;
-      return [queryKey, data];
-    });
-  }
-  setQueryData(queryKey, updater, options) {
-    const defaultedOptions = this.defaultQueryOptions({ queryKey });
-    const query = this.#queryCache.get(
-      defaultedOptions.queryHash
-    );
-    const prevData = query?.state.data;
-    const data = functionalUpdate(updater, prevData);
-    if (data === void 0) {
-      return void 0;
-    }
-    return this.#queryCache.build(this, defaultedOptions).setData(data, { ...options, manual: true });
-  }
-  setQueriesData(filters, updater, options) {
-    return notifyManager.batch(
-      () => this.#queryCache.findAll(filters).map(({ queryKey }) => [
-        queryKey,
-        this.setQueryData(queryKey, updater, options)
-      ])
-    );
-  }
-  getQueryState(queryKey) {
-    const options = this.defaultQueryOptions({ queryKey });
-    return this.#queryCache.get(
-      options.queryHash
-    )?.state;
-  }
-  removeQueries(filters) {
-    const queryCache = this.#queryCache;
-    notifyManager.batch(() => {
-      queryCache.findAll(filters).forEach((query) => {
-        queryCache.remove(query);
-      });
-    });
-  }
-  resetQueries(filters, options) {
-    const queryCache = this.#queryCache;
-    return notifyManager.batch(() => {
-      queryCache.findAll(filters).forEach((query) => {
-        query.reset();
-      });
-      return this.refetchQueries(
-        {
-          type: "active",
-          ...filters
-        },
-        options
-      );
-    });
-  }
-  cancelQueries(filters, cancelOptions = {}) {
-    const defaultedCancelOptions = { revert: true, ...cancelOptions };
-    const promises = notifyManager.batch(
-      () => this.#queryCache.findAll(filters).map((query) => query.cancel(defaultedCancelOptions))
-    );
-    return Promise.all(promises).then(noop).catch(noop);
-  }
-  invalidateQueries(filters, options = {}) {
-    return notifyManager.batch(() => {
-      this.#queryCache.findAll(filters).forEach((query) => {
-        query.invalidate();
-      });
-      if (filters?.refetchType === "none") {
-        return Promise.resolve();
-      }
-      return this.refetchQueries(
-        {
-          ...filters,
-          type: filters?.refetchType ?? filters?.type ?? "active"
-        },
-        options
-      );
-    });
-  }
-  refetchQueries(filters, options = {}) {
-    const fetchOptions = {
-      ...options,
-      cancelRefetch: options.cancelRefetch ?? true
-    };
-    const promises = notifyManager.batch(
-      () => this.#queryCache.findAll(filters).filter((query) => !query.isDisabled() && !query.isStatic()).map((query) => {
-        let promise = query.fetch(void 0, fetchOptions);
-        if (!fetchOptions.throwOnError) {
-          promise = promise.catch(noop);
-        }
-        return query.state.fetchStatus === "paused" ? Promise.resolve() : promise;
-      })
-    );
-    return Promise.all(promises).then(noop);
-  }
-  fetchQuery(options) {
-    const defaultedOptions = this.defaultQueryOptions(options);
-    if (defaultedOptions.retry === void 0) {
-      defaultedOptions.retry = false;
-    }
-    const query = this.#queryCache.build(this, defaultedOptions);
-    return query.isStaleByTime(
-      resolveStaleTime(defaultedOptions.staleTime, query)
-    ) ? query.fetch(defaultedOptions) : Promise.resolve(query.state.data);
-  }
-  prefetchQuery(options) {
-    return this.fetchQuery(options).then(noop).catch(noop);
-  }
-  fetchInfiniteQuery(options) {
-    options.behavior = infiniteQueryBehavior(options.pages);
-    return this.fetchQuery(options);
-  }
-  prefetchInfiniteQuery(options) {
-    return this.fetchInfiniteQuery(options).then(noop).catch(noop);
-  }
-  ensureInfiniteQueryData(options) {
-    options.behavior = infiniteQueryBehavior(options.pages);
-    return this.ensureQueryData(options);
-  }
-  resumePausedMutations() {
-    if (onlineManager.isOnline()) {
-      return this.#mutationCache.resumePausedMutations();
-    }
-    return Promise.resolve();
-  }
-  getQueryCache() {
-    return this.#queryCache;
-  }
-  getMutationCache() {
-    return this.#mutationCache;
-  }
-  getDefaultOptions() {
-    return this.#defaultOptions;
-  }
-  setDefaultOptions(options) {
-    this.#defaultOptions = options;
-  }
-  setQueryDefaults(queryKey, options) {
-    this.#queryDefaults.set(hashKey(queryKey), {
-      queryKey,
-      defaultOptions: options
-    });
-  }
-  getQueryDefaults(queryKey) {
-    const defaults = [...this.#queryDefaults.values()];
-    const result = {};
-    defaults.forEach((queryDefault) => {
-      if (partialMatchKey(queryKey, queryDefault.queryKey)) {
-        Object.assign(result, queryDefault.defaultOptions);
-      }
-    });
-    return result;
-  }
-  setMutationDefaults(mutationKey, options) {
-    this.#mutationDefaults.set(hashKey(mutationKey), {
-      mutationKey,
-      defaultOptions: options
-    });
-  }
-  getMutationDefaults(mutationKey) {
-    const defaults = [...this.#mutationDefaults.values()];
-    const result = {};
-    defaults.forEach((queryDefault) => {
-      if (partialMatchKey(mutationKey, queryDefault.mutationKey)) {
-        Object.assign(result, queryDefault.defaultOptions);
-      }
-    });
-    return result;
-  }
-  defaultQueryOptions(options) {
-    if (options._defaulted) {
-      return options;
-    }
-    const defaultedOptions = {
-      ...this.#defaultOptions.queries,
-      ...this.getQueryDefaults(options.queryKey),
-      ...options,
-      _defaulted: true
-    };
-    if (!defaultedOptions.queryHash) {
-      defaultedOptions.queryHash = hashQueryKeyByOptions(
-        defaultedOptions.queryKey,
-        defaultedOptions
-      );
-    }
-    if (defaultedOptions.refetchOnReconnect === void 0) {
-      defaultedOptions.refetchOnReconnect = defaultedOptions.networkMode !== "always";
-    }
-    if (defaultedOptions.throwOnError === void 0) {
-      defaultedOptions.throwOnError = !!defaultedOptions.suspense;
-    }
-    if (!defaultedOptions.networkMode && defaultedOptions.persister) {
-      defaultedOptions.networkMode = "offlineFirst";
-    }
-    if (defaultedOptions.queryFn === skipToken) {
-      defaultedOptions.enabled = false;
-    }
-    return defaultedOptions;
-  }
-  defaultMutationOptions(options) {
-    if (options?._defaulted) {
-      return options;
-    }
-    return {
-      ...this.#defaultOptions.mutations,
-      ...options?.mutationKey && this.getMutationDefaults(options.mutationKey),
-      ...options,
-      _defaulted: true
-    };
-  }
-  clear() {
-    this.#queryCache.clear();
-    this.#mutationCache.clear();
-  }
-};
-var QueryClientContext = reactExports.createContext(
-  void 0
-);
-var useQueryClient = (queryClient2) => {
-  const client2 = reactExports.useContext(QueryClientContext);
-  if (!client2) {
-    throw new Error("No QueryClient set, use QueryClientProvider to set one");
-  }
-  return client2;
-};
-var QueryClientProvider = ({
-  client: client2,
-  children
-}) => {
-  reactExports.useEffect(() => {
-    client2.mount();
-    return () => {
-      client2.unmount();
-    };
-  }, [client2]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientContext.Provider, { value: client2, children });
-};
-var IsRestoringContext = reactExports.createContext(false);
-var useIsRestoring = () => reactExports.useContext(IsRestoringContext);
-IsRestoringContext.Provider;
-function createValue() {
-  let isReset = false;
-  return {
-    clearReset: () => {
-      isReset = false;
-    },
-    reset: () => {
-      isReset = true;
-    },
-    isReset: () => {
-      return isReset;
-    }
-  };
-}
-var QueryErrorResetBoundaryContext = reactExports.createContext(createValue());
-var useQueryErrorResetBoundary = () => reactExports.useContext(QueryErrorResetBoundaryContext);
-var ensurePreventErrorBoundaryRetry = (options, errorResetBoundary) => {
-  if (options.suspense || options.throwOnError || options.experimental_prefetchInRender) {
-    if (!errorResetBoundary.isReset()) {
-      options.retryOnMount = false;
-    }
-  }
-};
-var useClearResetErrorBoundary = (errorResetBoundary) => {
-  reactExports.useEffect(() => {
-    errorResetBoundary.clearReset();
-  }, [errorResetBoundary]);
-};
-var getHasError = ({
-  result,
-  errorResetBoundary,
-  throwOnError,
-  query,
-  suspense
-}) => {
-  return result.isError && !errorResetBoundary.isReset() && !result.isFetching && query && (suspense && result.data === void 0 || shouldThrowError(throwOnError, [result.error, query]));
-};
-var ensureSuspenseTimers = (defaultedOptions) => {
-  if (defaultedOptions.suspense) {
-    const MIN_SUSPENSE_TIME_MS = 1e3;
-    const clamp2 = (value) => value === "static" ? value : Math.max(value ?? MIN_SUSPENSE_TIME_MS, MIN_SUSPENSE_TIME_MS);
-    const originalStaleTime = defaultedOptions.staleTime;
-    defaultedOptions.staleTime = typeof originalStaleTime === "function" ? (...args) => clamp2(originalStaleTime(...args)) : clamp2(originalStaleTime);
-    if (typeof defaultedOptions.gcTime === "number") {
-      defaultedOptions.gcTime = Math.max(
-        defaultedOptions.gcTime,
-        MIN_SUSPENSE_TIME_MS
-      );
-    }
-  }
-};
-var willFetch = (result, isRestoring) => result.isLoading && result.isFetching && !isRestoring;
-var shouldSuspend = (defaultedOptions, result) => defaultedOptions?.suspense && result.isPending;
-var fetchOptimistic = (defaultedOptions, observer, errorResetBoundary) => observer.fetchOptimistic(defaultedOptions).catch(() => {
-  errorResetBoundary.clearReset();
-});
-function useBaseQuery(options, Observer, queryClient2) {
-  {
-    if (typeof options !== "object" || Array.isArray(options)) {
-      throw new Error(
-        'Bad argument type. Starting with v5, only the "Object" form is allowed when calling query related functions. Please use the error stack to find the culprit call. More info here: https://tanstack.com/query/latest/docs/react/guides/migrating-to-v5#supports-a-single-signature-one-object'
-      );
-    }
-  }
-  const isRestoring = useIsRestoring();
-  const errorResetBoundary = useQueryErrorResetBoundary();
-  const client2 = useQueryClient();
-  const defaultedOptions = client2.defaultQueryOptions(options);
-  client2.getDefaultOptions().queries?._experimental_beforeQuery?.(
-    defaultedOptions
-  );
-  {
-    if (!defaultedOptions.queryFn) {
-      console.error(
-        `[${defaultedOptions.queryHash}]: No queryFn was passed as an option, and no default queryFn was found. The queryFn parameter is only optional when using a default queryFn. More info here: https://tanstack.com/query/latest/docs/framework/react/guides/default-query-function`
-      );
-    }
-  }
-  defaultedOptions._optimisticResults = isRestoring ? "isRestoring" : "optimistic";
-  ensureSuspenseTimers(defaultedOptions);
-  ensurePreventErrorBoundaryRetry(defaultedOptions, errorResetBoundary);
-  useClearResetErrorBoundary(errorResetBoundary);
-  const isNewCacheEntry = !client2.getQueryCache().get(defaultedOptions.queryHash);
-  const [observer] = reactExports.useState(
-    () => new Observer(
-      client2,
-      defaultedOptions
-    )
-  );
-  const result = observer.getOptimisticResult(defaultedOptions);
-  const shouldSubscribe = !isRestoring && options.subscribed !== false;
-  reactExports.useSyncExternalStore(
-    reactExports.useCallback(
-      (onStoreChange) => {
-        const unsubscribe = shouldSubscribe ? observer.subscribe(notifyManager.batchCalls(onStoreChange)) : noop;
-        observer.updateResult();
-        return unsubscribe;
-      },
-      [observer, shouldSubscribe]
-    ),
-    () => observer.getCurrentResult(),
-    () => observer.getCurrentResult()
-  );
-  reactExports.useEffect(() => {
-    observer.setOptions(defaultedOptions);
-  }, [defaultedOptions, observer]);
-  if (shouldSuspend(defaultedOptions, result)) {
-    throw fetchOptimistic(defaultedOptions, observer, errorResetBoundary);
-  }
-  if (getHasError({
-    result,
-    errorResetBoundary,
-    throwOnError: defaultedOptions.throwOnError,
-    query: client2.getQueryCache().get(defaultedOptions.queryHash),
-    suspense: defaultedOptions.suspense
-  })) {
-    throw result.error;
-  }
-  client2.getDefaultOptions().queries?._experimental_afterQuery?.(
-    defaultedOptions,
-    result
-  );
-  if (defaultedOptions.experimental_prefetchInRender && !isServer && willFetch(result, isRestoring)) {
-    const promise = isNewCacheEntry ? (
-      // Fetch immediately on render in order to ensure `.promise` is resolved even if the component is unmounted
-      fetchOptimistic(defaultedOptions, observer, errorResetBoundary)
-    ) : (
-      // subscribe to the "cache promise" so that we can finalize the currentThenable once data comes in
-      client2.getQueryCache().get(defaultedOptions.queryHash)?.promise
-    );
-    promise?.catch(noop).finally(() => {
-      observer.updateResult();
-    });
-  }
-  return !defaultedOptions.notifyOnChangeProps ? observer.trackResult(result) : result;
-}
-function useQuery(options, queryClient2) {
-  return useBaseQuery(options, QueryObserver);
-}
-function useMutation(options, queryClient2) {
-  const client2 = useQueryClient();
-  const [observer] = reactExports.useState(
-    () => new MutationObserver$1(
-      client2,
-      options
-    )
-  );
-  reactExports.useEffect(() => {
-    observer.setOptions(options);
-  }, [observer, options]);
-  const result = reactExports.useSyncExternalStore(
-    reactExports.useCallback(
-      (onStoreChange) => observer.subscribe(notifyManager.batchCalls(onStoreChange)),
-      [observer]
-    ),
-    () => observer.getCurrentResult(),
-    () => observer.getCurrentResult()
-  );
-  const mutate = reactExports.useCallback(
-    (variables, mutateOptions) => {
-      observer.mutate(variables, mutateOptions).catch(noop);
-    },
-    [observer]
-  );
-  if (result.error && shouldThrowError(observer.options.throwOnError, [result.error])) {
-    throw result.error;
-  }
-  return { ...result, mutate, mutateAsync: result.mutate };
-}
-const url = "http://localhost:4000/api";
-const clockIn = async () => {
-  const token = useAuthStore.getState().token;
-  if (!token) {
-    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
-  }
-  try {
-    const res = await fetch(`${url}/attendance/clockin`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      }
-    });
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message);
-    }
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.log("clockIn API 오류 : ", err);
-  }
-};
-const fetchTodayAttendance = async () => {
-  const token = useAuthStore.getState().token;
-  if (!token) {
-    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
-  }
-  try {
-    const res = await fetch(`${url}/attendance/today`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application-json",
-        Authorization: `Bearer ${token}`
-      }
-    });
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message);
-    }
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.log("fetchTodayAttendance API 오류 : ", err);
-  }
-};
-const clockOut = async (attendanceId) => {
-  const token = useAuthStore.getState().token;
-  if (!token) {
-    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
-  }
-  try {
-    const res = await fetch(`${url}/attendance/clockout`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ attendanceId })
-    });
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message);
-    }
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.log("clockOut API 오류 : ", err);
-  }
-};
-const millisecondsInWeek = 6048e5;
-const millisecondsInDay = 864e5;
-const constructFromSymbol = Symbol.for("constructDateFrom");
-function constructFrom(date, value) {
-  if (typeof date === "function") return date(value);
-  if (date && typeof date === "object" && constructFromSymbol in date)
-    return date[constructFromSymbol](value);
-  if (date instanceof Date) return new date.constructor(value);
-  return new Date(value);
-}
-function toDate(argument, context) {
-  return constructFrom(context || argument, argument);
-}
-let defaultOptions = {};
-function getDefaultOptions() {
-  return defaultOptions;
-}
-function startOfWeek(date, options) {
-  const defaultOptions2 = getDefaultOptions();
-  const weekStartsOn = options?.weekStartsOn ?? options?.locale?.options?.weekStartsOn ?? defaultOptions2.weekStartsOn ?? defaultOptions2.locale?.options?.weekStartsOn ?? 0;
-  const _date = toDate(date, options?.in);
-  const day = _date.getDay();
-  const diff = (day < weekStartsOn ? 7 : 0) + day - weekStartsOn;
-  _date.setDate(_date.getDate() - diff);
-  _date.setHours(0, 0, 0, 0);
-  return _date;
-}
-function startOfISOWeek(date, options) {
-  return startOfWeek(date, { ...options, weekStartsOn: 1 });
-}
-function getISOWeekYear(date, options) {
-  const _date = toDate(date, options?.in);
-  const year = _date.getFullYear();
-  const fourthOfJanuaryOfNextYear = constructFrom(_date, 0);
-  fourthOfJanuaryOfNextYear.setFullYear(year + 1, 0, 4);
-  fourthOfJanuaryOfNextYear.setHours(0, 0, 0, 0);
-  const startOfNextYear = startOfISOWeek(fourthOfJanuaryOfNextYear);
-  const fourthOfJanuaryOfThisYear = constructFrom(_date, 0);
-  fourthOfJanuaryOfThisYear.setFullYear(year, 0, 4);
-  fourthOfJanuaryOfThisYear.setHours(0, 0, 0, 0);
-  const startOfThisYear = startOfISOWeek(fourthOfJanuaryOfThisYear);
-  if (_date.getTime() >= startOfNextYear.getTime()) {
-    return year + 1;
-  } else if (_date.getTime() >= startOfThisYear.getTime()) {
-    return year;
-  } else {
-    return year - 1;
-  }
-}
-function getTimezoneOffsetInMilliseconds(date) {
-  const _date = toDate(date);
-  const utcDate = new Date(
-    Date.UTC(
-      _date.getFullYear(),
-      _date.getMonth(),
-      _date.getDate(),
-      _date.getHours(),
-      _date.getMinutes(),
-      _date.getSeconds(),
-      _date.getMilliseconds()
-    )
-  );
-  utcDate.setUTCFullYear(_date.getFullYear());
-  return +date - +utcDate;
-}
-function normalizeDates(context, ...dates) {
-  const normalize = constructFrom.bind(
-    null,
-    dates.find((date) => typeof date === "object")
-  );
-  return dates.map(normalize);
-}
-function startOfDay(date, options) {
-  const _date = toDate(date, options?.in);
-  _date.setHours(0, 0, 0, 0);
-  return _date;
-}
-function differenceInCalendarDays(laterDate, earlierDate, options) {
-  const [laterDate_, earlierDate_] = normalizeDates(
-    options?.in,
-    laterDate,
-    earlierDate
-  );
-  const laterStartOfDay = startOfDay(laterDate_);
-  const earlierStartOfDay = startOfDay(earlierDate_);
-  const laterTimestamp = +laterStartOfDay - getTimezoneOffsetInMilliseconds(laterStartOfDay);
-  const earlierTimestamp = +earlierStartOfDay - getTimezoneOffsetInMilliseconds(earlierStartOfDay);
-  return Math.round((laterTimestamp - earlierTimestamp) / millisecondsInDay);
-}
-function startOfISOWeekYear(date, options) {
-  const year = getISOWeekYear(date, options);
-  const fourthOfJanuary = constructFrom(date, 0);
-  fourthOfJanuary.setFullYear(year, 0, 4);
-  fourthOfJanuary.setHours(0, 0, 0, 0);
-  return startOfISOWeek(fourthOfJanuary);
-}
-function isDate(value) {
-  return value instanceof Date || typeof value === "object" && Object.prototype.toString.call(value) === "[object Date]";
-}
-function isValid(date) {
-  return !(!isDate(date) && typeof date !== "number" || isNaN(+toDate(date)));
-}
-function startOfYear(date, options) {
-  const date_ = toDate(date, options?.in);
-  date_.setFullYear(date_.getFullYear(), 0, 1);
-  date_.setHours(0, 0, 0, 0);
-  return date_;
-}
-const formatDistanceLocale = {
-  lessThanXSeconds: {
-    one: "less than a second",
-    other: "less than {{count}} seconds"
-  },
-  xSeconds: {
-    one: "1 second",
-    other: "{{count}} seconds"
-  },
-  halfAMinute: "half a minute",
-  lessThanXMinutes: {
-    one: "less than a minute",
-    other: "less than {{count}} minutes"
-  },
-  xMinutes: {
-    one: "1 minute",
-    other: "{{count}} minutes"
-  },
-  aboutXHours: {
-    one: "about 1 hour",
-    other: "about {{count}} hours"
-  },
-  xHours: {
-    one: "1 hour",
-    other: "{{count}} hours"
-  },
-  xDays: {
-    one: "1 day",
-    other: "{{count}} days"
-  },
-  aboutXWeeks: {
-    one: "about 1 week",
-    other: "about {{count}} weeks"
-  },
-  xWeeks: {
-    one: "1 week",
-    other: "{{count}} weeks"
-  },
-  aboutXMonths: {
-    one: "about 1 month",
-    other: "about {{count}} months"
-  },
-  xMonths: {
-    one: "1 month",
-    other: "{{count}} months"
-  },
-  aboutXYears: {
-    one: "about 1 year",
-    other: "about {{count}} years"
-  },
-  xYears: {
-    one: "1 year",
-    other: "{{count}} years"
-  },
-  overXYears: {
-    one: "over 1 year",
-    other: "over {{count}} years"
-  },
-  almostXYears: {
-    one: "almost 1 year",
-    other: "almost {{count}} years"
-  }
-};
-const formatDistance = (token, count, options) => {
-  let result;
-  const tokenValue = formatDistanceLocale[token];
-  if (typeof tokenValue === "string") {
-    result = tokenValue;
-  } else if (count === 1) {
-    result = tokenValue.one;
-  } else {
-    result = tokenValue.other.replace("{{count}}", count.toString());
-  }
-  if (options?.addSuffix) {
-    if (options.comparison && options.comparison > 0) {
-      return "in " + result;
-    } else {
-      return result + " ago";
-    }
-  }
-  return result;
-};
-function buildFormatLongFn(args) {
-  return (options = {}) => {
-    const width2 = options.width ? String(options.width) : args.defaultWidth;
-    const format2 = args.formats[width2] || args.formats[args.defaultWidth];
-    return format2;
-  };
-}
-const dateFormats = {
-  full: "EEEE, MMMM do, y",
-  long: "MMMM do, y",
-  medium: "MMM d, y",
-  short: "MM/dd/yyyy"
-};
-const timeFormats = {
-  full: "h:mm:ss a zzzz",
-  long: "h:mm:ss a z",
-  medium: "h:mm:ss a",
-  short: "h:mm a"
-};
-const dateTimeFormats = {
-  full: "{{date}} 'at' {{time}}",
-  long: "{{date}} 'at' {{time}}",
-  medium: "{{date}}, {{time}}",
-  short: "{{date}}, {{time}}"
-};
-const formatLong = {
-  date: buildFormatLongFn({
-    formats: dateFormats,
-    defaultWidth: "full"
-  }),
-  time: buildFormatLongFn({
-    formats: timeFormats,
-    defaultWidth: "full"
-  }),
-  dateTime: buildFormatLongFn({
-    formats: dateTimeFormats,
-    defaultWidth: "full"
-  })
-};
-const formatRelativeLocale = {
-  lastWeek: "'last' eeee 'at' p",
-  yesterday: "'yesterday at' p",
-  today: "'today at' p",
-  tomorrow: "'tomorrow at' p",
-  nextWeek: "eeee 'at' p",
-  other: "P"
-};
-const formatRelative = (token, _date, _baseDate, _options) => formatRelativeLocale[token];
-function buildLocalizeFn(args) {
-  return (value, options) => {
-    const context = options?.context ? String(options.context) : "standalone";
-    let valuesArray;
-    if (context === "formatting" && args.formattingValues) {
-      const defaultWidth = args.defaultFormattingWidth || args.defaultWidth;
-      const width2 = options?.width ? String(options.width) : defaultWidth;
-      valuesArray = args.formattingValues[width2] || args.formattingValues[defaultWidth];
-    } else {
-      const defaultWidth = args.defaultWidth;
-      const width2 = options?.width ? String(options.width) : args.defaultWidth;
-      valuesArray = args.values[width2] || args.values[defaultWidth];
-    }
-    const index = args.argumentCallback ? args.argumentCallback(value) : value;
-    return valuesArray[index];
-  };
-}
-const eraValues = {
-  narrow: ["B", "A"],
-  abbreviated: ["BC", "AD"],
-  wide: ["Before Christ", "Anno Domini"]
-};
-const quarterValues = {
-  narrow: ["1", "2", "3", "4"],
-  abbreviated: ["Q1", "Q2", "Q3", "Q4"],
-  wide: ["1st quarter", "2nd quarter", "3rd quarter", "4th quarter"]
-};
-const monthValues = {
-  narrow: ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
-  abbreviated: [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec"
-  ],
-  wide: [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December"
-  ]
-};
-const dayValues = {
-  narrow: ["S", "M", "T", "W", "T", "F", "S"],
-  short: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-  abbreviated: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-  wide: [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday"
-  ]
-};
-const dayPeriodValues = {
-  narrow: {
-    am: "a",
-    pm: "p",
-    midnight: "mi",
-    noon: "n",
-    morning: "morning",
-    afternoon: "afternoon",
-    evening: "evening",
-    night: "night"
-  },
-  abbreviated: {
-    am: "AM",
-    pm: "PM",
-    midnight: "midnight",
-    noon: "noon",
-    morning: "morning",
-    afternoon: "afternoon",
-    evening: "evening",
-    night: "night"
-  },
-  wide: {
-    am: "a.m.",
-    pm: "p.m.",
-    midnight: "midnight",
-    noon: "noon",
-    morning: "morning",
-    afternoon: "afternoon",
-    evening: "evening",
-    night: "night"
-  }
-};
-const formattingDayPeriodValues = {
-  narrow: {
-    am: "a",
-    pm: "p",
-    midnight: "mi",
-    noon: "n",
-    morning: "in the morning",
-    afternoon: "in the afternoon",
-    evening: "in the evening",
-    night: "at night"
-  },
-  abbreviated: {
-    am: "AM",
-    pm: "PM",
-    midnight: "midnight",
-    noon: "noon",
-    morning: "in the morning",
-    afternoon: "in the afternoon",
-    evening: "in the evening",
-    night: "at night"
-  },
-  wide: {
-    am: "a.m.",
-    pm: "p.m.",
-    midnight: "midnight",
-    noon: "noon",
-    morning: "in the morning",
-    afternoon: "in the afternoon",
-    evening: "in the evening",
-    night: "at night"
-  }
-};
-const ordinalNumber = (dirtyNumber, _options) => {
-  const number2 = Number(dirtyNumber);
-  const rem100 = number2 % 100;
-  if (rem100 > 20 || rem100 < 10) {
-    switch (rem100 % 10) {
-      case 1:
-        return number2 + "st";
-      case 2:
-        return number2 + "nd";
-      case 3:
-        return number2 + "rd";
-    }
-  }
-  return number2 + "th";
-};
-const localize = {
-  ordinalNumber,
-  era: buildLocalizeFn({
-    values: eraValues,
-    defaultWidth: "wide"
-  }),
-  quarter: buildLocalizeFn({
-    values: quarterValues,
-    defaultWidth: "wide",
-    argumentCallback: (quarter) => quarter - 1
-  }),
-  month: buildLocalizeFn({
-    values: monthValues,
-    defaultWidth: "wide"
-  }),
-  day: buildLocalizeFn({
-    values: dayValues,
-    defaultWidth: "wide"
-  }),
-  dayPeriod: buildLocalizeFn({
-    values: dayPeriodValues,
-    defaultWidth: "wide",
-    formattingValues: formattingDayPeriodValues,
-    defaultFormattingWidth: "wide"
-  })
-};
-function buildMatchFn(args) {
-  return (string, options = {}) => {
-    const width2 = options.width;
-    const matchPattern = width2 && args.matchPatterns[width2] || args.matchPatterns[args.defaultMatchWidth];
-    const matchResult = string.match(matchPattern);
-    if (!matchResult) {
-      return null;
-    }
-    const matchedString = matchResult[0];
-    const parsePatterns = width2 && args.parsePatterns[width2] || args.parsePatterns[args.defaultParseWidth];
-    const key = Array.isArray(parsePatterns) ? findIndex(parsePatterns, (pattern) => pattern.test(matchedString)) : (
-      // [TODO] -- I challenge you to fix the type
-      findKey(parsePatterns, (pattern) => pattern.test(matchedString))
-    );
-    let value;
-    value = args.valueCallback ? args.valueCallback(key) : key;
-    value = options.valueCallback ? (
-      // [TODO] -- I challenge you to fix the type
-      options.valueCallback(value)
-    ) : value;
-    const rest = string.slice(matchedString.length);
-    return { value, rest };
-  };
-}
-function findKey(object, predicate) {
-  for (const key in object) {
-    if (Object.prototype.hasOwnProperty.call(object, key) && predicate(object[key])) {
-      return key;
-    }
-  }
-  return void 0;
-}
-function findIndex(array, predicate) {
-  for (let key = 0; key < array.length; key++) {
-    if (predicate(array[key])) {
-      return key;
-    }
-  }
-  return void 0;
-}
-function buildMatchPatternFn(args) {
-  return (string, options = {}) => {
-    const matchResult = string.match(args.matchPattern);
-    if (!matchResult) return null;
-    const matchedString = matchResult[0];
-    const parseResult = string.match(args.parsePattern);
-    if (!parseResult) return null;
-    let value = args.valueCallback ? args.valueCallback(parseResult[0]) : parseResult[0];
-    value = options.valueCallback ? options.valueCallback(value) : value;
-    const rest = string.slice(matchedString.length);
-    return { value, rest };
-  };
-}
-const matchOrdinalNumberPattern = /^(\d+)(th|st|nd|rd)?/i;
-const parseOrdinalNumberPattern = /\d+/i;
-const matchEraPatterns = {
-  narrow: /^(b|a)/i,
-  abbreviated: /^(b\.?\s?c\.?|b\.?\s?c\.?\s?e\.?|a\.?\s?d\.?|c\.?\s?e\.?)/i,
-  wide: /^(before christ|before common era|anno domini|common era)/i
-};
-const parseEraPatterns = {
-  any: [/^b/i, /^(a|c)/i]
-};
-const matchQuarterPatterns = {
-  narrow: /^[1234]/i,
-  abbreviated: /^q[1234]/i,
-  wide: /^[1234](th|st|nd|rd)? quarter/i
-};
-const parseQuarterPatterns = {
-  any: [/1/i, /2/i, /3/i, /4/i]
-};
-const matchMonthPatterns = {
-  narrow: /^[jfmasond]/i,
-  abbreviated: /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i,
-  wide: /^(january|february|march|april|may|june|july|august|september|october|november|december)/i
-};
-const parseMonthPatterns = {
-  narrow: [
-    /^j/i,
-    /^f/i,
-    /^m/i,
-    /^a/i,
-    /^m/i,
-    /^j/i,
-    /^j/i,
-    /^a/i,
-    /^s/i,
-    /^o/i,
-    /^n/i,
-    /^d/i
-  ],
-  any: [
-    /^ja/i,
-    /^f/i,
-    /^mar/i,
-    /^ap/i,
-    /^may/i,
-    /^jun/i,
-    /^jul/i,
-    /^au/i,
-    /^s/i,
-    /^o/i,
-    /^n/i,
-    /^d/i
-  ]
-};
-const matchDayPatterns = {
-  narrow: /^[smtwf]/i,
-  short: /^(su|mo|tu|we|th|fr|sa)/i,
-  abbreviated: /^(sun|mon|tue|wed|thu|fri|sat)/i,
-  wide: /^(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/i
-};
-const parseDayPatterns = {
-  narrow: [/^s/i, /^m/i, /^t/i, /^w/i, /^t/i, /^f/i, /^s/i],
-  any: [/^su/i, /^m/i, /^tu/i, /^w/i, /^th/i, /^f/i, /^sa/i]
-};
-const matchDayPeriodPatterns = {
-  narrow: /^(a|p|mi|n|(in the|at) (morning|afternoon|evening|night))/i,
-  any: /^([ap]\.?\s?m\.?|midnight|noon|(in the|at) (morning|afternoon|evening|night))/i
-};
-const parseDayPeriodPatterns = {
-  any: {
-    am: /^a/i,
-    pm: /^p/i,
-    midnight: /^mi/i,
-    noon: /^no/i,
-    morning: /morning/i,
-    afternoon: /afternoon/i,
-    evening: /evening/i,
-    night: /night/i
-  }
-};
-const match = {
-  ordinalNumber: buildMatchPatternFn({
-    matchPattern: matchOrdinalNumberPattern,
-    parsePattern: parseOrdinalNumberPattern,
-    valueCallback: (value) => parseInt(value, 10)
-  }),
-  era: buildMatchFn({
-    matchPatterns: matchEraPatterns,
-    defaultMatchWidth: "wide",
-    parsePatterns: parseEraPatterns,
-    defaultParseWidth: "any"
-  }),
-  quarter: buildMatchFn({
-    matchPatterns: matchQuarterPatterns,
-    defaultMatchWidth: "wide",
-    parsePatterns: parseQuarterPatterns,
-    defaultParseWidth: "any",
-    valueCallback: (index) => index + 1
-  }),
-  month: buildMatchFn({
-    matchPatterns: matchMonthPatterns,
-    defaultMatchWidth: "wide",
-    parsePatterns: parseMonthPatterns,
-    defaultParseWidth: "any"
-  }),
-  day: buildMatchFn({
-    matchPatterns: matchDayPatterns,
-    defaultMatchWidth: "wide",
-    parsePatterns: parseDayPatterns,
-    defaultParseWidth: "any"
-  }),
-  dayPeriod: buildMatchFn({
-    matchPatterns: matchDayPeriodPatterns,
-    defaultMatchWidth: "any",
-    parsePatterns: parseDayPeriodPatterns,
-    defaultParseWidth: "any"
-  })
-};
-const enUS = {
-  code: "en-US",
-  formatDistance,
-  formatLong,
-  formatRelative,
-  localize,
-  match,
-  options: {
-    weekStartsOn: 0,
-    firstWeekContainsDate: 1
-  }
-};
-function getDayOfYear(date, options) {
-  const _date = toDate(date, options?.in);
-  const diff = differenceInCalendarDays(_date, startOfYear(_date));
-  const dayOfYear = diff + 1;
-  return dayOfYear;
-}
-function getISOWeek(date, options) {
-  const _date = toDate(date, options?.in);
-  const diff = +startOfISOWeek(_date) - +startOfISOWeekYear(_date);
-  return Math.round(diff / millisecondsInWeek) + 1;
-}
-function getWeekYear(date, options) {
-  const _date = toDate(date, options?.in);
-  const year = _date.getFullYear();
-  const defaultOptions2 = getDefaultOptions();
-  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
-  const firstWeekOfNextYear = constructFrom(options?.in || date, 0);
-  firstWeekOfNextYear.setFullYear(year + 1, 0, firstWeekContainsDate);
-  firstWeekOfNextYear.setHours(0, 0, 0, 0);
-  const startOfNextYear = startOfWeek(firstWeekOfNextYear, options);
-  const firstWeekOfThisYear = constructFrom(options?.in || date, 0);
-  firstWeekOfThisYear.setFullYear(year, 0, firstWeekContainsDate);
-  firstWeekOfThisYear.setHours(0, 0, 0, 0);
-  const startOfThisYear = startOfWeek(firstWeekOfThisYear, options);
-  if (+_date >= +startOfNextYear) {
-    return year + 1;
-  } else if (+_date >= +startOfThisYear) {
-    return year;
-  } else {
-    return year - 1;
-  }
-}
-function startOfWeekYear(date, options) {
-  const defaultOptions2 = getDefaultOptions();
-  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
-  const year = getWeekYear(date, options);
-  const firstWeek = constructFrom(options?.in || date, 0);
-  firstWeek.setFullYear(year, 0, firstWeekContainsDate);
-  firstWeek.setHours(0, 0, 0, 0);
-  const _date = startOfWeek(firstWeek, options);
-  return _date;
-}
-function getWeek(date, options) {
-  const _date = toDate(date, options?.in);
-  const diff = +startOfWeek(_date, options) - +startOfWeekYear(_date, options);
-  return Math.round(diff / millisecondsInWeek) + 1;
-}
-function addLeadingZeros(number2, targetLength) {
-  const sign = number2 < 0 ? "-" : "";
-  const output = Math.abs(number2).toString().padStart(targetLength, "0");
-  return sign + output;
-}
-const lightFormatters = {
-  // Year
-  y(date, token) {
-    const signedYear = date.getFullYear();
-    const year = signedYear > 0 ? signedYear : 1 - signedYear;
-    return addLeadingZeros(token === "yy" ? year % 100 : year, token.length);
-  },
-  // Month
-  M(date, token) {
-    const month = date.getMonth();
-    return token === "M" ? String(month + 1) : addLeadingZeros(month + 1, 2);
-  },
-  // Day of the month
-  d(date, token) {
-    return addLeadingZeros(date.getDate(), token.length);
-  },
-  // AM or PM
-  a(date, token) {
-    const dayPeriodEnumValue = date.getHours() / 12 >= 1 ? "pm" : "am";
-    switch (token) {
-      case "a":
-      case "aa":
-        return dayPeriodEnumValue.toUpperCase();
-      case "aaa":
-        return dayPeriodEnumValue;
-      case "aaaaa":
-        return dayPeriodEnumValue[0];
-      case "aaaa":
-      default:
-        return dayPeriodEnumValue === "am" ? "a.m." : "p.m.";
-    }
-  },
-  // Hour [1-12]
-  h(date, token) {
-    return addLeadingZeros(date.getHours() % 12 || 12, token.length);
-  },
-  // Hour [0-23]
-  H(date, token) {
-    return addLeadingZeros(date.getHours(), token.length);
-  },
-  // Minute
-  m(date, token) {
-    return addLeadingZeros(date.getMinutes(), token.length);
-  },
-  // Second
-  s(date, token) {
-    return addLeadingZeros(date.getSeconds(), token.length);
-  },
-  // Fraction of second
-  S(date, token) {
-    const numberOfDigits = token.length;
-    const milliseconds = date.getMilliseconds();
-    const fractionalSeconds = Math.trunc(
-      milliseconds * Math.pow(10, numberOfDigits - 3)
-    );
-    return addLeadingZeros(fractionalSeconds, token.length);
-  }
-};
-const dayPeriodEnum = {
-  midnight: "midnight",
-  noon: "noon",
-  morning: "morning",
-  afternoon: "afternoon",
-  evening: "evening",
-  night: "night"
-};
-const formatters = {
-  // Era
-  G: function(date, token, localize2) {
-    const era = date.getFullYear() > 0 ? 1 : 0;
-    switch (token) {
-      // AD, BC
-      case "G":
-      case "GG":
-      case "GGG":
-        return localize2.era(era, { width: "abbreviated" });
-      // A, B
-      case "GGGGG":
-        return localize2.era(era, { width: "narrow" });
-      // Anno Domini, Before Christ
-      case "GGGG":
-      default:
-        return localize2.era(era, { width: "wide" });
-    }
-  },
-  // Year
-  y: function(date, token, localize2) {
-    if (token === "yo") {
-      const signedYear = date.getFullYear();
-      const year = signedYear > 0 ? signedYear : 1 - signedYear;
-      return localize2.ordinalNumber(year, { unit: "year" });
-    }
-    return lightFormatters.y(date, token);
-  },
-  // Local week-numbering year
-  Y: function(date, token, localize2, options) {
-    const signedWeekYear = getWeekYear(date, options);
-    const weekYear = signedWeekYear > 0 ? signedWeekYear : 1 - signedWeekYear;
-    if (token === "YY") {
-      const twoDigitYear = weekYear % 100;
-      return addLeadingZeros(twoDigitYear, 2);
-    }
-    if (token === "Yo") {
-      return localize2.ordinalNumber(weekYear, { unit: "year" });
-    }
-    return addLeadingZeros(weekYear, token.length);
-  },
-  // ISO week-numbering year
-  R: function(date, token) {
-    const isoWeekYear = getISOWeekYear(date);
-    return addLeadingZeros(isoWeekYear, token.length);
-  },
-  // Extended year. This is a single number designating the year of this calendar system.
-  // The main difference between `y` and `u` localizers are B.C. years:
-  // | Year | `y` | `u` |
-  // |------|-----|-----|
-  // | AC 1 |   1 |   1 |
-  // | BC 1 |   1 |   0 |
-  // | BC 2 |   2 |  -1 |
-  // Also `yy` always returns the last two digits of a year,
-  // while `uu` pads single digit years to 2 characters and returns other years unchanged.
-  u: function(date, token) {
-    const year = date.getFullYear();
-    return addLeadingZeros(year, token.length);
-  },
-  // Quarter
-  Q: function(date, token, localize2) {
-    const quarter = Math.ceil((date.getMonth() + 1) / 3);
-    switch (token) {
-      // 1, 2, 3, 4
-      case "Q":
-        return String(quarter);
-      // 01, 02, 03, 04
-      case "QQ":
-        return addLeadingZeros(quarter, 2);
-      // 1st, 2nd, 3rd, 4th
-      case "Qo":
-        return localize2.ordinalNumber(quarter, { unit: "quarter" });
-      // Q1, Q2, Q3, Q4
-      case "QQQ":
-        return localize2.quarter(quarter, {
-          width: "abbreviated",
-          context: "formatting"
-        });
-      // 1, 2, 3, 4 (narrow quarter; could be not numerical)
-      case "QQQQQ":
-        return localize2.quarter(quarter, {
-          width: "narrow",
-          context: "formatting"
-        });
-      // 1st quarter, 2nd quarter, ...
-      case "QQQQ":
-      default:
-        return localize2.quarter(quarter, {
-          width: "wide",
-          context: "formatting"
-        });
-    }
-  },
-  // Stand-alone quarter
-  q: function(date, token, localize2) {
-    const quarter = Math.ceil((date.getMonth() + 1) / 3);
-    switch (token) {
-      // 1, 2, 3, 4
-      case "q":
-        return String(quarter);
-      // 01, 02, 03, 04
-      case "qq":
-        return addLeadingZeros(quarter, 2);
-      // 1st, 2nd, 3rd, 4th
-      case "qo":
-        return localize2.ordinalNumber(quarter, { unit: "quarter" });
-      // Q1, Q2, Q3, Q4
-      case "qqq":
-        return localize2.quarter(quarter, {
-          width: "abbreviated",
-          context: "standalone"
-        });
-      // 1, 2, 3, 4 (narrow quarter; could be not numerical)
-      case "qqqqq":
-        return localize2.quarter(quarter, {
-          width: "narrow",
-          context: "standalone"
-        });
-      // 1st quarter, 2nd quarter, ...
-      case "qqqq":
-      default:
-        return localize2.quarter(quarter, {
-          width: "wide",
-          context: "standalone"
-        });
-    }
-  },
-  // Month
-  M: function(date, token, localize2) {
-    const month = date.getMonth();
-    switch (token) {
-      case "M":
-      case "MM":
-        return lightFormatters.M(date, token);
-      // 1st, 2nd, ..., 12th
-      case "Mo":
-        return localize2.ordinalNumber(month + 1, { unit: "month" });
-      // Jan, Feb, ..., Dec
-      case "MMM":
-        return localize2.month(month, {
-          width: "abbreviated",
-          context: "formatting"
-        });
-      // J, F, ..., D
-      case "MMMMM":
-        return localize2.month(month, {
-          width: "narrow",
-          context: "formatting"
-        });
-      // January, February, ..., December
-      case "MMMM":
-      default:
-        return localize2.month(month, { width: "wide", context: "formatting" });
-    }
-  },
-  // Stand-alone month
-  L: function(date, token, localize2) {
-    const month = date.getMonth();
-    switch (token) {
-      // 1, 2, ..., 12
-      case "L":
-        return String(month + 1);
-      // 01, 02, ..., 12
-      case "LL":
-        return addLeadingZeros(month + 1, 2);
-      // 1st, 2nd, ..., 12th
-      case "Lo":
-        return localize2.ordinalNumber(month + 1, { unit: "month" });
-      // Jan, Feb, ..., Dec
-      case "LLL":
-        return localize2.month(month, {
-          width: "abbreviated",
-          context: "standalone"
-        });
-      // J, F, ..., D
-      case "LLLLL":
-        return localize2.month(month, {
-          width: "narrow",
-          context: "standalone"
-        });
-      // January, February, ..., December
-      case "LLLL":
-      default:
-        return localize2.month(month, { width: "wide", context: "standalone" });
-    }
-  },
-  // Local week of year
-  w: function(date, token, localize2, options) {
-    const week = getWeek(date, options);
-    if (token === "wo") {
-      return localize2.ordinalNumber(week, { unit: "week" });
-    }
-    return addLeadingZeros(week, token.length);
-  },
-  // ISO week of year
-  I: function(date, token, localize2) {
-    const isoWeek = getISOWeek(date);
-    if (token === "Io") {
-      return localize2.ordinalNumber(isoWeek, { unit: "week" });
-    }
-    return addLeadingZeros(isoWeek, token.length);
-  },
-  // Day of the month
-  d: function(date, token, localize2) {
-    if (token === "do") {
-      return localize2.ordinalNumber(date.getDate(), { unit: "date" });
-    }
-    return lightFormatters.d(date, token);
-  },
-  // Day of year
-  D: function(date, token, localize2) {
-    const dayOfYear = getDayOfYear(date);
-    if (token === "Do") {
-      return localize2.ordinalNumber(dayOfYear, { unit: "dayOfYear" });
-    }
-    return addLeadingZeros(dayOfYear, token.length);
-  },
-  // Day of week
-  E: function(date, token, localize2) {
-    const dayOfWeek = date.getDay();
-    switch (token) {
-      // Tue
-      case "E":
-      case "EE":
-      case "EEE":
-        return localize2.day(dayOfWeek, {
-          width: "abbreviated",
-          context: "formatting"
-        });
-      // T
-      case "EEEEE":
-        return localize2.day(dayOfWeek, {
-          width: "narrow",
-          context: "formatting"
-        });
-      // Tu
-      case "EEEEEE":
-        return localize2.day(dayOfWeek, {
-          width: "short",
-          context: "formatting"
-        });
-      // Tuesday
-      case "EEEE":
-      default:
-        return localize2.day(dayOfWeek, {
-          width: "wide",
-          context: "formatting"
-        });
-    }
-  },
-  // Local day of week
-  e: function(date, token, localize2, options) {
-    const dayOfWeek = date.getDay();
-    const localDayOfWeek = (dayOfWeek - options.weekStartsOn + 8) % 7 || 7;
-    switch (token) {
-      // Numerical value (Nth day of week with current locale or weekStartsOn)
-      case "e":
-        return String(localDayOfWeek);
-      // Padded numerical value
-      case "ee":
-        return addLeadingZeros(localDayOfWeek, 2);
-      // 1st, 2nd, ..., 7th
-      case "eo":
-        return localize2.ordinalNumber(localDayOfWeek, { unit: "day" });
-      case "eee":
-        return localize2.day(dayOfWeek, {
-          width: "abbreviated",
-          context: "formatting"
-        });
-      // T
-      case "eeeee":
-        return localize2.day(dayOfWeek, {
-          width: "narrow",
-          context: "formatting"
-        });
-      // Tu
-      case "eeeeee":
-        return localize2.day(dayOfWeek, {
-          width: "short",
-          context: "formatting"
-        });
-      // Tuesday
-      case "eeee":
-      default:
-        return localize2.day(dayOfWeek, {
-          width: "wide",
-          context: "formatting"
-        });
-    }
-  },
-  // Stand-alone local day of week
-  c: function(date, token, localize2, options) {
-    const dayOfWeek = date.getDay();
-    const localDayOfWeek = (dayOfWeek - options.weekStartsOn + 8) % 7 || 7;
-    switch (token) {
-      // Numerical value (same as in `e`)
-      case "c":
-        return String(localDayOfWeek);
-      // Padded numerical value
-      case "cc":
-        return addLeadingZeros(localDayOfWeek, token.length);
-      // 1st, 2nd, ..., 7th
-      case "co":
-        return localize2.ordinalNumber(localDayOfWeek, { unit: "day" });
-      case "ccc":
-        return localize2.day(dayOfWeek, {
-          width: "abbreviated",
-          context: "standalone"
-        });
-      // T
-      case "ccccc":
-        return localize2.day(dayOfWeek, {
-          width: "narrow",
-          context: "standalone"
-        });
-      // Tu
-      case "cccccc":
-        return localize2.day(dayOfWeek, {
-          width: "short",
-          context: "standalone"
-        });
-      // Tuesday
-      case "cccc":
-      default:
-        return localize2.day(dayOfWeek, {
-          width: "wide",
-          context: "standalone"
-        });
-    }
-  },
-  // ISO day of week
-  i: function(date, token, localize2) {
-    const dayOfWeek = date.getDay();
-    const isoDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
-    switch (token) {
-      // 2
-      case "i":
-        return String(isoDayOfWeek);
-      // 02
-      case "ii":
-        return addLeadingZeros(isoDayOfWeek, token.length);
-      // 2nd
-      case "io":
-        return localize2.ordinalNumber(isoDayOfWeek, { unit: "day" });
-      // Tue
-      case "iii":
-        return localize2.day(dayOfWeek, {
-          width: "abbreviated",
-          context: "formatting"
-        });
-      // T
-      case "iiiii":
-        return localize2.day(dayOfWeek, {
-          width: "narrow",
-          context: "formatting"
-        });
-      // Tu
-      case "iiiiii":
-        return localize2.day(dayOfWeek, {
-          width: "short",
-          context: "formatting"
-        });
-      // Tuesday
-      case "iiii":
-      default:
-        return localize2.day(dayOfWeek, {
-          width: "wide",
-          context: "formatting"
-        });
-    }
-  },
-  // AM or PM
-  a: function(date, token, localize2) {
-    const hours = date.getHours();
-    const dayPeriodEnumValue = hours / 12 >= 1 ? "pm" : "am";
-    switch (token) {
-      case "a":
-      case "aa":
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "abbreviated",
-          context: "formatting"
-        });
-      case "aaa":
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "abbreviated",
-          context: "formatting"
-        }).toLowerCase();
-      case "aaaaa":
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "narrow",
-          context: "formatting"
-        });
-      case "aaaa":
-      default:
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "wide",
-          context: "formatting"
-        });
-    }
-  },
-  // AM, PM, midnight, noon
-  b: function(date, token, localize2) {
-    const hours = date.getHours();
-    let dayPeriodEnumValue;
-    if (hours === 12) {
-      dayPeriodEnumValue = dayPeriodEnum.noon;
-    } else if (hours === 0) {
-      dayPeriodEnumValue = dayPeriodEnum.midnight;
-    } else {
-      dayPeriodEnumValue = hours / 12 >= 1 ? "pm" : "am";
-    }
-    switch (token) {
-      case "b":
-      case "bb":
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "abbreviated",
-          context: "formatting"
-        });
-      case "bbb":
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "abbreviated",
-          context: "formatting"
-        }).toLowerCase();
-      case "bbbbb":
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "narrow",
-          context: "formatting"
-        });
-      case "bbbb":
-      default:
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "wide",
-          context: "formatting"
-        });
-    }
-  },
-  // in the morning, in the afternoon, in the evening, at night
-  B: function(date, token, localize2) {
-    const hours = date.getHours();
-    let dayPeriodEnumValue;
-    if (hours >= 17) {
-      dayPeriodEnumValue = dayPeriodEnum.evening;
-    } else if (hours >= 12) {
-      dayPeriodEnumValue = dayPeriodEnum.afternoon;
-    } else if (hours >= 4) {
-      dayPeriodEnumValue = dayPeriodEnum.morning;
-    } else {
-      dayPeriodEnumValue = dayPeriodEnum.night;
-    }
-    switch (token) {
-      case "B":
-      case "BB":
-      case "BBB":
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "abbreviated",
-          context: "formatting"
-        });
-      case "BBBBB":
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "narrow",
-          context: "formatting"
-        });
-      case "BBBB":
-      default:
-        return localize2.dayPeriod(dayPeriodEnumValue, {
-          width: "wide",
-          context: "formatting"
-        });
-    }
-  },
-  // Hour [1-12]
-  h: function(date, token, localize2) {
-    if (token === "ho") {
-      let hours = date.getHours() % 12;
-      if (hours === 0) hours = 12;
-      return localize2.ordinalNumber(hours, { unit: "hour" });
-    }
-    return lightFormatters.h(date, token);
-  },
-  // Hour [0-23]
-  H: function(date, token, localize2) {
-    if (token === "Ho") {
-      return localize2.ordinalNumber(date.getHours(), { unit: "hour" });
-    }
-    return lightFormatters.H(date, token);
-  },
-  // Hour [0-11]
-  K: function(date, token, localize2) {
-    const hours = date.getHours() % 12;
-    if (token === "Ko") {
-      return localize2.ordinalNumber(hours, { unit: "hour" });
-    }
-    return addLeadingZeros(hours, token.length);
-  },
-  // Hour [1-24]
-  k: function(date, token, localize2) {
-    let hours = date.getHours();
-    if (hours === 0) hours = 24;
-    if (token === "ko") {
-      return localize2.ordinalNumber(hours, { unit: "hour" });
-    }
-    return addLeadingZeros(hours, token.length);
-  },
-  // Minute
-  m: function(date, token, localize2) {
-    if (token === "mo") {
-      return localize2.ordinalNumber(date.getMinutes(), { unit: "minute" });
-    }
-    return lightFormatters.m(date, token);
-  },
-  // Second
-  s: function(date, token, localize2) {
-    if (token === "so") {
-      return localize2.ordinalNumber(date.getSeconds(), { unit: "second" });
-    }
-    return lightFormatters.s(date, token);
-  },
-  // Fraction of second
-  S: function(date, token) {
-    return lightFormatters.S(date, token);
-  },
-  // Timezone (ISO-8601. If offset is 0, output is always `'Z'`)
-  X: function(date, token, _localize) {
-    const timezoneOffset = date.getTimezoneOffset();
-    if (timezoneOffset === 0) {
-      return "Z";
-    }
-    switch (token) {
-      // Hours and optional minutes
-      case "X":
-        return formatTimezoneWithOptionalMinutes(timezoneOffset);
-      // Hours, minutes and optional seconds without `:` delimiter
-      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
-      // so this token always has the same output as `XX`
-      case "XXXX":
-      case "XX":
-        return formatTimezone(timezoneOffset);
-      // Hours, minutes and optional seconds with `:` delimiter
-      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
-      // so this token always has the same output as `XXX`
-      case "XXXXX":
-      case "XXX":
-      // Hours and minutes with `:` delimiter
-      default:
-        return formatTimezone(timezoneOffset, ":");
-    }
-  },
-  // Timezone (ISO-8601. If offset is 0, output is `'+00:00'` or equivalent)
-  x: function(date, token, _localize) {
-    const timezoneOffset = date.getTimezoneOffset();
-    switch (token) {
-      // Hours and optional minutes
-      case "x":
-        return formatTimezoneWithOptionalMinutes(timezoneOffset);
-      // Hours, minutes and optional seconds without `:` delimiter
-      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
-      // so this token always has the same output as `xx`
-      case "xxxx":
-      case "xx":
-        return formatTimezone(timezoneOffset);
-      // Hours, minutes and optional seconds with `:` delimiter
-      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
-      // so this token always has the same output as `xxx`
-      case "xxxxx":
-      case "xxx":
-      // Hours and minutes with `:` delimiter
-      default:
-        return formatTimezone(timezoneOffset, ":");
-    }
-  },
-  // Timezone (GMT)
-  O: function(date, token, _localize) {
-    const timezoneOffset = date.getTimezoneOffset();
-    switch (token) {
-      // Short
-      case "O":
-      case "OO":
-      case "OOO":
-        return "GMT" + formatTimezoneShort(timezoneOffset, ":");
-      // Long
-      case "OOOO":
-      default:
-        return "GMT" + formatTimezone(timezoneOffset, ":");
-    }
-  },
-  // Timezone (specific non-location)
-  z: function(date, token, _localize) {
-    const timezoneOffset = date.getTimezoneOffset();
-    switch (token) {
-      // Short
-      case "z":
-      case "zz":
-      case "zzz":
-        return "GMT" + formatTimezoneShort(timezoneOffset, ":");
-      // Long
-      case "zzzz":
-      default:
-        return "GMT" + formatTimezone(timezoneOffset, ":");
-    }
-  },
-  // Seconds timestamp
-  t: function(date, token, _localize) {
-    const timestamp = Math.trunc(+date / 1e3);
-    return addLeadingZeros(timestamp, token.length);
-  },
-  // Milliseconds timestamp
-  T: function(date, token, _localize) {
-    return addLeadingZeros(+date, token.length);
-  }
-};
-function formatTimezoneShort(offset, delimiter = "") {
-  const sign = offset > 0 ? "-" : "+";
-  const absOffset = Math.abs(offset);
-  const hours = Math.trunc(absOffset / 60);
-  const minutes = absOffset % 60;
-  if (minutes === 0) {
-    return sign + String(hours);
-  }
-  return sign + String(hours) + delimiter + addLeadingZeros(minutes, 2);
-}
-function formatTimezoneWithOptionalMinutes(offset, delimiter) {
-  if (offset % 60 === 0) {
-    const sign = offset > 0 ? "-" : "+";
-    return sign + addLeadingZeros(Math.abs(offset) / 60, 2);
-  }
-  return formatTimezone(offset, delimiter);
-}
-function formatTimezone(offset, delimiter = "") {
-  const sign = offset > 0 ? "-" : "+";
-  const absOffset = Math.abs(offset);
-  const hours = addLeadingZeros(Math.trunc(absOffset / 60), 2);
-  const minutes = addLeadingZeros(absOffset % 60, 2);
-  return sign + hours + delimiter + minutes;
-}
-const dateLongFormatter = (pattern, formatLong2) => {
-  switch (pattern) {
-    case "P":
-      return formatLong2.date({ width: "short" });
-    case "PP":
-      return formatLong2.date({ width: "medium" });
-    case "PPP":
-      return formatLong2.date({ width: "long" });
-    case "PPPP":
-    default:
-      return formatLong2.date({ width: "full" });
-  }
-};
-const timeLongFormatter = (pattern, formatLong2) => {
-  switch (pattern) {
-    case "p":
-      return formatLong2.time({ width: "short" });
-    case "pp":
-      return formatLong2.time({ width: "medium" });
-    case "ppp":
-      return formatLong2.time({ width: "long" });
-    case "pppp":
-    default:
-      return formatLong2.time({ width: "full" });
-  }
-};
-const dateTimeLongFormatter = (pattern, formatLong2) => {
-  const matchResult = pattern.match(/(P+)(p+)?/) || [];
-  const datePattern = matchResult[1];
-  const timePattern = matchResult[2];
-  if (!timePattern) {
-    return dateLongFormatter(pattern, formatLong2);
-  }
-  let dateTimeFormat;
-  switch (datePattern) {
-    case "P":
-      dateTimeFormat = formatLong2.dateTime({ width: "short" });
-      break;
-    case "PP":
-      dateTimeFormat = formatLong2.dateTime({ width: "medium" });
-      break;
-    case "PPP":
-      dateTimeFormat = formatLong2.dateTime({ width: "long" });
-      break;
-    case "PPPP":
-    default:
-      dateTimeFormat = formatLong2.dateTime({ width: "full" });
-      break;
-  }
-  return dateTimeFormat.replace("{{date}}", dateLongFormatter(datePattern, formatLong2)).replace("{{time}}", timeLongFormatter(timePattern, formatLong2));
-};
-const longFormatters = {
-  p: timeLongFormatter,
-  P: dateTimeLongFormatter
-};
-const dayOfYearTokenRE = /^D+$/;
-const weekYearTokenRE = /^Y+$/;
-const throwTokens = ["D", "DD", "YY", "YYYY"];
-function isProtectedDayOfYearToken(token) {
-  return dayOfYearTokenRE.test(token);
-}
-function isProtectedWeekYearToken(token) {
-  return weekYearTokenRE.test(token);
-}
-function warnOrThrowProtectedError(token, format2, input) {
-  const _message = message(token, format2, input);
-  console.warn(_message);
-  if (throwTokens.includes(token)) throw new RangeError(_message);
-}
-function message(token, format2, input) {
-  const subject = token[0] === "Y" ? "years" : "days of the month";
-  return `Use \`${token.toLowerCase()}\` instead of \`${token}\` (in \`${format2}\`) for formatting ${subject} to the input \`${input}\`; see: https://github.com/date-fns/date-fns/blob/master/docs/unicodeTokens.md`;
-}
-const formattingTokensRegExp = /[yYQqMLwIdDecihHKkms]o|(\w)\1*|''|'(''|[^'])+('|$)|./g;
-const longFormattingTokensRegExp = /P+p+|P+|p+|''|'(''|[^'])+('|$)|./g;
-const escapedStringRegExp = /^'([^]*?)'?$/;
-const doubleQuoteRegExp = /''/g;
-const unescapedLatinCharacterRegExp = /[a-zA-Z]/;
-function format(date, formatStr, options) {
-  const defaultOptions2 = getDefaultOptions();
-  const locale = defaultOptions2.locale ?? enUS;
-  const firstWeekContainsDate = defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
-  const weekStartsOn = defaultOptions2.weekStartsOn ?? defaultOptions2.locale?.options?.weekStartsOn ?? 0;
-  const originalDate = toDate(date, options?.in);
-  if (!isValid(originalDate)) {
-    throw new RangeError("Invalid time value");
-  }
-  let parts = formatStr.match(longFormattingTokensRegExp).map((substring) => {
-    const firstCharacter = substring[0];
-    if (firstCharacter === "p" || firstCharacter === "P") {
-      const longFormatter = longFormatters[firstCharacter];
-      return longFormatter(substring, locale.formatLong);
-    }
-    return substring;
-  }).join("").match(formattingTokensRegExp).map((substring) => {
-    if (substring === "''") {
-      return { isToken: false, value: "'" };
-    }
-    const firstCharacter = substring[0];
-    if (firstCharacter === "'") {
-      return { isToken: false, value: cleanEscapedString(substring) };
-    }
-    if (formatters[firstCharacter]) {
-      return { isToken: true, value: substring };
-    }
-    if (firstCharacter.match(unescapedLatinCharacterRegExp)) {
-      throw new RangeError(
-        "Format string contains an unescaped latin alphabet character `" + firstCharacter + "`"
-      );
-    }
-    return { isToken: false, value: substring };
-  });
-  if (locale.localize.preprocessor) {
-    parts = locale.localize.preprocessor(originalDate, parts);
-  }
-  const formatterOptions = {
-    firstWeekContainsDate,
-    weekStartsOn,
-    locale
-  };
-  return parts.map((part) => {
-    if (!part.isToken) return part.value;
-    const token = part.value;
-    if (isProtectedWeekYearToken(token) || isProtectedDayOfYearToken(token)) {
-      warnOrThrowProtectedError(token, formatStr, String(date));
-    }
-    const formatter = formatters[token[0]];
-    return formatter(originalDate, token, locale.localize, formatterOptions);
-  }).join("");
-}
-function cleanEscapedString(input) {
-  const matched = input.match(escapedStringRegExp);
-  if (!matched) {
-    return input;
-  }
-  return matched[1].replace(doubleQuoteRegExp, "'");
-}
 const useClockIn = () => {
   const queryClient2 = useQueryClient();
-  const today = format(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
+  const today = format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
   return useMutation({
     mutationFn: clockIn,
     onSuccess: (data) => {
@@ -56484,7 +57208,7 @@ const useClockIn = () => {
 };
 const useClockOut = () => {
   const queryClient2 = useQueryClient();
-  const today = format(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
+  const today = format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
   return useMutation({
     mutationFn: (attendanceId) => clockOut(attendanceId),
     onSuccess: (data) => {
@@ -56499,15 +57223,17 @@ const useClockOut = () => {
     }
   });
 };
-const useAttendanceToday = () => {
-  const today = format(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
-  return useQuery({
-    queryKey: ["attendance", today],
-    queryFn: fetchTodayAttendance,
-    staleTime: Infinity,
-    retry: false
-  });
-};
+function Dialog() {
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "absolute w-full h-full flex items-center justify-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "rounded-2xl border border-gray-40 cursor-pointer", children: "123" }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+    lineNumber: 4,
+    columnNumber: 13
+  }, this) }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+    lineNumber: 3,
+    columnNumber: 9
+  }, this);
+}
 function Header() {
   const userName = useUserStore().user?.name;
   const { mutate: clockIn2 } = useClockIn();
@@ -56524,63 +57250,73 @@ function Header() {
       clockIn2();
     }
   };
-  console.log(attendance);
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-[60px] flex items-center justify-between px-[20px] bg-white", children: [
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "logo", className: "h-full" }, void 0, false, {
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(Dialog, {}, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 32,
-      columnNumber: 17
-    }, this) }, void 0, false, {
-      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 31,
+      lineNumber: 30,
       columnNumber: 13
     }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px]", children: [
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-        "button",
-        {
-          disabled: isDisabled,
-          onClick: () => handleAttendance(),
-          className: `px-[12px] py-[6px] rounded-[12px] text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white"}`,
-          children: isLoading ? "로딩 중" : clockInOutBtnText
-        },
-        void 0,
-        false,
-        {
-          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 35,
-          columnNumber: 17
-        },
-        this
-      ),
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[12px]", children: [
-        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "cursor-pointer", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(NotificationsNoneRoundedIcon, { className: "cursor-pointer" }, void 0, false, {
-          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 42,
-          columnNumber: 25
-        }, this) }, void 0, false, {
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-[60px] flex items-center justify-between px-[20px] bg-white", children: [
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "logo", className: "h-full" }, void 0, false, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+        lineNumber: 33,
+        columnNumber: 21
+      }, this) }, void 0, false, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+        lineNumber: 32,
+        columnNumber: 17
+      }, this),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px]", children: [
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            disabled: isDisabled,
+            onClick: () => handleAttendance(),
+            className: `px-[12px] py-[6px] rounded-2xl text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white"}`,
+            children: isLoading ? "로딩 중" : clockInOutBtnText
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+            lineNumber: 36,
+            columnNumber: 21
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[12px]", children: [
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "cursor-pointer", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(NotificationsNoneRoundedIcon, { className: "cursor-pointer" }, void 0, false, {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+            lineNumber: 43,
+            columnNumber: 29
+          }, this) }, void 0, false, {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+            lineNumber: 42,
+            columnNumber: 25
+          }, this),
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-sm", children: userName }, void 0, false, {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+            lineNumber: 45,
+            columnNumber: 25
+          }, this)
+        ] }, void 0, true, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
           lineNumber: 41,
-          columnNumber: 21
-        }, this),
-        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-sm", children: userName }, void 0, false, {
-          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 44,
           columnNumber: 21
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 40,
+        lineNumber: 35,
         columnNumber: 17
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 34,
+      lineNumber: 31,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-    lineNumber: 30,
+    lineNumber: 29,
     columnNumber: 9
   }, this);
 }
@@ -56600,18 +57336,18 @@ function Navbar() {
     setOpenMenu((prev) => prev === menu ? null : menu);
   };
   const isAttendanceActive = pathname.startsWith("/attendance");
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-[200px] min-h-[calc(100vh-80px)] rounded-tr-xl bg-white p-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { children: [
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.NavLink, { to: "/dashboard", onClick: () => setOpenMenu(null), className: ({ isActive }) => `w-full flex gap-[8px] px-[12px] py-[10px] cursor-pointer rounded-[12px] transition-all duration-200 ${isActive ? "bg-gray-100" : ""}`, children: [
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-[200px] min-h-[calc(100vh-80px)] rounded-tr-2xl bg-white p-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { children: [
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.NavLink, { to: "/dashboard", onClick: () => setOpenMenu(null), className: ({ isActive }) => `w-full flex gap-[8px] px-[12px] py-[10px] cursor-pointer rounded-2xl transition-all duration-200 ${isActive ? "bg-gray-100" : ""}`, children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(GridViewRoundedIcon, {}, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
         lineNumber: 19,
-        columnNumber: 243
+        columnNumber: 240
       }, this),
       " ",
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: "대시보드" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
         lineNumber: 19,
-        columnNumber: 267
+        columnNumber: 264
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
@@ -56623,30 +57359,30 @@ function Navbar() {
       columnNumber: 17
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { children: [
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { onClick: () => toggleMenu("attendance"), className: `flex justify-between px-[12px] py-[10px] cursor-pointer rounded-[12px] transition-all duration-200 ${isAttendanceActive ? "bg-gray-100" : ""}`, children: [
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { onClick: () => toggleMenu("attendance"), className: `flex justify-between px-[12px] py-[10px] cursor-pointer rounded-2xl transition-all duration-200 ${isAttendanceActive ? "bg-gray-100" : ""}`, children: [
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("span", { className: "flex gap-[8px]", children: [
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(CalendarMonthRoundedIcon, {}, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
             lineNumber: 22,
-            columnNumber: 254
+            columnNumber: 251
           }, this),
           "근태관리"
         ] }, void 0, true, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
           lineNumber: 22,
-          columnNumber: 221
+          columnNumber: 218
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardArrowRightRoundedIcon, { className: `${openMenu === "attendance" ? "rotate-90" : ""}` }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
           lineNumber: 22,
-          columnNumber: 293
+          columnNumber: 290
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
         lineNumber: 22,
         columnNumber: 21
       }, this),
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { className: `overflow-hidden ${openMenu === "attendance" ? "h-full" : "h-0"}`, children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.NavLink, { to: "/attendance/attendance", className: ({ isActive }) => `w-full flex gap-[8px] px-[24px] py-[10px] cursor-pointer rounded-[12px] transition-all duration-200 ${isActive ? "text-blue-700" : ""}`, children: "근태 현황" }, void 0, false, {
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { className: `overflow-hidden ${openMenu === "attendance" ? "h-full" : "h-0"}`, children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.NavLink, { to: "/attendance/attendance", className: ({ isActive }) => `w-full flex gap-[8px] px-[24px] py-[10px] cursor-pointer rounded-2xl transition-all duration-200 ${isActive ? "text-blue-700" : ""}`, children: "근태 현황" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
         lineNumber: 25,
         columnNumber: 29
@@ -56675,7 +57411,7 @@ function Navbar() {
   }, this);
 }
 function PrivateLayout() {
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-[100vh] flex flex-col gap-[20px] bg-gray-100", children: [
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-[100vh] flex flex-col gap-[20px] bg-gray-100 relative", children: [
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(Header, {}, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/privateLayout.tsx",
       lineNumber: 9,
@@ -56832,4 +57568,6 @@ clientExports.createRoot(document.getElementById("root")).render(
     lineNumber: 10,
     columnNumber: 5
   }, void 0)
+);
+ void 0)
 );

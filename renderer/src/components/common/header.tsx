@@ -4,6 +4,7 @@ import { useUserStore } from "../../hooks/useUserStore";
 import { useClockIn } from "../../hooks/useClockIn";
 import { useClockOut } from "../../hooks/useClockOut";
 import { useAttendanceToday } from "../../hooks/useAttendanceToday";
+import { Dialog } from "./dialog";
 
 export function Header(){
     const userName = useUserStore().user?.name;
@@ -24,26 +25,27 @@ export function Header(){
         }
     }
 
-    console.log(attendance)
-
     return(
-        <div className="w-full h-[60px] flex items-center justify-between px-[20px] bg-white">
-            <div className="h-[20px]">
-                <img src={Logo} alt="logo" className="h-full"/>
-            </div>
-            <div className="flex items-center justify-center gap-[20px]">
-                <button
-                    disabled={isDisabled}
-                    onClick={() => handleAttendance()}
-                    className={`px-[12px] py-[6px] rounded-[12px] text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white"}`}
-                >{isLoading ? "로딩 중" : clockInOutBtnText}</button>
-                <div className="flex items-center justify-center gap-[12px]">
-                    <div className="cursor-pointer">
-                        <NotificationsNoneRoundedIcon className="cursor-pointer"/>
+        <>
+            <Dialog />
+            <div className="w-full h-[60px] flex items-center justify-between px-[20px] bg-white">
+                <div className="h-[20px]">
+                    <img src={Logo} alt="logo" className="h-full"/>
+                </div>
+                <div className="flex items-center justify-center gap-[20px]">
+                    <button
+                        disabled={isDisabled}
+                        onClick={() => handleAttendance()}
+                        className={`px-[12px] py-[6px] rounded-2xl text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white"}`}
+                        >{isLoading ? "로딩 중" : clockInOutBtnText}</button>
+                    <div className="flex items-center justify-center gap-[12px]">
+                        <div className="cursor-pointer">
+                            <NotificationsNoneRoundedIcon className="cursor-pointer"/>
+                        </div>
+                        <p className="text-sm">{userName}</p>
                     </div>
-                    <p className="text-sm">{userName}</p>
                 </div>
             </div>
-        </div>
+        </>
     )
 }
