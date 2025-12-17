@@ -45080,7 +45080,7 @@ function hashQueryKeyByOptions(queryKey, options) {
 function hashKey(queryKey) {
   return JSON.stringify(
     queryKey,
-    (_, val) => isPlainObject$1(val) ? Object.keys(val).sort().reduce((result, key) => {
+    (_, val) => isPlainObject(val) ? Object.keys(val).sort().reduce((result, key) => {
       result[key] = val[key];
       return result;
     }, {}) : val
@@ -45104,7 +45104,7 @@ function replaceEqualDeep(a, b) {
     return a;
   }
   const array = isPlainArray(a) && isPlainArray(b);
-  if (!array && !(isPlainObject$1(a) && isPlainObject$1(b))) return b;
+  if (!array && !(isPlainObject(a) && isPlainObject(b))) return b;
   const aItems = array ? a : Object.keys(a);
   const aSize = aItems.length;
   const bItems = array ? b : Object.keys(b);
@@ -45144,7 +45144,7 @@ function shallowEqualObjects(a, b) {
 function isPlainArray(value) {
   return Array.isArray(value) && value.length === Object.keys(value).length;
 }
-function isPlainObject$1(o) {
+function isPlainObject(o) {
   if (!hasObjectPrototype(o)) {
     return false;
   }
@@ -50816,7 +50816,7 @@ function requireReactIs$1() {
   return reactIs$1.exports;
 }
 var reactIsExports = /* @__PURE__ */ requireReactIs$1();
-function isPlainObject(item) {
+function isPlainObject$1(item) {
   if (typeof item !== "object" || item === null) {
     return false;
   }
@@ -50824,7 +50824,7 @@ function isPlainObject(item) {
   return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(Symbol.toStringTag in item) && !(Symbol.iterator in item);
 }
 function deepClone(source) {
-  if (/* @__PURE__ */ reactExports.isValidElement(source) || reactIsExports.isValidElementType(source) || !isPlainObject(source)) {
+  if (/* @__PURE__ */ reactExports.isValidElement(source) || reactIsExports.isValidElementType(source) || !isPlainObject$1(source)) {
     return source;
   }
   const output = {};
@@ -50839,15 +50839,15 @@ function deepmerge(target, source, options = {
   const output = options.clone ? {
     ...target
   } : target;
-  if (isPlainObject(target) && isPlainObject(source)) {
+  if (isPlainObject$1(target) && isPlainObject$1(source)) {
     Object.keys(source).forEach((key) => {
       if (/* @__PURE__ */ reactExports.isValidElement(source[key]) || reactIsExports.isValidElementType(source[key])) {
         output[key] = source[key];
-      } else if (isPlainObject(source[key]) && // Avoid prototype pollution
-      Object.prototype.hasOwnProperty.call(target, key) && isPlainObject(target[key])) {
+      } else if (isPlainObject$1(source[key]) && // Avoid prototype pollution
+      Object.prototype.hasOwnProperty.call(target, key) && isPlainObject$1(target[key])) {
         output[key] = deepmerge(target[key], source[key], options);
       } else if (options.clone) {
-        output[key] = isPlainObject(source[key]) ? deepClone(source[key]) : source[key];
+        output[key] = isPlainObject$1(source[key]) ? deepClone(source[key]) : source[key];
       } else {
         output[key] = source[key];
       }
@@ -54881,7 +54881,7 @@ function createStyled(input = {}) {
           return processStyle(props, style2, props.theme.modularCssLayers ? layerName : void 0);
         };
       }
-      if (isPlainObject(style2)) {
+      if (isPlainObject$1(style2)) {
         const serialized = preprocessStyles(style2);
         return function styleObjectProcessor(props) {
           if (!serialized.variants) {
@@ -56188,7 +56188,7 @@ const zIndex = {
   tooltip: 1500
 };
 function isSerializable(val) {
-  return isPlainObject(val) || typeof val === "undefined" || typeof val === "string" || typeof val === "boolean" || typeof val === "number" || Array.isArray(val);
+  return isPlainObject$1(val) || typeof val === "undefined" || typeof val === "string" || typeof val === "boolean" || typeof val === "number" || Array.isArray(val);
 }
 function stringifyTheme(baseTheme = {}) {
   const serializableTheme = {
@@ -56200,7 +56200,7 @@ function stringifyTheme(baseTheme = {}) {
       const [key, value] = array[index];
       if (!isSerializable(value) || key.startsWith("unstable_")) {
         delete object[key];
-      } else if (isPlainObject(value)) {
+      } else if (isPlainObject$1(value)) {
         object[key] = {
           ...value
         };
@@ -57223,14 +57223,87 @@ const useClockOut = () => {
     }
   });
 };
-function Dialog() {
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "absolute w-full h-full flex items-center justify-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "rounded-2xl border border-gray-40 cursor-pointer", children: "123" }, void 0, false, {
+function Dialog({ dialogData, onClose, open }) {
+  if (!open) return null;
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "absolute w-full h-full flex items-center justify-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+    motion.div,
+    {
+      initial: { scale: 0 },
+      animate: { scale: 1 },
+      className: "rounded-2xl border border-gray-40 w-[300px] overflow-hidden bg-white text-base",
+      children: [
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] bg-gray-100 flex items-center px-[20px] w-full", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: dialogData.title }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+          lineNumber: 14,
+          columnNumber: 21
+        }, this) }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+          lineNumber: 13,
+          columnNumber: 17
+        }, this),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[80px] w-full px-[20px] flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: dialogData.content }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+          lineNumber: 17,
+          columnNumber: 21
+        }, this) }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+          lineNumber: 16,
+          columnNumber: 17
+        }, this),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center px-[20px] justify-between w-full h-[60px]", children: [
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+            "button",
+            {
+              className: "w-[124px] h-[40px] rounded-2xl bg-gray-100 cursor-pointer",
+              onClick: () => onClose(),
+              children: "취소"
+            },
+            void 0,
+            false,
+            {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+              lineNumber: 20,
+              columnNumber: 21
+            },
+            this
+          ),
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+            "button",
+            {
+              className: "w-[124px] h-[40px] rounded-2xl bg-blue-700 cursor-pointer text-white",
+              onClick: () => {
+                dialogData.onOK();
+                onClose();
+              },
+              children: dialogData.okButtonText
+            },
+            void 0,
+            false,
+            {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+              lineNumber: 24,
+              columnNumber: 21
+            },
+            this
+          )
+        ] }, void 0, true, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+          lineNumber: 19,
+          columnNumber: 17
+        }, this)
+      ]
+    },
+    void 0,
+    true,
+    {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+      lineNumber: 9,
+      columnNumber: 13
+    },
+    this
+  ) }, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
-    lineNumber: 4,
-    columnNumber: 13
-  }, this) }, void 0, false, {
-    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
-    lineNumber: 3,
+    lineNumber: 8,
     columnNumber: 9
   }, this);
 }
@@ -57242,28 +57315,52 @@ function Header() {
   const attendance = data?.attendance;
   const isWorking = attendance?.clockin && !attendance?.clockout;
   const isDisabled = attendance?.clockin && attendance?.clockout;
+  const [open, setOpen] = reactExports.useState(false);
+  const [dialogData, setDialogData] = reactExports.useState(null);
   let clockInOutBtnText = attendance && isWorking ? "퇴근하기" : "출근하기";
   const handleAttendance = () => {
     if (attendance && isWorking) {
-      clockOut2(attendance?.id);
+      setDialogData({
+        title: "퇴근 등록",
+        content: "퇴근 등록을 하시겠습니까?",
+        okButtonText: "퇴근 등록",
+        onOK: () => clockOut2(attendance?.id)
+      });
     } else {
-      clockIn2();
+      setDialogData({
+        title: "출근 등록",
+        content: "출근 등록을 하시겠습니까?",
+        okButtonText: "출근 등록",
+        onOK: () => clockIn2()
+      });
     }
+    setOpen(true);
   };
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(Dialog, {}, void 0, false, {
-      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 30,
-      columnNumber: 13
-    }, this),
+    dialogData && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      Dialog,
+      {
+        open,
+        onClose: () => setOpen(false),
+        dialogData
+      },
+      void 0,
+      false,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+        lineNumber: 49,
+        columnNumber: 13
+      },
+      this
+    ),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-[60px] flex items-center justify-between px-[20px] bg-white", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "logo", className: "h-full" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 33,
+        lineNumber: 57,
         columnNumber: 21
       }, this) }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 32,
+        lineNumber: 56,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px]", children: [
@@ -57271,7 +57368,7 @@ function Header() {
           "button",
           {
             disabled: isDisabled,
-            onClick: () => handleAttendance(),
+            onClick: handleAttendance,
             className: `px-[12px] py-[6px] rounded-2xl text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white"}`,
             children: isLoading ? "로딩 중" : clockInOutBtnText
           },
@@ -57279,7 +57376,7 @@ function Header() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 36,
+            lineNumber: 60,
             columnNumber: 21
           },
           this
@@ -57287,36 +57384,36 @@ function Header() {
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[12px]", children: [
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "cursor-pointer", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(NotificationsNoneRoundedIcon, { className: "cursor-pointer" }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 43,
+            lineNumber: 67,
             columnNumber: 29
           }, this) }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 42,
+            lineNumber: 66,
             columnNumber: 25
           }, this),
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-sm", children: userName }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 45,
+            lineNumber: 69,
             columnNumber: 25
           }, this)
         ] }, void 0, true, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 41,
+          lineNumber: 65,
           columnNumber: 21
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 35,
+        lineNumber: 59,
         columnNumber: 17
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 31,
+      lineNumber: 55,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-    lineNumber: 29,
+    lineNumber: 47,
     columnNumber: 9
   }, this);
 }
@@ -57568,6 +57665,4 @@ clientExports.createRoot(document.getElementById("root")).render(
     lineNumber: 10,
     columnNumber: 5
   }, void 0)
-);
- void 0)
 );
