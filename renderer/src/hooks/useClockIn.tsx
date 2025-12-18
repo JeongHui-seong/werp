@@ -9,7 +9,7 @@ export const useClockIn = () => {
     const today = format(new Date(), 'yyyy-MM-dd');
 
     return useMutation({
-        mutationFn: clockIn,
+        mutationFn: () => clockIn( today ),
         onSuccess: (data:attendanceResponse) => {
             toast.success(data.message);
             queryClient.setQueryData(

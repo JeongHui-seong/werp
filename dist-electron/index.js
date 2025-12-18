@@ -45080,7 +45080,7 @@ function hashQueryKeyByOptions(queryKey, options) {
 function hashKey(queryKey) {
   return JSON.stringify(
     queryKey,
-    (_, val) => isPlainObject(val) ? Object.keys(val).sort().reduce((result, key) => {
+    (_, val) => isPlainObject$1(val) ? Object.keys(val).sort().reduce((result, key) => {
       result[key] = val[key];
       return result;
     }, {}) : val
@@ -45104,7 +45104,7 @@ function replaceEqualDeep(a, b) {
     return a;
   }
   const array = isPlainArray(a) && isPlainArray(b);
-  if (!array && !(isPlainObject(a) && isPlainObject(b))) return b;
+  if (!array && !(isPlainObject$1(a) && isPlainObject$1(b))) return b;
   const aItems = array ? a : Object.keys(a);
   const aSize = aItems.length;
   const bItems = array ? b : Object.keys(b);
@@ -45144,7 +45144,7 @@ function shallowEqualObjects(a, b) {
 function isPlainArray(value) {
   return Array.isArray(value) && value.length === Object.keys(value).length;
 }
-function isPlainObject(o) {
+function isPlainObject$1(o) {
   if (!hasObjectPrototype(o)) {
     return false;
   }
@@ -49097,7 +49097,7 @@ function getDefaultOptions() {
   return Object.assign({}, getDefaultOptions$1());
 }
 const url = "http://localhost:4000/api";
-const clockIn = async () => {
+const clockIn = async (date) => {
   const token = useAuthStore.getState().token;
   if (!token) {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
@@ -49108,7 +49108,8 @@ const clockIn = async () => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
-      }
+      },
+      body: JSON.stringify({ date, clockin: (/* @__PURE__ */ new Date()).toISOString() })
     });
     if (!res.ok) {
       const error = await res.json();
@@ -49120,16 +49121,16 @@ const clockIn = async () => {
     console.log("clockIn API 오류 : ", err);
   }
 };
-const fetchTodayAttendance = async () => {
+const fetchTodayAttendance = async (date) => {
   const token = useAuthStore.getState().token;
   if (!token) {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url}/attendance/today`, {
+    const res = await fetch(`${url}/attendance/today?date=${date}`, {
       method: "GET",
       headers: {
-        "Content-Type": "application-json",
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       }
     });
@@ -49155,7 +49156,7 @@ const clockOut = async (attendanceId) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({ attendanceId })
+      body: JSON.stringify({ attendanceId, clockout: (/* @__PURE__ */ new Date()).toISOString() })
     });
     if (!res.ok) {
       const error = await res.json();
@@ -49168,10 +49169,20 @@ const clockOut = async (attendanceId) => {
   }
 };
 const useAttendanceToday = () => {
-  const today = format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
+  const [today, setToday] = reactExports.useState(format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd"));
+  reactExports.useEffect(() => {
+    const now2 = /* @__PURE__ */ new Date();
+    const nextMidnight = /* @__PURE__ */ new Date();
+    nextMidnight.setHours(24, 0, 0, 0);
+    const timeout = setTimeout(() => {
+      const newToday = format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
+      setToday(newToday);
+    }, nextMidnight.getTime() - now2.getTime());
+    return () => clearTimeout(timeout);
+  }, []);
   return useQuery({
     queryKey: ["attendance", today],
-    queryFn: fetchTodayAttendance,
+    queryFn: () => fetchTodayAttendance(today),
     staleTime: Infinity,
     retry: false
   });
@@ -50816,7 +50827,7 @@ function requireReactIs$1() {
   return reactIs$1.exports;
 }
 var reactIsExports = /* @__PURE__ */ requireReactIs$1();
-function isPlainObject$1(item) {
+function isPlainObject(item) {
   if (typeof item !== "object" || item === null) {
     return false;
   }
@@ -50824,7 +50835,7 @@ function isPlainObject$1(item) {
   return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(Symbol.toStringTag in item) && !(Symbol.iterator in item);
 }
 function deepClone(source) {
-  if (/* @__PURE__ */ reactExports.isValidElement(source) || reactIsExports.isValidElementType(source) || !isPlainObject$1(source)) {
+  if (/* @__PURE__ */ reactExports.isValidElement(source) || reactIsExports.isValidElementType(source) || !isPlainObject(source)) {
     return source;
   }
   const output = {};
@@ -50839,15 +50850,15 @@ function deepmerge(target, source, options = {
   const output = options.clone ? {
     ...target
   } : target;
-  if (isPlainObject$1(target) && isPlainObject$1(source)) {
+  if (isPlainObject(target) && isPlainObject(source)) {
     Object.keys(source).forEach((key) => {
       if (/* @__PURE__ */ reactExports.isValidElement(source[key]) || reactIsExports.isValidElementType(source[key])) {
         output[key] = source[key];
-      } else if (isPlainObject$1(source[key]) && // Avoid prototype pollution
-      Object.prototype.hasOwnProperty.call(target, key) && isPlainObject$1(target[key])) {
+      } else if (isPlainObject(source[key]) && // Avoid prototype pollution
+      Object.prototype.hasOwnProperty.call(target, key) && isPlainObject(target[key])) {
         output[key] = deepmerge(target[key], source[key], options);
       } else if (options.clone) {
-        output[key] = isPlainObject$1(source[key]) ? deepClone(source[key]) : source[key];
+        output[key] = isPlainObject(source[key]) ? deepClone(source[key]) : source[key];
       } else {
         output[key] = source[key];
       }
@@ -54881,7 +54892,7 @@ function createStyled(input = {}) {
           return processStyle(props, style2, props.theme.modularCssLayers ? layerName : void 0);
         };
       }
-      if (isPlainObject$1(style2)) {
+      if (isPlainObject(style2)) {
         const serialized = preprocessStyles(style2);
         return function styleObjectProcessor(props) {
           if (!serialized.variants) {
@@ -56188,7 +56199,7 @@ const zIndex = {
   tooltip: 1500
 };
 function isSerializable(val) {
-  return isPlainObject$1(val) || typeof val === "undefined" || typeof val === "string" || typeof val === "boolean" || typeof val === "number" || Array.isArray(val);
+  return isPlainObject(val) || typeof val === "undefined" || typeof val === "string" || typeof val === "boolean" || typeof val === "number" || Array.isArray(val);
 }
 function stringifyTheme(baseTheme = {}) {
   const serializableTheme = {
@@ -56200,7 +56211,7 @@ function stringifyTheme(baseTheme = {}) {
       const [key, value] = array[index];
       if (!isSerializable(value) || key.startsWith("unstable_")) {
         delete object[key];
-      } else if (isPlainObject$1(value)) {
+      } else if (isPlainObject(value)) {
         object[key] = {
           ...value
         };
@@ -57193,7 +57204,7 @@ const useClockIn = () => {
   const queryClient2 = useQueryClient();
   const today = format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
   return useMutation({
-    mutationFn: clockIn,
+    mutationFn: () => clockIn(today),
     onSuccess: (data) => {
       y.success(data.message);
       queryClient2.setQueryData(
