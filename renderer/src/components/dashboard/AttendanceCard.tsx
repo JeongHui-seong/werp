@@ -1,4 +1,4 @@
-import { useAttendanceToday } from "../../hooks/useAttendanceToday"
+import { useAttendanceToday } from "../../hooks/attendance/useAttendanceToday"
 import { formatInTimeZone } from "date-fns-tz"
 
 export function AttendanceCard(){

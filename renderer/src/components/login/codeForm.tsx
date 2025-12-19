@@ -1,10 +1,10 @@
 import { useState } from "react"
 import Logo from "../../assets/logo.png"
-import useTimer from "../../hooks/useTimer";
+import useTimer from "../../hooks/auth/useTimer";
 import { login, resendVerification } from "../../api/authService";
 import { toast } from "react-toastify";
-import { useAuthStore } from "../../hooks/useAuthStore";
-import { useUserStore } from "../../hooks/useUserStore";
+import { useAuthStore } from "../../hooks/auth/useAuthStore";
+import { useUserStore } from "../../hooks/auth/useUserStore";
 import type { codeParams } from "../../types/login/codeParams";
 import { SyncLoader } from "react-spinners";
 

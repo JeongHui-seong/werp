@@ -49168,18 +49168,54 @@ const clockOut = async (attendanceId) => {
     console.log("clockOut API 오류 : ", err);
   }
 };
+const fetchMonthlyAttendance = async (yearMonth, startWorkTime) => {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
+  }
+  try {
+    const res = await fetch(`${url}/attendance/monthly?yearMonth=${yearMonth}&startWorkTime=${startWorkTime}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("fetchMonthlyAttendance API error : ", err);
+  }
+};
+const fetchYearMonth = async () => {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
+  }
+  try {
+    const res = await fetch(`${url}/attendance/year-months`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("fetchYearMonth API error : ", err);
+  }
+};
 const useAttendanceToday = () => {
-  const [today, setToday] = reactExports.useState(format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd"));
-  reactExports.useEffect(() => {
-    const now2 = /* @__PURE__ */ new Date();
-    const nextMidnight = /* @__PURE__ */ new Date();
-    nextMidnight.setHours(24, 0, 0, 0);
-    const timeout = setTimeout(() => {
-      const newToday = format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
-      setToday(newToday);
-    }, nextMidnight.getTime() - now2.getTime());
-    return () => clearTimeout(timeout);
-  }, []);
+  const today = format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd");
   return useQuery({
     queryKey: ["attendance", today],
     queryFn: () => fetchTodayAttendance(today),
@@ -57551,14 +57587,72 @@ function PrivateLayout() {
     columnNumber: 9
   }, this);
 }
+const useYearMonths = () => {
+  const yearMonth = format$1(/* @__PURE__ */ new Date(), "yyyy-MM");
+  return useQuery({
+    queryKey: ["yearMonths", yearMonth],
+    queryFn: fetchYearMonth,
+    staleTime: Infinity,
+    retry: false
+  });
+};
+const useAttendanceMonthly = (yearMonth) => {
+  return useQuery({
+    queryKey: ["attendanceMonthly", yearMonth],
+    queryFn: () => fetchMonthlyAttendance(yearMonth, "09:00"),
+    staleTime: Infinity,
+    retry: false,
+    enabled: !!yearMonth
+  });
+};
+function MonthlyAttendanceCard() {
+  const [searchParams, setSearchParams] = distExports.useSearchParams();
+  const { data } = useYearMonths();
+  const yearMonth = searchParams.get("yearMonth");
+  const { data: monthlyAttendanceData } = useAttendanceMonthly(yearMonth);
+  reactExports.useEffect(() => {
+    if (!data?.yearMonth?.length) return;
+    if (!yearMonth) {
+      setSearchParams({ "yearMonth": data?.yearMonth[0] });
+    }
+  }, [data, setSearchParams]);
+  console.log("yearMonths : ", data);
+  console.log("monthlyAttendanceData : ", monthlyAttendanceData);
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+    "select",
+    {
+      name: "yearMonth",
+      id: "yearMonth",
+      value: yearMonth ?? "",
+      onChange: (e) => setSearchParams({ yearMonth: e.target.value }),
+      children: data?.yearMonth?.map((d) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: d, children: d }, d, false, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
+        lineNumber: 30,
+        columnNumber: 21
+      }, this))
+    },
+    void 0,
+    false,
+    {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
+      lineNumber: 23,
+      columnNumber: 13
+    },
+    this
+  ) }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
+    lineNumber: 22,
+    columnNumber: 9
+  }, this);
+}
 function AttendancePage() {
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-[calc(100%-240px)] h-full", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h1", { children: "Attendance" }, void 0, false, {
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-[calc(100%-240px)] h-full pb-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(MonthlyAttendanceCard, {}, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/pages/attendance.tsx",
-    lineNumber: 4,
+    lineNumber: 6,
     columnNumber: 13
   }, this) }, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/pages/attendance.tsx",
-    lineNumber: 3,
+    lineNumber: 5,
     columnNumber: 9
   }, this);
 }

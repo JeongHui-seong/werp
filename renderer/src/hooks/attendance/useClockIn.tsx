@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { clockIn } from "../api/attendanceService";
+import { clockIn } from "../../api/attendanceService";
 import { toast } from "react-toastify";
 import { format } from 'date-fns';
-import type { attendanceResponse } from "../types/attendance/attendanceData";
+import type { attendanceResponse } from "../../types/attendance/attendanceData";
 
 export const useClockIn = () => {
     const queryClient = useQueryClient();

@@ -1,9 +1,9 @@
 import Logo from "../../assets/logo.png"
 import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneRounded';
-import { useUserStore } from "../../hooks/useUserStore";
-import { useClockIn } from "../../hooks/useClockIn";
-import { useClockOut } from "../../hooks/useClockOut";
-import { useAttendanceToday } from "../../hooks/useAttendanceToday";
+import { useUserStore } from "../../hooks/auth/useUserStore";
+import { useClockIn } from "../../hooks/attendance/useClockIn";
+import { useClockOut } from "../../hooks/attendance/useClockOut";
+import { useAttendanceToday } from "../../hooks/attendance/useAttendanceToday";
 import { Dialog } from "./dialog";
 import { useState } from "react";
 import type { dialog } from "../../types/dialogData";

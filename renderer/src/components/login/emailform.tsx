@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Logo from "../../assets/logo.png"
-import useEmailValidation from "../../hooks/useEmailValidation";
+import useEmailValidation from "../../hooks/auth/useEmailValidation";
 import { emailValidation } from "../../api/authService";
 import type { EmailFormProps } from "../../types/login/emailResult"
 import { toast } from "react-toastify";
