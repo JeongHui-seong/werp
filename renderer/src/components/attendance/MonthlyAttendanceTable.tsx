@@ -5,8 +5,10 @@ import { type ColumnDef, useReactTable, flexRender, getCoreRowModel, getSortedRo
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import SwapVertRoundedIcon from '@mui/icons-material/SwapVertRounded';
+import type { monthlyAttendanceRef } from "../../types/attendance/attendanceRow";
+import { forwardRef, useImperativeHandle } from "react";
 
-export function MonthlyAttendanceTable({recordData}:attendanceRowProps){
+export const MonthlyAttendanceTable = forwardRef<monthlyAttendanceRef, attendanceRowProps>(({ recordData, filename }, ref) => {
     const attendanceColumn: ColumnDef<attendanceRow>[] = [
         {
             accessorKey: "date",
@@ -14,6 +16,9 @@ export function MonthlyAttendanceTable({recordData}:attendanceRowProps){
             cell: info => {
                 return format(new Date(info.getValue<string>()), "yyyy년 MM월 dd일");
             },
+            meta:{
+                exportValue: (value: string) => {return format(new Date(value), "yyyy년 MM월 dd일")}
+            }
         },
         {
             id: "clockIn",
@@ -36,6 +41,16 @@ export function MonthlyAttendanceTable({recordData}:attendanceRowProps){
                 const m = Math.floor((value % 3600) / 60);
                 const s = value % 60
                 return `${h}시 ${m}분 ${s}초`;
+            },
+            meta: {
+                exportValue: (value: number) => {
+                    if (!value) return "-";
+
+                    const h = Math.floor(value / 3600);
+                    const m = Math.floor((value % 3600) / 60);
+                    const s = value % 60
+                    return `${h}시 ${m}분 ${s}초`;
+                }
             }
         },
         {
@@ -59,6 +74,16 @@ export function MonthlyAttendanceTable({recordData}:attendanceRowProps){
                 const m = Math.floor((value % 3600) / 60);
                 const s = value % 60
                 return `${h}시 ${m}분 ${s}초`;
+            },
+            meta: {
+                exportValue: (value: number) => {
+                    if (!value) return "-";
+
+                    const h = Math.floor(value / 3600);
+                    const m = Math.floor((value % 3600) / 60);
+                    const s = value % 60
+                    return `${h}시 ${m}분 ${s}초`;
+                }
             }
         },
         {
@@ -71,6 +96,15 @@ export function MonthlyAttendanceTable({recordData}:attendanceRowProps){
                 const m = value % 60;
                 if (h === 0) return `${m}분`
                 return `${h}시간 ${m}분`;
+            },
+            meta: {
+                exportValue: (value: number) => {
+                    if(!value) return "-";
+                    const h = Math.floor(value / 60);
+                    const m = value % 60;
+                    if (h === 0) return `${m}분`
+                    return `${h}시간 ${m}분`;
+                }
             },
             sortDescFirst: false,
         },
@@ -85,16 +119,30 @@ export function MonthlyAttendanceTable({recordData}:attendanceRowProps){
             if (h === 0) return `${m}분`
             return `${h}시간 ${m}분`;
             },
+            meta: {
+                exportValue: (value:number) => {
+                    if (value === 0) return "-";
+                    const h = Math.floor(value / 60);
+                    const m = value % 60;
+                    if (h === 0) return `${m}분`
+                    return `${h}시간 ${m}분`;
+                }
+            },
             sortDescFirst: false,
         },
         {
             accessorKey: "note",
             header: "비고",
             cell: info => info.getValue() ?? "-",
+            meta:{
+                exportValue: (value:string) => {
+                    return value;
+                }
+            }
         },
     ]
 
-    const table = useReactTable({
+    const table = useReactTable<attendanceRow>({
         data: recordData ?? [],
         columns: attendanceColumn,
         getCoreRowModel: getCoreRowModel(),
@@ -109,6 +157,62 @@ export function MonthlyAttendanceTable({recordData}:attendanceRowProps){
         if (sort === 'desc') return <ArrowDownwardRoundedIcon fontSize="small" />
         return <SwapVertRoundedIcon fontSize="small"/>
     }
+
+    const handleExportToCsv = (): void => {
+        const headers = table.getVisibleLeafColumns();
+
+        const csvHeaders = headers.map(header => {
+            const h = header.columnDef.header;
+            return typeof h === 'string' ? h : ""
+        })
+
+        const columns = table.getVisibleLeafColumns();
+
+        const rows = table.getRowModel().rows.map(row =>
+            columns.map(column => {
+                const cell = row.getVisibleCells()
+                .find(c => c.column.id === column.id);
+
+                if (!cell) return "";
+
+                const meta = column.columnDef.meta as any;
+
+                // CSV 전용 값 우선 사용
+                if (meta?.exportValue) {
+                return meta.exportValue(cell.getValue());
+                }
+
+                // fallback (문자/숫자만)
+                const value = cell.getValue();
+                return typeof value === "string" || typeof value === "number"
+                ? value
+                : "";
+            })
+        );
+
+
+
+        // CSV 문자열 생성
+        const csvContent =
+        [csvHeaders, ...rows]
+            .map(row => row.map(v => `"${String(v)}"`).join(","))
+            .join("\n");
+
+        // 다운로드
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${filename}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    useImperativeHandle(ref, () => ({
+        exportToCsv: handleExportToCsv,
+    }));
+
 
     return(
         <div className="mt-[20px] w-full max-h-[365px] overflow-auto text-base text-center">
@@ -138,7 +242,10 @@ export function MonthlyAttendanceTable({recordData}:attendanceRowProps){
                 </thead>
                 <tbody>
                     {table.getRowModel().rows.map(row => (
-                        <tr key={row.id}>
+                        <tr
+                            key={row.id}
+                            className="hover:bg-gray-100 transition-all"
+                        >
                             {row.getVisibleCells().map(cell => (
                                 <td
                                     key={cell.id}
@@ -156,4 +263,4 @@ export function MonthlyAttendanceTable({recordData}:attendanceRowProps){
             </table>
         </div>
     )
-}
+})

@@ -60398,13 +60398,18 @@ const ArrowUpwardRoundedIcon = createSvgIcon(/* @__PURE__ */ jsxRuntimeExports.j
 const SwapVertRoundedIcon = createSvgIcon(/* @__PURE__ */ jsxRuntimeExports.jsx("path", {
   d: "M16 17.01V11c0-.55-.45-1-1-1s-1 .45-1 1v6.01h-1.79c-.45 0-.67.54-.35.85l2.79 2.78c.2.19.51.19.71 0l2.79-2.78c.32-.31.09-.85-.35-.85zM8.65 3.35 5.86 6.14c-.32.31-.1.85.35.85H8V13c0 .55.45 1 1 1s1-.45 1-1V6.99h1.79c.45 0 .67-.54.35-.85L9.35 3.35c-.19-.19-.51-.19-.7 0"
 }), "SwapVertRounded");
-function MonthlyAttendanceTable({ recordData }) {
+const MonthlyAttendanceTable = reactExports.forwardRef(({ recordData, filename }, ref) => {
   const attendanceColumn = [
     {
       accessorKey: "date",
       header: "날짜",
       cell: (info) => {
         return format$1(new Date(info.getValue()), "yyyy년 MM월 dd일");
+      },
+      meta: {
+        exportValue: (value) => {
+          return format$1(new Date(value), "yyyy년 MM월 dd일");
+        }
       }
     },
     {
@@ -60425,6 +60430,15 @@ function MonthlyAttendanceTable({ recordData }) {
         const m = Math.floor(value % 3600 / 60);
         const s = value % 60;
         return `${h}시 ${m}분 ${s}초`;
+      },
+      meta: {
+        exportValue: (value) => {
+          if (!value) return "-";
+          const h = Math.floor(value / 3600);
+          const m = Math.floor(value % 3600 / 60);
+          const s = value % 60;
+          return `${h}시 ${m}분 ${s}초`;
+        }
       }
     },
     {
@@ -60445,6 +60459,15 @@ function MonthlyAttendanceTable({ recordData }) {
         const m = Math.floor(value % 3600 / 60);
         const s = value % 60;
         return `${h}시 ${m}분 ${s}초`;
+      },
+      meta: {
+        exportValue: (value) => {
+          if (!value) return "-";
+          const h = Math.floor(value / 3600);
+          const m = Math.floor(value % 3600 / 60);
+          const s = value % 60;
+          return `${h}시 ${m}분 ${s}초`;
+        }
       }
     },
     {
@@ -60457,6 +60480,15 @@ function MonthlyAttendanceTable({ recordData }) {
         const m = value % 60;
         if (h === 0) return `${m}분`;
         return `${h}시간 ${m}분`;
+      },
+      meta: {
+        exportValue: (value) => {
+          if (!value) return "-";
+          const h = Math.floor(value / 60);
+          const m = value % 60;
+          if (h === 0) return `${m}분`;
+          return `${h}시간 ${m}분`;
+        }
       },
       sortDescFirst: false
     },
@@ -60471,12 +60503,26 @@ function MonthlyAttendanceTable({ recordData }) {
         if (h === 0) return `${m}분`;
         return `${h}시간 ${m}분`;
       },
+      meta: {
+        exportValue: (value) => {
+          if (value === 0) return "-";
+          const h = Math.floor(value / 60);
+          const m = value % 60;
+          if (h === 0) return `${m}분`;
+          return `${h}시간 ${m}분`;
+        }
+      },
       sortDescFirst: false
     },
     {
       accessorKey: "note",
       header: "비고",
-      cell: (info) => info.getValue() ?? "-"
+      cell: (info) => info.getValue() ?? "-",
+      meta: {
+        exportValue: (value) => {
+          return value;
+        }
+      }
     }
   ];
   const table = useReactTable({
@@ -60490,20 +60536,51 @@ function MonthlyAttendanceTable({ recordData }) {
     const sort = column.getIsSorted();
     if (sort === "asc") return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(ArrowUpwardRoundedIcon, { fontSize: "small" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-      lineNumber: 108,
+      lineNumber: 156,
       columnNumber: 36
-    }, this);
+    }, void 0);
     if (sort === "desc") return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(ArrowDownwardRoundedIcon, { fontSize: "small" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-      lineNumber: 109,
+      lineNumber: 157,
       columnNumber: 37
-    }, this);
+    }, void 0);
     return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SwapVertRoundedIcon, { fontSize: "small" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-      lineNumber: 110,
+      lineNumber: 158,
       columnNumber: 16
-    }, this);
+    }, void 0);
   };
+  const handleExportToCsv = () => {
+    const headers = table.getVisibleLeafColumns();
+    const csvHeaders = headers.map((header) => {
+      const h = header.columnDef.header;
+      return typeof h === "string" ? h : "";
+    });
+    const columns = table.getVisibleLeafColumns();
+    const rows = table.getRowModel().rows.map(
+      (row) => columns.map((column) => {
+        const cell = row.getVisibleCells().find((c) => c.column.id === column.id);
+        if (!cell) return "";
+        const meta = column.columnDef.meta;
+        if (meta?.exportValue) {
+          return meta.exportValue(cell.getValue());
+        }
+        const value = cell.getValue();
+        return typeof value === "string" || typeof value === "number" ? value : "";
+      })
+    );
+    const csvContent = [csvHeaders, ...rows].map((row) => row.map((v) => `"${String(v)}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url2 = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url2;
+    a.download = `${filename}.csv`;
+    a.click();
+    URL.revokeObjectURL(url2);
+  };
+  reactExports.useImperativeHandle(ref, () => ({
+    exportToCsv: handleExportToCsv
+  }));
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "mt-[20px] w-full max-h-[365px] overflow-auto text-base text-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("table", { className: "min-w-full h-full border-collapse", children: [
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("thead", { className: "sticky top-0 z-10 bg-gray-100", children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
       "tr",
@@ -60520,74 +60597,84 @@ function MonthlyAttendanceTable({ recordData }) {
               ),
               /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SortIcon, { column: header.column }, void 0, false, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-                lineNumber: 132,
+                lineNumber: 236,
                 columnNumber: 41
-              }, this)
+              }, void 0)
             ] }, void 0, true, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-              lineNumber: 127,
+              lineNumber: 231,
               columnNumber: 37
-            }, this)
+            }, void 0)
           },
           header.id,
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-            lineNumber: 122,
+            lineNumber: 226,
             columnNumber: 33
           },
-          this
+          void 0
         ))
       },
       headerGroup.id,
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-        lineNumber: 118,
+        lineNumber: 222,
         columnNumber: 25
       },
-      this
+      void 0
     )) }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-      lineNumber: 116,
+      lineNumber: 220,
       columnNumber: 17
-    }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("tbody", { children: table.getRowModel().rows.map((row) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("tr", { children: row.getVisibleCells().map((cell) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-      "td",
+    }, void 0),
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("tbody", { children: table.getRowModel().rows.map((row) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      "tr",
       {
-        className: "py-[6px] px-[12px] border border-gray-200 whitespace-nowrap break-all",
-        children: flexRender(
-          cell.column.columnDef.cell,
-          cell.getContext()
-        )
+        className: "hover:bg-gray-100 transition-all",
+        children: row.getVisibleCells().map((cell) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "td",
+          {
+            className: "py-[6px] px-[12px] border border-gray-200 whitespace-nowrap break-all",
+            children: flexRender(
+              cell.column.columnDef.cell,
+              cell.getContext()
+            )
+          },
+          cell.id,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
+            lineNumber: 250,
+            columnNumber: 33
+          },
+          void 0
+        ))
       },
-      cell.id,
+      row.id,
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-        lineNumber: 143,
-        columnNumber: 33
+        lineNumber: 245,
+        columnNumber: 25
       },
-      this
-    )) }, row.id, false, {
+      void 0
+    )) }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-      lineNumber: 141,
-      columnNumber: 25
-    }, this)) }, void 0, false, {
-      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-      lineNumber: 139,
+      lineNumber: 243,
       columnNumber: 17
-    }, this)
+    }, void 0)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-    lineNumber: 115,
+    lineNumber: 219,
     columnNumber: 13
-  }, this) }, void 0, false, {
+  }, void 0) }, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
-    lineNumber: 114,
+    lineNumber: 218,
     columnNumber: 9
-  }, this);
-}
+  }, void 0);
+});
 function MonthlyAttendanceCard() {
   const [searchParams, setSearchParams] = distExports.useSearchParams();
   const { data } = useYearMonths();
@@ -60595,6 +60682,7 @@ function MonthlyAttendanceCard() {
   const { data: monthlyAttendanceData } = useAttendanceMonthly(yearMonth);
   const summaryData = monthlyAttendanceData?.summary;
   const recordData = monthlyAttendanceData?.records;
+  const tableRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
     const ym = searchParams.get("yearMonth");
     if (ym) setYearMonth(ym);
@@ -60612,49 +60700,67 @@ function MonthlyAttendanceCard() {
       " 출퇴근 근태 현황"
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-      lineNumber: 34,
+      lineNumber: 36,
       columnNumber: 13
     }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full flex items-center justify-end gap-[20px] mt-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-      "select",
-      {
-        name: "yearMonth",
-        id: "yearMonth",
-        value: yearMonth ?? "",
-        onChange: (e) => setSearchParams({ yearMonth: e.target.value }),
-        className: "text-base border rounded-2xl border-gray-40 px-[12px] py-[3px]",
-        children: data?.yearMonth?.map((d) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: d, children: d }, d, false, {
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full flex items-center justify-end gap-[20px] mt-[20px]", children: [
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+        "button",
+        {
+          onClick: () => tableRef?.current?.exportToCsv(),
+          className: "text-base border rounded-2xl border-gray-40 px-[12px] py-[3px] cursor-pointer hover:bg-gray-100 transition-all",
+          children: "Export to CSV"
+        },
+        void 0,
+        false,
+        {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-          lineNumber: 44,
-          columnNumber: 25
-        }, this))
-      },
-      void 0,
-      false,
-      {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-        lineNumber: 36,
-        columnNumber: 17
-      },
-      this
-    ) }, void 0, false, {
+          lineNumber: 38,
+          columnNumber: 17
+        },
+        this
+      ),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+        "select",
+        {
+          name: "yearMonth",
+          id: "yearMonth",
+          value: yearMonth ?? "",
+          onChange: (e) => setSearchParams({ yearMonth: e.target.value }),
+          className: "text-base border rounded-2xl border-gray-40 px-[12px] py-[3px]",
+          children: data?.yearMonth?.map((d) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: d, children: d }, d, false, {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
+            lineNumber: 50,
+            columnNumber: 25
+          }, this))
+        },
+        void 0,
+        false,
+        {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
+          lineNumber: 42,
+          columnNumber: 17
+        },
+        this
+      )
+    ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-      lineNumber: 35,
+      lineNumber: 37,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(MonthlyAttendanceSummaryCard, { summaryData }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-      lineNumber: 50,
+      lineNumber: 56,
       columnNumber: 13
     }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(MonthlyAttendanceTable, { recordData }, void 0, false, {
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(MonthlyAttendanceTable, { recordData, ref: tableRef, filename: `${yearMonth}_Monthly_Attendance` }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-      lineNumber: 51,
+      lineNumber: 57,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-    lineNumber: 33,
+    lineNumber: 35,
     columnNumber: 9
   }, this);
 }

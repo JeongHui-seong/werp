@@ -10,4 +10,9 @@ export type attendanceRow = {
 
 export type attendanceRowProps = {
     recordData?: attendanceRow[];
+    filename: string;
+}
+
+export type monthlyAttendanceRef = {
+    exportToCsv: () => void;
 }

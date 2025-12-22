@@ -1,9 +1,10 @@
 import { useSearchParams } from "react-router-dom";
 import { useYearMonths } from "../../hooks/attendance/useYearMonths";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAttendanceMonthly } from "../../hooks/attendance/useAttendanceMonthly";
 import { MonthlyAttendanceSummaryCard } from "./MonthlyAttendanceSummaryCard";
 import { MonthlyAttendanceTable } from "./MonthlyAttendanceTable";
+import type { monthlyAttendanceRef } from "../../types/attendance/attendanceRow";
 
 export function MonthlyAttendanceCard() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -12,6 +13,7 @@ export function MonthlyAttendanceCard() {
     const { data: monthlyAttendanceData } = useAttendanceMonthly(yearMonth);
     const summaryData = monthlyAttendanceData?.summary;
     const recordData = monthlyAttendanceData?.records;
+    const tableRef = useRef<monthlyAttendanceRef>(null)
 
     // URL → state 동기화
     useEffect(() => {
@@ -33,6 +35,10 @@ export function MonthlyAttendanceCard() {
         <div className="w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden">
             <h2 className="text-lg text-center font-bold">{yearMonth} 출퇴근 근태 현황</h2>
             <div className="w-full flex items-center justify-end gap-[20px] mt-[20px]">
+                <button
+                    onClick={() => tableRef?.current?.exportToCsv()}
+                    className="text-base border rounded-2xl border-gray-40 px-[12px] py-[3px] cursor-pointer hover:bg-gray-100 transition-all"
+                >Export to CSV</button>
                 <select
                     name="yearMonth"
                     id="yearMonth"
@@ -48,7 +54,7 @@ export function MonthlyAttendanceCard() {
                 </select>
             </div>
             <MonthlyAttendanceSummaryCard summaryData = {summaryData}/>
-            <MonthlyAttendanceTable recordData = {recordData}/>
+            <MonthlyAttendanceTable recordData = {recordData} ref={tableRef} filename={`${yearMonth}_Monthly_Attendance`}/>
         </div>
     )
 }
