@@ -4,7 +4,10 @@ import { fetchMonthlyAttendance } from "../../api/attendanceService";
 export const useAttendanceMonthly = (yearMonth: string | null) => {
     return useQuery({
         queryKey: ['attendanceMonthly', yearMonth],
-        queryFn: () => fetchMonthlyAttendance(yearMonth!, "09:00"),
+        queryFn: () => {
+            console.log("fetch month : ", yearMonth);
+            return fetchMonthlyAttendance(yearMonth!, "09:00");
+        },
         staleTime: Infinity,
         retry: false,
         enabled: !!yearMonth,

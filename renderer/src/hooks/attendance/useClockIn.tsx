@@ -14,7 +14,9 @@ export const useClockIn = () => {
             toast.success(data.message);
             queryClient.setQueryData(
                 ['attendance', today]
-                , data)
+                , data);
+            queryClient.invalidateQueries({ queryKey: ['attendanceMonthly']});
+            queryClient.invalidateQueries({ queryKey: ['yearMonths']});
         },
         onError: (err) => {
             toast.error(err.message)
