@@ -36563,10 +36563,10 @@ function useEmailValidation(value) {
   }, [value]);
   return isValid2;
 }
-const url$1 = "http://localhost:4000/api";
+const url$2 = "http://localhost:4000/api";
 const emailValidation = async (email) => {
   try {
-    const res = await fetch(`${url$1}/auth/find-email`, {
+    const res = await fetch(`${url$2}/auth/find-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -36585,7 +36585,7 @@ const emailValidation = async (email) => {
 };
 const resendVerification = async (email) => {
   try {
-    const res = await fetch(`${url$1}/auth/resend-code`, {
+    const res = await fetch(`${url$2}/auth/resend-code`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -36604,7 +36604,7 @@ const resendVerification = async (email) => {
 };
 const login = async (email) => {
   try {
-    const res = await fetch(`${url$1}/auth/login`, {
+    const res = await fetch(`${url$2}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -49096,14 +49096,14 @@ function cleanEscapedString(input) {
 function getDefaultOptions() {
   return Object.assign({}, getDefaultOptions$1());
 }
-const url = "http://localhost:4000/api";
+const url$1 = "http://localhost:4000/api";
 const clockIn = async (date) => {
   const token = useAuthStore.getState().token;
   if (!token) {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url}/attendance/clockin`, {
+    const res = await fetch(`${url$1}/attendance/clockin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49127,7 +49127,7 @@ const fetchTodayAttendance = async (date) => {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url}/attendance/today?date=${date}`, {
+    const res = await fetch(`${url$1}/attendance/today?date=${date}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -49150,7 +49150,7 @@ const clockOut = async (attendanceId) => {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url}/attendance/clockout`, {
+    const res = await fetch(`${url$1}/attendance/clockout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49174,7 +49174,7 @@ const fetchMonthlyAttendance = async (yearMonth, startWorkTime) => {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url}/attendance/monthly?yearMonth=${yearMonth}&startWorkTime=${startWorkTime}`, {
+    const res = await fetch(`${url$1}/attendance/monthly?yearMonth=${yearMonth}&startWorkTime=${startWorkTime}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -49197,7 +49197,7 @@ const fetchYearMonth = async () => {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url}/attendance/year-months`, {
+    const res = await fetch(`${url$1}/attendance/year-months`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -57661,7 +57661,6 @@ const useAttendanceMonthly = (yearMonth) => {
   return useQuery({
     queryKey: ["attendanceMonthly", yearMonth],
     queryFn: () => {
-      console.log("fetch month : ", yearMonth);
       return fetchMonthlyAttendance(yearMonth, "09:00");
     },
     staleTime: Infinity,
@@ -60825,10 +60824,90 @@ function AttendancePage() {
     columnNumber: 9
   }, this);
 }
+const url = "http://localhost:4000/api";
+const fetchLeavesType = async () => {
+  try {
+    const res = await fetch(`${url}/leaves/types`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("fetchLeaves api error : ", err);
+  }
+};
+const useLeavesType = () => {
+  return useQuery({
+    queryKey: ["leavesType"],
+    queryFn: fetchLeavesType,
+    staleTime: Infinity,
+    retry: false
+  });
+};
+const leavesTypeColumn = [
+  {
+    accessorKey: "id",
+    header: "No",
+    cell: (info) => info.getValue()
+  },
+  {
+    accessorKey: "type",
+    header: "휴가 타입",
+    cell: (info) => info.getValue()
+  },
+  {
+    accessorKey: "days",
+    header: "차감 일수",
+    cell: (info) => info.getValue()
+  }
+];
+const LeavesSettingsTable = ({ recordData }) => {
+  const table = useReactTable({
+    data: recordData ?? [],
+    columns: leavesTypeColumn,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    enableSorting: true
+  });
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "mt-[20px] w-full max-h-[500px] overflow-auto text-base text-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(TableUI, { table }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsTable.tsx",
+    lineNumber: 17,
+    columnNumber: 13
+  }, void 0) }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsTable.tsx",
+    lineNumber: 16,
+    columnNumber: 9
+  }, void 0);
+};
 function AdminLeaveSettingsCard() {
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden", children: "AdminLeaveSettings" }, void 0, false, {
-    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminSettingsCard.tsx",
-    lineNumber: 3,
+  const { data: leavesType } = useLeavesType();
+  console.log(leavesType?.leavesType.length);
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden", children: [
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "font-bold text-center text-lg", children: "휴가 설정" }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
+      lineNumber: 13,
+      columnNumber: 13
+    }, this),
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(LeavesSettingsTable, { recordData: leavesType }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
+      lineNumber: 14,
+      columnNumber: 13
+    }, this),
+    leavesType?.leavesType.length === 0 && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base text-center p-[20px]", children: "등록된 데이터가 없습니다." }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
+      lineNumber: 16,
+      columnNumber: 17
+    }, this)
+  ] }, void 0, true, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
+    lineNumber: 12,
     columnNumber: 9
   }, this);
 }

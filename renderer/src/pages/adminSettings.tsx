@@ -1,4 +1,4 @@
-import { AdminLeaveSettingsCard } from "../components/adminSettings/adminSettingsCard"
+import { AdminLeaveSettingsCard } from "../components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard"
 
 export function AdminLeaveSettingsPage() {
     return(
