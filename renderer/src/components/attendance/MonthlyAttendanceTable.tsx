@@ -23,7 +23,7 @@ export const MonthlyAttendanceTable = forwardRef<monthlyAttendanceRef, attendanc
 
 
     return(
-        <div className="mt-[20px] w-full max-h-[365px] overflow-auto text-base text-center">
+        <div className="mt-[20px] w-full overflow-auto text-base text-center">
             <TableUI table={table} />
         </div>
     )

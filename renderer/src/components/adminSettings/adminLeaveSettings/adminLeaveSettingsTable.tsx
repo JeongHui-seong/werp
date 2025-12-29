@@ -13,7 +13,7 @@ export const LeavesSettingsTable = ({ recordData }: leavesTypeProps) => {
     });
 
     return(
-        <div className="mt-[20px] w-full max-h-[500px] overflow-auto text-base text-center">
+        <div className="mt-[20px] w-full overflow-auto text-base text-center">
             <TableUI table={table} />
         </div>
     )

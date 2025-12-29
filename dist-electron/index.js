@@ -57622,7 +57622,7 @@ function PrivateLayout() {
       lineNumber: 9,
       columnNumber: 17
     }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full flex gap-[20px]", children: [
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full max-h-[calc(100vh-80px)] flex gap-[20px]", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(Navbar, {}, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/privateLayout.tsx",
         lineNumber: 11,
@@ -60714,7 +60714,7 @@ const MonthlyAttendanceTable = reactExports.forwardRef(({ recordData, filename }
   reactExports.useImperativeHandle(ref, () => ({
     exportToCsv: handleExportToCsv
   }));
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "mt-[20px] w-full max-h-[365px] overflow-auto text-base text-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(TableUI, { table }, void 0, false, {
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "mt-[20px] w-full overflow-auto text-base text-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(TableUI, { table }, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceTable.tsx",
     lineNumber: 27,
     columnNumber: 13
@@ -60743,7 +60743,7 @@ function MonthlyAttendanceCard() {
     setSearchParams({ yearMonth: first });
     setYearMonth(first);
   }, [data, yearMonth, setSearchParams]);
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden", children: [
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col", children: [
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "text-lg text-center font-bold", children: [
       yearMonth,
       " 출퇴근 근태 현황"
@@ -60876,7 +60876,7 @@ const LeavesSettingsTable = ({ recordData }) => {
     getSortedRowModel: getSortedRowModel(),
     enableSorting: true
   });
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "mt-[20px] w-full max-h-[500px] overflow-auto text-base text-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(TableUI, { table }, void 0, false, {
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "mt-[20px] w-full overflow-auto text-base text-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(TableUI, { table }, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsTable.tsx",
     lineNumber: 17,
     columnNumber: 13
@@ -60889,25 +60889,25 @@ const LeavesSettingsTable = ({ recordData }) => {
 function AdminLeaveSettingsCard() {
   const { data: leavesType } = useLeavesType();
   console.log(leavesType?.leavesType.length);
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden", children: [
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col", children: [
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "font-bold text-center text-lg", children: "휴가 설정" }, void 0, false, {
-      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-      lineNumber: 13,
-      columnNumber: 13
-    }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(LeavesSettingsTable, { recordData: leavesType }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
       lineNumber: 14,
       columnNumber: 13
     }, this),
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(LeavesSettingsTable, { recordData: leavesType }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
+      lineNumber: 15,
+      columnNumber: 13
+    }, this),
     leavesType?.leavesType.length === 0 && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base text-center p-[20px]", children: "등록된 데이터가 없습니다." }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-      lineNumber: 16,
+      lineNumber: 17,
       columnNumber: 17
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-    lineNumber: 12,
+    lineNumber: 13,
     columnNumber: 9
   }, this);
 }

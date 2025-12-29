@@ -7,7 +7,7 @@ export function PrivateLayout(){
         <>
             <div className="w-full h-[100vh] flex flex-col gap-[20px] bg-gray-100 relative">
                 <Header />
-                <div className="w-full flex gap-[20px]">
+                <div className="w-full max-h-[calc(100vh-80px)] flex gap-[20px]">
                     <Navbar />
                     <Outlet />
                 </div>

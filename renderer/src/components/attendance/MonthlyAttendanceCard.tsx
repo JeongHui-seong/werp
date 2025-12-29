@@ -32,7 +32,7 @@ export function MonthlyAttendanceCard() {
     }, [data, yearMonth, setSearchParams]);
 
     return(
-        <div className="w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden">
+        <div className="w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col">
             <h2 className="text-lg text-center font-bold">{yearMonth} 출퇴근 근태 현황</h2>
             <div className="w-full flex items-center justify-end gap-[20px] mt-[20px]">
                 <button
