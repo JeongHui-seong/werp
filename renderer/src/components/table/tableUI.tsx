@@ -25,7 +25,9 @@ export function TableUI<T>({ table }: TableUIProps<T>){
                                         header.column.columnDef.header,
                                         header.getContext()
                                     )}
-                                    <SortIcon column={header.column} />
+                                    {header.column.getCanSort() && (
+                                        <SortIcon column={header.column} />
+                                    )}
                                 </div>
                             </th>
                         ))}

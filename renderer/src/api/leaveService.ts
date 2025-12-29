@@ -1,3 +1,5 @@
+import type { upsertLeavesType } from "../types/leaves/leavesType"; 
+
 const url: string = import.meta.env.VITE_BASE_URL
 
 export const fetchLeavesType = async () => {
@@ -19,7 +21,7 @@ export const fetchLeavesType = async () => {
     }
 }
 
-export const updateLeavesType = async (leaveTypes : string) => {
+export const updateLeavesType = async (leaveTypes : upsertLeavesType) => {
     try{
         const res = await fetch(`${url}/leaves/types`, {
             method: "POST",

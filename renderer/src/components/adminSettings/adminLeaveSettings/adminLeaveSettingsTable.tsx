@@ -1,15 +1,19 @@
 import { getCoreRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
-import type { leavesType, leavesTypeProps } from "../../../types/leaves/leavesType";
+import type { leavesTypeDraft, leavesTypeProps } from "../../../types/leaves/leavesType";
 import { leavesTypeColumn } from "./adminLeaveSettingsColumn";
 import { TableUI } from "../../table/tableUI";
+import { useMemo } from "react";
 
-export const LeavesSettingsTable = ({ recordData }: leavesTypeProps) => {
-    const table = useReactTable<leavesType>({
+export const LeavesSettingsTable = ({ recordData, editMode, onChange }: leavesTypeProps) => {
+    const columns = useMemo(() => leavesTypeColumn(editMode, onChange), [editMode, onChange])
+    const table = useReactTable<leavesTypeDraft>({
         data: recordData ?? [],
-        columns: leavesTypeColumn,
+        columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        enableSorting: true,
+        enableSorting: !editMode,
+        enableRowSelection: true,
+        getRowId: row => row.rowId,
     });
 
     return(

@@ -60,7 +60,7 @@ export function Header(){
                     <button
                         disabled={isDisabled}
                         onClick={handleAttendance}
-                        className={`px-[12px] py-[6px] rounded-2xl text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white"}`}
+                        className={`px-[12px] py-[6px] rounded-2xl text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white hover:bg-blue-600 transition-all"}`}
                         >{isLoading ? "로딩 중" : clockInOutBtnText}</button>
                     <div className="flex items-center justify-center gap-[12px]">
                         <div className="cursor-pointer">

@@ -37,14 +37,14 @@ export function MonthlyAttendanceCard() {
             <div className="w-full flex items-center justify-end gap-[20px] mt-[20px]">
                 <button
                     onClick={() => tableRef?.current?.exportToCsv()}
-                    className="text-base border rounded-2xl border-gray-40 px-[12px] py-[3px] cursor-pointer hover:bg-gray-100 transition-all"
+                    className="text-base rounded-2xl px-[12px] py-[6px] cursor-pointer bg-green-700 text-white hover:bg-green-600 transition-all"
                 >Export to CSV</button>
                 <select
                     name="yearMonth"
                     id="yearMonth"
                     value={yearMonth ?? ""}
                     onChange={(e) => setSearchParams({ yearMonth : e.target.value })}
-                    className="text-base border rounded-2xl border-gray-40 px-[12px] py-[3px]"
+                    className="text-base border rounded-2xl border-gray-40 px-[12px] py-[6px]"
                     >
                     {data?.yearMonth?.map((d:string) => (
                         <option key={d} value={d}>
