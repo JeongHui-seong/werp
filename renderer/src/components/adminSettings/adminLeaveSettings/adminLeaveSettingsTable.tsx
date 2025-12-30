@@ -4,7 +4,7 @@ import { leavesTypeColumn } from "./adminLeaveSettingsColumn";
 import { TableUI } from "../../table/tableUI";
 import { useMemo } from "react";
 
-export const LeavesSettingsTable = ({ recordData, editMode, onChange }: leavesTypeProps) => {
+export const LeavesSettingsTable = ({ recordData, editMode, onChange, rowSelection, setRowSelection }: leavesTypeProps) => {
     const columns = useMemo(() => leavesTypeColumn(editMode, onChange), [editMode, onChange])
     const table = useReactTable<leavesTypeDraft>({
         data: recordData ?? [],
@@ -12,7 +12,11 @@ export const LeavesSettingsTable = ({ recordData, editMode, onChange }: leavesTy
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         enableSorting: !editMode,
+        state: {
+            rowSelection,
+        },
         enableRowSelection: true,
+        onRowSelectionChange: setRowSelection,
         getRowId: row => row.rowId,
     });
 

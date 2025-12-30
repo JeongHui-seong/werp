@@ -47,11 +47,14 @@ export const leavesTypeColumn = (
                         onChange={e =>setRows(prev =>
                             prev.map((r) =>
                                 r.rowId === row.original.rowId ?
-                                { ...r, type: e.target.value, isDirty: true}
+                                { ...r, type: e.target.value,
+                                    isDirty: e.target.value !== r.original?.type ||
+                                    r.days !== r.original?.days}
                                 : r    
                             )
                         )}
                         className="border border-gray-700 px-[12px] py-[3px] rounded-xl"
+                        placeholder="휴가타입"
                     />
                 ) : (getValue()),
         },
@@ -65,11 +68,14 @@ export const leavesTypeColumn = (
                         onChange={e =>setRows(prev =>
                             prev.map((r) =>
                                 r.rowId === row.original.rowId ?
-                                { ...r, days: e.target.value, isDirty: true}
+                                { ...r, days: e.target.value,
+                                    isDirty: r.type !== r.original?.type ||
+                                    e.target.value !== r.original?.days,}
                                 : r    
                             )
                         )}
                         className="border border-gray-700 p-[12px] py-[3px] rounded-xl"
+                        placeholder="0~1 사이 소수"
                     />
                 ) : (getValue()),
         },
