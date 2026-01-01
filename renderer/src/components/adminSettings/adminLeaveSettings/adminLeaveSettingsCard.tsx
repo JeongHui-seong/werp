@@ -9,6 +9,7 @@ import { Dialog } from "../../common/dialog";
 import type { dialog } from "../../../types/dialogData";
 import type { RowSelectionState } from "@tanstack/react-table";
 import { useDeleteLeavesType } from "../../../hooks/leaves/useDeleteLeavesType";
+import { AdminLeaveSettingsPolicy } from "./adminLeaveSettingsPolicy";
 
 export function AdminLeaveSettingsCard(){
     //TODO
@@ -141,7 +142,6 @@ export function AdminLeaveSettingsCard(){
                 }))
             )
         }
-        console.log(data)
     }, [data]);
 
     return(
@@ -155,6 +155,7 @@ export function AdminLeaveSettingsCard(){
         }
             <div className="w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col">
                 <h2 className="font-bold text-center text-lg">휴가 설정</h2>
+                <AdminLeaveSettingsPolicy />
                 <div className="flex w-full justify-end items-center gap-[20px]">
                     {!editMode ? (
                         <>

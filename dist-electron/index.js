@@ -60823,11 +60823,13 @@ function AttendancePage() {
 }
 const url = "http://localhost:4000/api";
 const fetchLeavesType = async () => {
+  const token = useAuthStore.getState().token;
   try {
     const res = await fetch(`${url}/leaves/types`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       }
     });
     if (!res.ok) {
@@ -60841,11 +60843,13 @@ const fetchLeavesType = async () => {
   }
 };
 const updateLeavesType = async (leaveTypes) => {
+  const token = useAuthStore.getState().token;
   try {
     const res = await fetch(`${url}/leaves/types`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ leaveTypes })
     });
@@ -60860,11 +60864,13 @@ const updateLeavesType = async (leaveTypes) => {
   }
 };
 const deleteLeavesType = async (ids) => {
+  const token = useAuthStore.getState().token;
   try {
     const res = await fetch(`${url}/leaves/types`, {
       method: "DELETE",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ ids })
     });
@@ -60876,6 +60882,47 @@ const deleteLeavesType = async (ids) => {
     return data;
   } catch (err) {
     console.log("deleteLeavesType api error : ", err);
+  }
+};
+const fetchLeavesPolicy = async (year) => {
+  const token = useAuthStore.getState().token;
+  try {
+    const res = await fetch(`${url}/leaves/policy?year=${year}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("fetchLeavesPolicy api error : ", err);
+  }
+};
+const updateLeavesPolicy = async (year, days) => {
+  const token = useAuthStore.getState().token;
+  try {
+    const res = await fetch(`${url}/leaves/policy`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ year, days })
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("updateLeavesPolicy api error : ", err);
   }
 };
 const useLeavesType = () => {
@@ -61085,6 +61132,186 @@ const useDeleteLeavesType = () => {
     }
   });
 };
+function useGetLeavePolicy(year) {
+  return useQuery({
+    queryKey: ["leavePolicy", year],
+    queryFn: () => fetchLeavesPolicy(Number(year)),
+    staleTime: Infinity,
+    retry: false,
+    enabled: !!year
+  });
+}
+function useEditLeavePolicy(year) {
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: ({ year: year2, days }) => updateLeavesPolicy(year2, days),
+    onSuccess: (data) => {
+      y.success(data.message);
+      queryClient2.invalidateQueries({ queryKey: ["leavePolicy", year] });
+    },
+    onError: (err) => {
+      y.error(err.message);
+    }
+  });
+}
+function AdminLeaveSettingsPolicy() {
+  const { data: yearMonth } = useYearMonths();
+  const [year, setYear] = reactExports.useState(null);
+  const { data: leavePolicy } = useGetLeavePolicy(year ?? "");
+  const [mode, setMode] = reactExports.useState("view");
+  const [rawDays, setRawDays] = reactExports.useState(0);
+  const [editedDays, setEditedDays] = reactExports.useState(0);
+  const isDisabled = rawDays === editedDays;
+  const [open, setOpen] = reactExports.useState(false);
+  const [dialogData, setDialogData] = reactExports.useState(null);
+  const { mutate: editLeavePolicy } = useEditLeavePolicy(year ?? "");
+  reactExports.useEffect(() => {
+    setYear(yearMonth?.yearMonth[0].split("-")[0] ?? null);
+  }, [yearMonth]);
+  reactExports.useEffect(() => {
+    if (!leavePolicy?.result) return;
+    setRawDays(leavePolicy.result.days);
+    setEditedDays(leavePolicy.result.days);
+  }, [leavePolicy]);
+  const onEdit = () => {
+    setDialogData({
+      title: "기본 휴가일 수정",
+      content: "기본 휴가일을 수정하시겠습니까?",
+      okButtonText: "수정하기",
+      onOK: () => {
+        editLeavePolicy({ year: Number(year), days: editedDays });
+        setMode("view");
+      }
+    });
+    setOpen(true);
+  };
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
+    dialogData && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      Dialog,
+      {
+        dialogData,
+        open,
+        onClose: () => setOpen(false)
+      },
+      void 0,
+      false,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+        lineNumber: 47,
+        columnNumber: 17
+      },
+      this
+    ),
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full border border-gray-200 rounded-2xl mt-[20px] mb-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-between gap-[20px] px-[12px] py-[6px]", children: [
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "flex-1 text-center", children: [
+        year,
+        "년도 기본 휴가일"
+      ] }, void 0, true, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+        lineNumber: 55,
+        columnNumber: 21
+      }, this),
+      mode === "view" && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px] flex-1", children: [
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "flex-1 text-center font-bold", children: [
+          leavePolicy?.result.days,
+          "일"
+        ] }, void 0, true, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+          lineNumber: 58,
+          columnNumber: 25
+        }, this),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            className: "text-base rounded-2xl px-[12px] py-[6px] cursor-pointer bg-green-700 text-white hover:bg-green-600 transition-all",
+            onClick: () => setMode("edit"),
+            children: "수정하기"
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+            lineNumber: 59,
+            columnNumber: 25
+          },
+          this
+        )
+      ] }, void 0, true, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+        lineNumber: 57,
+        columnNumber: 21
+      }, this),
+      mode === "edit" && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px] flex-1", children: [
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "input",
+          {
+            type: "number",
+            value: editedDays,
+            className: "flex-1 py-[6px] px-[12px] rounded-2xl border border-gray-300",
+            onChange: (e) => setEditedDays(Number(e.target.value))
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+            lineNumber: 68,
+            columnNumber: 29
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            className: "text-base rounded-2xl px-[12px] py-[6px] cursor-pointer text-black hover:bg-gray-100 transition-all",
+            onClick: () => setMode("view"),
+            children: "취소"
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+            lineNumber: 74,
+            columnNumber: 29
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            onClick: onEdit,
+            disabled: isDisabled,
+            className: `${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-green-700 text-white hover:bg-green-600 cursor-pointer transition-all"} text-base rounded-2xl px-[12px] py-[6px]`,
+            children: "수정하기"
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+            lineNumber: 80,
+            columnNumber: 29
+          },
+          this
+        )
+      ] }, void 0, true, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+        lineNumber: 67,
+        columnNumber: 25
+      }, this)
+    ] }, void 0, true, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+      lineNumber: 54,
+      columnNumber: 17
+    }, this) }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+      lineNumber: 53,
+      columnNumber: 13
+    }, this)
+  ] }, void 0, true, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
+    lineNumber: 45,
+    columnNumber: 9
+  }, this);
+}
 function AdminLeaveSettingsCard() {
   const { data } = useLeavesType();
   const [editMode, setEditMode] = reactExports.useState(false);
@@ -61188,7 +61415,6 @@ function AdminLeaveSettingsCard() {
         }))
       );
     }
-    console.log(data);
   }, [data]);
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
     dialogData && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -61213,6 +61439,11 @@ function AdminLeaveSettingsCard() {
         lineNumber: 157,
         columnNumber: 17
       }, this),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(AdminLeaveSettingsPolicy, {}, void 0, false, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
+        lineNumber: 158,
+        columnNumber: 17
+      }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex w-full justify-end items-center gap-[20px]", children: !editMode ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
           "button",
@@ -61225,7 +61456,7 @@ function AdminLeaveSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-            lineNumber: 161,
+            lineNumber: 162,
             columnNumber: 29
           },
           this
@@ -61241,14 +61472,14 @@ function AdminLeaveSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-            lineNumber: 165,
+            lineNumber: 166,
             columnNumber: 29
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-        lineNumber: 160,
+        lineNumber: 161,
         columnNumber: 25
       }, this) : /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -61278,7 +61509,7 @@ function AdminLeaveSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-            lineNumber: 172,
+            lineNumber: 173,
             columnNumber: 29
           },
           this
@@ -61294,18 +61525,18 @@ function AdminLeaveSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-            lineNumber: 192,
+            lineNumber: 193,
             columnNumber: 29
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-        lineNumber: 171,
+        lineNumber: 172,
         columnNumber: 25
       }, this) }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-        lineNumber: 158,
+        lineNumber: 159,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -61321,7 +61552,7 @@ function AdminLeaveSettingsCard() {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-          lineNumber: 199,
+          lineNumber: 200,
           columnNumber: 17
         },
         this
@@ -61334,7 +61565,7 @@ function AdminLeaveSettingsCard() {
           children: [
             /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(AddRoundedIcon, { fontSize: "small" }, void 0, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-              lineNumber: 211,
+              lineNumber: 212,
               columnNumber: 25
             }, this),
             "행 추가"
@@ -61344,14 +61575,14 @@ function AdminLeaveSettingsCard() {
         true,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-          lineNumber: 207,
+          lineNumber: 208,
           columnNumber: 21
         },
         this
       ),
       data?.leavesType.length === 0 && !editMode && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base text-center p-[20px]", children: "등록된 데이터가 없습니다." }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsCard.tsx",
-        lineNumber: 215,
+        lineNumber: 216,
         columnNumber: 21
       }, this)
     ] }, void 0, true, {

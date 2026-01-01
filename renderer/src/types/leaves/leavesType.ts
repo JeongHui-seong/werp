@@ -33,3 +33,8 @@ export type Response = {
     success: boolean;
     message: string;
 }
+
+export type updateLeavesPolicyPayload = {
+    year: number;
+    days: number;
+}
