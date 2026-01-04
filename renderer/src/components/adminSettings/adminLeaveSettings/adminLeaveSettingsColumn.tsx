@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { leavesTypeDraft } from "../../../types/leaves/leavesType";
+import type { leavesTypeDraft } from "../../../types/leaves/adminLeavesType";
 import { IndeterminateCheckbox } from "../../table/IndeterminateCheckbox";
 import type React from "react";
 
@@ -10,20 +10,20 @@ export const leavesTypeColumn = (
         {
             id: 'select',
             enableSorting: false,
-            header: ({ table }) => ( !editMode &&
+            header: ({ table }) =>
                 <IndeterminateCheckbox
                     checked={table.getIsAllRowsSelected()}
                     indeterminate={table.getIsSomeRowsSelected()}
                     onChange={table.getToggleAllRowsSelectedHandler()}
                 />
-            ),
-            cell: ({ row }) => ( !editMode &&
+            ,
+            cell: ({ row }) =>
                 <IndeterminateCheckbox
                     checked={row.getIsSelected()}
                     disabled={!row.getCanSelect()}
                     onChange={row.getToggleSelectedHandler()}
                 />
-            ),
+            ,
         },
         {
             accessorKey: "id",

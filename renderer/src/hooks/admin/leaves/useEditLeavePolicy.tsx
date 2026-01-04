@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateLeavesPolicy } from "../../api/leaveService";
-import type { Response, updateLeavesPolicyPayload } from "../../types/leaves/leavesType";
+import { updateLeavesPolicy } from "../../../api/leaveService";
+import type { Response, updateLeavesPolicyPayload } from "../../../types/leaves/adminLeavesType";
 import { toast } from "react-toastify";
 
 export function useEditLeavePolicy(year: string) {

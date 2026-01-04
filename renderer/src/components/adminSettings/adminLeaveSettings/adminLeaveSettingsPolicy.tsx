@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useYearMonths } from "../../../hooks/attendance/useYearMonths";
-import { useGetLeavePolicy } from "../../../hooks/leaves/useGetLeavePolicy";
+import { useGetLeavePolicy } from "../../../hooks/admin/leaves/useGetLeavePolicy";
 import { Dialog } from "../../common/dialog";
 import type { dialog } from "../../../types/dialogData";
-import { useEditLeavePolicy } from "../../../hooks/leaves/useEditLeavePolicy";
+import { useEditLeavePolicy } from "../../../hooks/admin/leaves/useEditLeavePolicy";
 
 export function AdminLeaveSettingsPolicy() {
     const { data: yearMonth } = useYearMonths();

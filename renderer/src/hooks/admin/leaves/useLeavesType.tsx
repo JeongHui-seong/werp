@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { fetchLeavesType } from "../../api/leaveService"
+import { fetchLeavesType } from "../../../api/leaveService"
 
 export const useLeavesType = () => {
     return useQuery({

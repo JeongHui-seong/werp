@@ -1,40 +1,31 @@
-import type { RowSelectionState } from "@tanstack/react-table";
-
-export type leavesType = {
-    id?: number;
-    type: string;
-    days: number;
+export type leavesSummary = {
+    remainingLeaves: number;
+    usedLeaves: number;
+    pendingLeaves: number;
 }
 
-export type leavesTypeDraft = {
-    rowId: string;
-    id?: number;
-    type: string;
-    days: number | string;
-    isDirty: boolean;
-    isNew: boolean;
-    original:{
-        type: string;
-        days: number | string;
-    }
+export type leavesSummaryProps = {
+    summaryData?: leavesSummary
 }
 
-export type leavesTypeProps = {
-    recordData?: leavesTypeDraft[];
-    editMode: boolean;
-    onChange: React.Dispatch<React.SetStateAction<leavesTypeDraft[]>>;
-    rowSelection: RowSelectionState;
-    setRowSelection: React.Dispatch<React.SetStateAction<RowSelectionState>>;
+export type leavesColumnRow = {
+    id: number;
+    startdate: string;
+    enddate: string;
+    status: string;
+    reason: string | null;
+    approvedAt: string | null;
+    createdAt: string;
+    rejectionReason: string | null;
+    approverName: string | null;
+    leaveType: string;
 }
 
-export type upsertLeavesTypePayload = leavesType[];
-
-export type Response = {
-    success: boolean;
-    message: string;
+export type leavesColumnProps = {
+    recordData?: leavesColumnRow[];
+    filename: string;
 }
 
-export type updateLeavesPolicyPayload = {
-    year: number;
-    days: number;
+export type leavesColumnRef = {
+    exportToCsv: () => void;
 }

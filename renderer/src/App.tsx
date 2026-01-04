@@ -7,6 +7,7 @@ import { PrivateLayout } from "./components/common/privateLayout"
 import 'react-toastify/ReactToastify.css'
 import AttendancePage from "./pages/attendance"
 import { AdminLeaveSettingsPage } from "./pages/adminSettings"
+import { LeavesPage } from "./pages/leaves"
 
 function App() {
   return(
@@ -24,6 +25,7 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/attendance/attendance" element={<AttendancePage />} />
+            <Route path="/attendance/leaves" element={<LeavesPage />} />
             <Route path="/admin/leaveSettings" element={<AdminLeaveSettingsPage />} />
           </Route>
         </Route>

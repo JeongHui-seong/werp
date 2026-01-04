@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { deleteLeavesType } from "../../api/leaveService";
-import type { Response } from "../../types/leaves/leavesType";
+import { updateLeavesType } from "../../../api/leaveService";
+import type { upsertLeavesTypePayload, Response } from "../../../types/leaves/adminLeavesType";
 import { toast } from "react-toastify";
 
-export const useDeleteLeavesType = () => {
+export const useEditLeavesType = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (ids: number[]) => deleteLeavesType(ids),
+        mutationFn: (leaveTypes: upsertLeavesTypePayload) => updateLeavesType(leaveTypes),
         onSuccess: (data: Response) => {
             toast.success(data.message);
             queryClient.invalidateQueries({ queryKey: ['leavesType'] })

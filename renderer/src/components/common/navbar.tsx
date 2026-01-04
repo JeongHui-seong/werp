@@ -38,6 +38,9 @@ export function Navbar(){
                         <li>
                             <NavLink to='/attendance/attendance'  className={({isActive}) => `w-full flex gap-[8px] px-[24px] py-[10px] cursor-pointer rounded-2xl transition-all duration-200 ${isActive ? "text-blue-700" : ''}`}>근태 현황</NavLink>
                         </li>
+                        <li>
+                            <NavLink to='/attendance/leaves'  className={({isActive}) => `w-full flex gap-[8px] px-[24px] py-[10px] cursor-pointer rounded-2xl transition-all duration-200 ${isActive ? "text-blue-700" : ''}`}>휴가 현황</NavLink>
+                        </li>
                     </ul>
                 </li>
                 {user?.user?.role === "admin" &&                 

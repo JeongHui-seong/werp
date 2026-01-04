@@ -1,20 +1,19 @@
 import { useEffect, useState } from "react";
-import { useLeavesType } from "../../../hooks/leaves/useLeavesType";
+import { useLeavesType } from "../../../hooks/admin/leaves/useLeavesType";
 import { LeavesSettingsTable } from "../adminLeaveSettings/adminLeaveSettingsTable";
-import type { leavesTypeDraft } from "../../../types/leaves/leavesType";
+import type { leavesTypeDraft } from "../../../types/leaves/adminLeavesType";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { toast } from "react-toastify";
-import { useEditLeavesType } from "../../../hooks/leaves/useEditLeavesType";
+import { useEditLeavesType } from "../../../hooks/admin/leaves/useEditLeavesType";
 import { Dialog } from "../../common/dialog";
 import type { dialog } from "../../../types/dialogData";
 import type { RowSelectionState } from "@tanstack/react-table";
-import { useDeleteLeavesType } from "../../../hooks/leaves/useDeleteLeavesType";
+import { useDeleteLeavesType } from "../../../hooks/admin/leaves/useDeleteLeavesType";
 import { AdminLeaveSettingsPolicy } from "./adminLeaveSettingsPolicy";
 
 export function AdminLeaveSettingsCard(){
-    //TODO
-    //type의 이름이 같은지 확인하는 로직
-    //upsert로 수정/삽입 기능
+    // TODO
+    // 수정모드일 때 삭제 기능 구현 필요
     const { data } = useLeavesType();
     const [editMode, setEditMode] = useState(false);
     const [draftRows, setDraftRows] = useState<leavesTypeDraft[]>([]);

@@ -1,5 +1,5 @@
 import { getCoreRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
-import type { leavesTypeDraft, leavesTypeProps } from "../../../types/leaves/leavesType";
+import type { leavesTypeDraft, leavesTypeProps } from "../../../types/leaves/adminLeavesType";
 import { leavesTypeColumn } from "./adminLeaveSettingsColumn";
 import { TableUI } from "../../table/tableUI";
 import { useMemo } from "react";

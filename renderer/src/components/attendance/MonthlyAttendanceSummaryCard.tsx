@@ -1,4 +1,5 @@
 import type { attendanceSummaryProps, attendanceSummary } from "../../types/attendance/attendanceSummary";
+import { timeFormatMinutes } from "../../utils/timeFormat";
 
 export function MonthlyAttendanceSummaryCard({summaryData}:attendanceSummaryProps){
     const attendanceSummaryConfig = {
@@ -8,20 +9,12 @@ export function MonthlyAttendanceSummaryCard({summaryData}:attendanceSummaryProp
         lateMinutes: "지각"
     } as const;
 
-    const formatMinutes = (minutes: number) => {
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-
-        if (hours === 0) return `${mins}분`;
-        return `${hours}시간 ${mins}분`
-    }
-
     const summaryList = summaryData ?
         (Object.keys(attendanceSummaryConfig) as (keyof attendanceSummary)[]).map(
             (key) => ({
                 key,
                 label: attendanceSummaryConfig[key],
-                value: formatMinutes(summaryData[key]),
+                value: timeFormatMinutes(summaryData[key]),
             }))
         : [];
     return(
