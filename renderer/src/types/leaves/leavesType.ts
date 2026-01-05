@@ -1,3 +1,5 @@
+import type { Dispatch, SetStateAction } from "react";
+
 export type leavesSummary = {
     remainingLeaves: number;
     usedLeaves: number;
@@ -28,4 +30,8 @@ export type leavesColumnProps = {
 
 export type leavesColumnRef = {
     exportToCsv: () => void;
+}
+
+export type createLeavesDialogProps = {
+    setOpen: Dispatch<SetStateAction<boolean>>;
 }
