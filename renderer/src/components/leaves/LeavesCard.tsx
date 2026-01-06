@@ -4,7 +4,7 @@ import { LeavesSummaryCard } from "./LeavesSummaryCard";
 import { LeavesTable } from "./LeavesTable";
 import { useRef, useState } from "react";
 import type { leavesColumnRef } from "../../types/leaves/leavesType";
-import { CreateLeavesDialog } from "./createLeavesDialog";
+import { CreateLeavesDialog } from "./CreateLeavesDialog";
 
 export function LeavesCard() {
     const year = format(new Date(), "yyyy");

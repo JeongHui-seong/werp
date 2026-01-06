@@ -1,5 +1,6 @@
 import { useAuthStore } from "../hooks/auth/useAuthStore";
 import type { upsertLeavesTypePayload } from "../types/leaves/adminLeavesType"; 
+import type { createLeavesPayload } from "../types/leaves/leavesType";
 
 const url: string = import.meta.env.VITE_BASE_URL
 
@@ -129,6 +130,28 @@ export const fetchLeavesYearly = async (year: number) => {
         return data;
     } catch (err) {
         console.log("fetchLeavesYearly api error : ", err);
+    }
+}
+
+export const createLeave = async (payload: createLeavesPayload) => {
+    const token = useAuthStore.getState().token;
+    try {
+        const res = await fetch(`${url}/leaves/create`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.message);
+        }
+        const data = await res.json();
+        return data;
+    } catch (err) {
+        console.log("createLeave api error : ", err);
     }
 }
         

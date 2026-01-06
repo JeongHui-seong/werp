@@ -5,7 +5,8 @@ export function Dialog({dialogData, onClose, open}: dialogProps){
     if (!open) return null;
 
     return(
-        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-20">
+        <div
+            className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-20">
             <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}

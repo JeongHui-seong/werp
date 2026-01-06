@@ -35,3 +35,11 @@ export type leavesColumnRef = {
 export type createLeavesDialogProps = {
     setOpen: Dispatch<SetStateAction<boolean>>;
 }
+
+export type createLeavesPayload = {
+    created_at: string;
+    leave_type: string;
+    startdate: string | null;
+    enddate: string | null;
+    reason: string;
+}

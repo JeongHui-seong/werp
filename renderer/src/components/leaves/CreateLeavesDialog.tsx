@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import { format } from "date-fns";
+import { format, isBefore, startOfDay } from "date-fns";
 import { useLeavesType } from "../../hooks/admin/leaves/useLeavesType";
 import { useState } from "react";
 import DatePicker from "react-datepicker";
@@ -8,8 +8,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import type { createLeavesDialogProps } from "../../types/leaves/leavesType";
 import { Dialog } from "../common/dialog";
 import type { dialog } from "../../types/dialogData";
+import { toast } from "react-toastify";
+import { useCreateLeaves } from "../../hooks/leaves/useCreateLeaves";
 
 export const CreateLeavesDialog = ({ setOpen }: createLeavesDialogProps) => {
+    const year = format(new Date(), "yyyy");
     const date = format(new Date(), "yyyy년 MM월 dd일");
     const [selectedLeaveType, setSelectedLeaveType] = useState<string>("연차");
     const { data: leaveTypeData } = useLeavesType();
@@ -18,12 +21,13 @@ export const CreateLeavesDialog = ({ setOpen }: createLeavesDialogProps) => {
     const [reason, setReason] = useState<string>("");
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [dialogData, setDialogData] = useState<dialog | null>(null);
+    const { mutate: createLeave } = useCreateLeaves(Number(year));
 
     const payload = {
-        createdAt: date,
-        leaveType: selectedLeaveType,
-        startdate: startDate,
-        enddate: endDate,
+        created_at: format(new Date(), "yyyy-MM-dd"),
+        leave_type: selectedLeaveType,
+        startdate: startDate ? format(startDate, "yyyy-MM-dd") : null,
+        enddate: endDate ? format(endDate, "yyyy-MM-dd") : null,
         reason: reason
     }
 
@@ -33,10 +37,24 @@ export const CreateLeavesDialog = ({ setOpen }: createLeavesDialogProps) => {
             content: "휴가를 신청하시겠습니까?",
             okButtonText: "휴가 신청",
             onOK: () => {
-                console.log(payload);
+                if (!startDate || !endDate) {
+                    toast.error("휴가 시작일과 종료일을 선택해주세요.");
+                    return;
+                }
+
+                if (isBefore(startOfDay(startDate), startOfDay(new Date()))) {
+                    toast.error("휴가 시작일은 오늘 이후로 선택해주세요.");
+                    return;
+                }
+
+                if (isBefore(startOfDay(endDate), startOfDay(startDate))) {
+                    toast.error("휴가 종료일은 휴가 시작일 이후로 선택해주세요.");
+                    return;
+                }
+                createLeave(payload);
+                console.log("휴가신청 payload : ", payload);
                 setOpen(false);
-            }
-        });
+        }});
         setDialogOpen(true);
     }
 
@@ -49,10 +67,16 @@ export const CreateLeavesDialog = ({ setOpen }: createLeavesDialogProps) => {
                     open={dialogOpen}
                 />
             }
-            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-19">
+            <div
+                className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-19"
+                onClick={() => {
+                    setOpen(false);
+                }}
+            >
                 <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
+                    onClick={(e) => e.stopPropagation()}
                     className="rounded-2xl border border-gray-40 w-[500px] max-h-[calc(100vh-40px)] flex flex-col overflow-hidden bg-white text-base">
                     <div className="p-[20px] border-b border-b-gray-40 bg-gray-100 flex items-center justify-between shrink-0">
                         <h3 className="text-base font-bold">휴가 신청</h3>

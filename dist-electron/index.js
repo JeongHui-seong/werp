@@ -59425,87 +59425,97 @@ const useClockOut = () => {
 };
 function Dialog({ dialogData, onClose, open }) {
   if (!open) return null;
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "absolute top-0 left-0 w-full h-full flex items-center justify-center z-20", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-    motion.div,
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+    "div",
     {
-      initial: { scale: 0 },
-      animate: { scale: 1 },
-      className: "rounded-2xl border border-gray-40 w-[300px] overflow-hidden bg-white text-base",
-      children: [
-        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] bg-gray-100 flex items-center px-[20px] w-full", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: dialogData.title }, void 0, false, {
-          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
-          lineNumber: 14,
-          columnNumber: 21
-        }, this) }, void 0, false, {
-          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
-          lineNumber: 13,
-          columnNumber: 17
-        }, this),
-        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[80px] w-full px-[20px] flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: dialogData.content }, void 0, false, {
-          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
-          lineNumber: 17,
-          columnNumber: 21
-        }, this) }, void 0, false, {
-          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
-          lineNumber: 16,
-          columnNumber: 17
-        }, this),
-        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center px-[20px] justify-between w-full h-[60px]", children: [
-          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-            "button",
-            {
-              className: "w-[124px] h-[40px] rounded-2xl bg-gray-100 cursor-pointer",
-              onClick: () => onClose(),
-              children: "취소"
-            },
-            void 0,
-            false,
-            {
+      className: "absolute top-0 left-0 w-full h-full flex items-center justify-center z-20",
+      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+        motion.div,
+        {
+          initial: { scale: 0 },
+          animate: { scale: 1 },
+          className: "rounded-2xl border border-gray-40 w-[300px] overflow-hidden bg-white text-base",
+          children: [
+            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] bg-gray-100 flex items-center px-[20px] w-full", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: dialogData.title }, void 0, false, {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+              lineNumber: 15,
+              columnNumber: 21
+            }, this) }, void 0, false, {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+              lineNumber: 14,
+              columnNumber: 17
+            }, this),
+            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[80px] w-full px-[20px] flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: dialogData.content }, void 0, false, {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+              lineNumber: 18,
+              columnNumber: 21
+            }, this) }, void 0, false, {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+              lineNumber: 17,
+              columnNumber: 17
+            }, this),
+            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center px-[20px] justify-between w-full h-[60px]", children: [
+              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                "button",
+                {
+                  className: "w-[124px] h-[40px] rounded-2xl bg-gray-100 cursor-pointer",
+                  onClick: () => onClose(),
+                  children: "취소"
+                },
+                void 0,
+                false,
+                {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+                  lineNumber: 21,
+                  columnNumber: 21
+                },
+                this
+              ),
+              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                "button",
+                {
+                  className: "w-[124px] h-[40px] rounded-2xl bg-blue-700 cursor-pointer text-white",
+                  onClick: () => {
+                    dialogData.onOK();
+                    onClose();
+                  },
+                  children: dialogData.okButtonText
+                },
+                void 0,
+                false,
+                {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
+                  lineNumber: 25,
+                  columnNumber: 21
+                },
+                this
+              )
+            ] }, void 0, true, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
               lineNumber: 20,
-              columnNumber: 21
-            },
-            this
-          ),
-          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-            "button",
-            {
-              className: "w-[124px] h-[40px] rounded-2xl bg-blue-700 cursor-pointer text-white",
-              onClick: () => {
-                dialogData.onOK();
-                onClose();
-              },
-              children: dialogData.okButtonText
-            },
-            void 0,
-            false,
-            {
-              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
-              lineNumber: 24,
-              columnNumber: 21
-            },
-            this
-          )
-        ] }, void 0, true, {
+              columnNumber: 17
+            }, this)
+          ]
+        },
+        void 0,
+        true,
+        {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
-          lineNumber: 19,
-          columnNumber: 17
-        }, this)
-      ]
+          lineNumber: 10,
+          columnNumber: 13
+        },
+        this
+      )
     },
     void 0,
-    true,
+    false,
     {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
-      lineNumber: 9,
-      columnNumber: 13
+      lineNumber: 8,
+      columnNumber: 9
     },
     this
-  ) }, void 0, false, {
-    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/dialog.tsx",
-    lineNumber: 8,
-    columnNumber: 9
-  }, this);
+  );
 }
 function Header() {
   const userName = useUserStore().user?.name;
@@ -63098,6 +63108,27 @@ const fetchLeavesYearly = async (year) => {
     return data;
   } catch (err) {
     console.log("fetchLeavesYearly api error : ", err);
+  }
+};
+const createLeave = async (payload) => {
+  const token = useAuthStore.getState().token;
+  try {
+    const res = await fetch(`${url}/leaves/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const error2 = await res.json();
+      throw new Error(error2.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("createLeave api error : ", err);
   }
 };
 const useLeavesType = () => {
@@ -70569,7 +70600,21 @@ var DatePicker = (
 );
 var PRESELECT_CHANGE_VIA_INPUT = "input";
 var PRESELECT_CHANGE_VIA_NAVIGATE = "navigate";
+const useCreateLeaves = (year) => {
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: (payload) => createLeave(payload),
+    onSuccess: (data) => {
+      y.success(data.message);
+      queryClient2.invalidateQueries({ queryKey: ["leavesYearly", year] });
+    },
+    onError: (err) => {
+      y.error(err.message);
+    }
+  });
+};
 const CreateLeavesDialog = ({ setOpen }) => {
+  const year = format$1(/* @__PURE__ */ new Date(), "yyyy");
   const date = format$1(/* @__PURE__ */ new Date(), "yyyy년 MM월 dd일");
   const [selectedLeaveType, setSelectedLeaveType] = reactExports.useState("연차");
   const { data: leaveTypeData } = useLeavesType();
@@ -70578,11 +70623,12 @@ const CreateLeavesDialog = ({ setOpen }) => {
   const [reason, setReason] = reactExports.useState("");
   const [dialogOpen, setDialogOpen] = reactExports.useState(false);
   const [dialogData, setDialogData] = reactExports.useState(null);
+  const { mutate: createLeave2 } = useCreateLeaves(Number(year));
   const payload = {
-    createdAt: date,
-    leaveType: selectedLeaveType,
-    startdate: startDate,
-    enddate: endDate,
+    created_at: format$1(/* @__PURE__ */ new Date(), "yyyy-MM-dd"),
+    leave_type: selectedLeaveType,
+    startdate: startDate ? format$1(startDate, "yyyy-MM-dd") : null,
+    enddate: endDate ? format$1(endDate, "yyyy-MM-dd") : null,
     reason
   };
   const onCreate = () => {
@@ -70591,7 +70637,20 @@ const CreateLeavesDialog = ({ setOpen }) => {
       content: "휴가를 신청하시겠습니까?",
       okButtonText: "휴가 신청",
       onOK: () => {
-        console.log(payload);
+        if (!startDate || !endDate) {
+          y.error("휴가 시작일과 종료일을 선택해주세요.");
+          return;
+        }
+        if (isBefore(startOfDay(startDate), startOfDay(/* @__PURE__ */ new Date()))) {
+          y.error("휴가 시작일은 오늘 이후로 선택해주세요.");
+          return;
+        }
+        if (isBefore(startOfDay(endDate), startOfDay(startDate))) {
+          y.error("휴가 종료일은 휴가 시작일 이후로 선택해주세요.");
+          return;
+        }
+        createLeave2(payload);
+        console.log("휴가신청 payload : ", payload);
         setOpen(false);
       }
     });
@@ -70609,327 +70668,341 @@ const CreateLeavesDialog = ({ setOpen }) => {
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-        lineNumber: 46,
+        lineNumber: 64,
         columnNumber: 17
       },
       void 0
     ),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "absolute top-0 left-0 w-full h-full flex items-center justify-center z-19", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-      motion.div,
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      "div",
       {
-        initial: { scale: 0 },
-        animate: { scale: 1 },
-        className: "rounded-2xl border border-gray-40 w-[500px] max-h-[calc(100vh-40px)] flex flex-col overflow-hidden bg-white text-base",
-        children: [
-          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "p-[20px] border-b border-b-gray-40 bg-gray-100 flex items-center justify-between shrink-0", children: [
-            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h3", { className: "text-base font-bold", children: "휴가 신청" }, void 0, false, {
-              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-              lineNumber: 58,
-              columnNumber: 25
-            }, void 0),
-            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-              CloseRoundedIcon,
-              {
-                onClick: () => setOpen(false),
-                className: "cursor-pointer"
-              },
-              void 0,
-              false,
-              {
-                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                lineNumber: 59,
-                columnNumber: 25
-              },
-              void 0
-            )
-          ] }, void 0, true, {
-            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-            lineNumber: 57,
-            columnNumber: 21
-          }, void 0),
-          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { className: "bg-white flex-1 overflow-y-auto p-[20px] flex flex-col gap-[12px]", children: [
-            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                "div",
-                {
-                  className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                  children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 신청일" }, void 0, false, {
-                    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                    lineNumber: 68,
-                    columnNumber: 30
-                  }, void 0)
-                },
-                void 0,
-                false,
-                {
+        className: "absolute top-0 left-0 w-full h-full flex items-center justify-center z-19",
+        onClick: () => {
+          setOpen(false);
+        },
+        children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          motion.div,
+          {
+            initial: { scale: 0 },
+            animate: { scale: 1 },
+            onClick: (e) => e.stopPropagation(),
+            className: "rounded-2xl border border-gray-40 w-[500px] max-h-[calc(100vh-40px)] flex flex-col overflow-hidden bg-white text-base",
+            children: [
+              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "p-[20px] border-b border-b-gray-40 bg-gray-100 flex items-center justify-between shrink-0", children: [
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h3", { className: "text-base font-bold", children: "휴가 신청" }, void 0, false, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                  lineNumber: 66,
-                  columnNumber: 29
-                },
-                void 0
-              ),
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: date }, void 0, false, {
-                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                lineNumber: 69,
-                columnNumber: 29
-              }, void 0)
-            ] }, void 0, true, {
-              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-              lineNumber: 65,
-              columnNumber: 25
-            }, void 0),
-            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                "div",
-                {
-                  className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                  children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 구분" }, void 0, false, {
+                  lineNumber: 82,
+                  columnNumber: 25
+                }, void 0),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                  CloseRoundedIcon,
+                  {
+                    onClick: () => setOpen(false),
+                    className: "cursor-pointer"
+                  },
+                  void 0,
+                  false,
+                  {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                    lineNumber: 74,
-                    columnNumber: 30
-                  }, void 0)
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                  lineNumber: 72,
-                  columnNumber: 29
-                },
-                void 0
-              ),
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                "select",
-                {
-                  name: "leaveType",
-                  id: "leaveType",
-                  onChange: (e) => setSelectedLeaveType(e.target.value),
-                  value: selectedLeaveType,
-                  className: "border border-gray-40 rounded-2xl px-[12px] py-[6px]",
-                  children: leaveTypeData?.leavesType?.map((type) => {
-                    return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: type.type, children: type.type }, type.id, false, {
+                    lineNumber: 83,
+                    columnNumber: 25
+                  },
+                  void 0
+                )
+              ] }, void 0, true, {
+                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                lineNumber: 81,
+                columnNumber: 21
+              }, void 0),
+              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { className: "bg-white flex-1 overflow-y-auto p-[20px] flex flex-col gap-[12px]", children: [
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 신청일" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                        lineNumber: 92,
+                        columnNumber: 30
+                      }, void 0)
+                    },
+                    void 0,
+                    false,
+                    {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                      lineNumber: 82,
-                      columnNumber: 45
-                    }, void 0);
-                  })
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                  lineNumber: 76,
-                  columnNumber: 33
-                },
-                void 0
-              ) }, void 0, false, {
-                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                lineNumber: 75,
-                columnNumber: 29
-              }, void 0)
-            ] }, void 0, true, {
-              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-              lineNumber: 71,
-              columnNumber: 25
-            }, void 0),
-            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                "div",
-                {
-                  className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                  children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 시작일" }, void 0, false, {
+                      lineNumber: 90,
+                      columnNumber: 29
+                    },
+                    void 0
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: date }, void 0, false, {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                    lineNumber: 91,
-                    columnNumber: 30
+                    lineNumber: 93,
+                    columnNumber: 29
                   }, void 0)
-                },
-                void 0,
-                false,
-                {
+                ] }, void 0, true, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
                   lineNumber: 89,
-                  columnNumber: 29
-                },
-                void 0
-              ),
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                DatePicker,
-                {
-                  selected: startDate,
-                  onChange: setStartDate,
-                  dateFormat: "yyyy년 MM월 dd일",
-                  className: "border border-gray-40 rounded-2xl px-[12px] py-[6px] cursor-pointer"
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                  lineNumber: 93,
-                  columnNumber: 33
-                },
-                void 0
-              ) }, void 0, false, {
-                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                lineNumber: 92,
-                columnNumber: 29
-              }, void 0)
-            ] }, void 0, true, {
-              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-              lineNumber: 88,
-              columnNumber: 25
-            }, void 0),
-            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                "div",
-                {
-                  className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                  children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 종료일" }, void 0, false, {
+                  columnNumber: 25
+                }, void 0),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 구분" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                        lineNumber: 98,
+                        columnNumber: 30
+                      }, void 0)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                      lineNumber: 96,
+                      columnNumber: 29
+                    },
+                    void 0
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "select",
+                    {
+                      name: "leaveType",
+                      id: "leaveType",
+                      onChange: (e) => setSelectedLeaveType(e.target.value),
+                      value: selectedLeaveType,
+                      className: "border border-gray-40 rounded-2xl px-[12px] py-[6px]",
+                      children: leaveTypeData?.leavesType?.map((type) => {
+                        return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: type.type, children: type.type }, type.id, false, {
+                          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                          lineNumber: 106,
+                          columnNumber: 45
+                        }, void 0);
+                      })
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                      lineNumber: 100,
+                      columnNumber: 33
+                    },
+                    void 0
+                  ) }, void 0, false, {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                    lineNumber: 104,
-                    columnNumber: 30
+                    lineNumber: 99,
+                    columnNumber: 29
                   }, void 0)
-                },
-                void 0,
-                false,
-                {
+                ] }, void 0, true, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                  lineNumber: 102,
-                  columnNumber: 29
-                },
-                void 0
-              ),
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                DatePicker,
-                {
-                  selected: endDate,
-                  onChange: setEndDate,
-                  dateFormat: "yyyy년 MM월 dd일",
-                  className: "border border-gray-40 rounded-2xl px-[12px] py-[6px] cursor-pointer"
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                  lineNumber: 106,
-                  columnNumber: 33
-                },
-                void 0
-              ) }, void 0, false, {
-                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                lineNumber: 105,
-                columnNumber: 29
-              }, void 0)
-            ] }, void 0, true, {
-              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-              lineNumber: 101,
-              columnNumber: 25
-            }, void 0),
-            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                "div",
-                {
-                  className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                  children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 사유" }, void 0, false, {
+                  lineNumber: 95,
+                  columnNumber: 25
+                }, void 0),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 시작일" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                        lineNumber: 115,
+                        columnNumber: 30
+                      }, void 0)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                      lineNumber: 113,
+                      columnNumber: 29
+                    },
+                    void 0
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    DatePicker,
+                    {
+                      selected: startDate,
+                      onChange: setStartDate,
+                      dateFormat: "yyyy년 MM월 dd일",
+                      className: "border border-gray-40 rounded-2xl px-[12px] py-[6px] cursor-pointer"
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                      lineNumber: 117,
+                      columnNumber: 33
+                    },
+                    void 0
+                  ) }, void 0, false, {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                    lineNumber: 117,
-                    columnNumber: 30
+                    lineNumber: 116,
+                    columnNumber: 29
                   }, void 0)
-                },
-                void 0,
-                false,
-                {
+                ] }, void 0, true, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                  lineNumber: 115,
-                  columnNumber: 29
-                },
-                void 0
-              ),
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex-1 text-base flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                "textarea",
-                {
-                  value: reason,
-                  onChange: (e) => setReason(e.target.value),
-                  className: "bg-white text-base w-full h-[200px] border border-gray-40 rounded-2xl px-[12px] py-[6px] whitespace-pre-wrap overflow-y-auto resize-none break-words"
-                },
-                void 0,
-                false,
-                {
+                  lineNumber: 112,
+                  columnNumber: 25
+                }, void 0),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 종료일" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                        lineNumber: 128,
+                        columnNumber: 30
+                      }, void 0)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                      lineNumber: 126,
+                      columnNumber: 29
+                    },
+                    void 0
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    DatePicker,
+                    {
+                      selected: endDate,
+                      onChange: setEndDate,
+                      dateFormat: "yyyy년 MM월 dd일",
+                      className: "border border-gray-40 rounded-2xl px-[12px] py-[6px] cursor-pointer"
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                      lineNumber: 130,
+                      columnNumber: 33
+                    },
+                    void 0
+                  ) }, void 0, false, {
+                    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                    lineNumber: 129,
+                    columnNumber: 29
+                  }, void 0)
+                ] }, void 0, true, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                  lineNumber: 119,
-                  columnNumber: 33
-                },
-                void 0
-              ) }, void 0, false, {
+                  lineNumber: 125,
+                  columnNumber: 25
+                }, void 0),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 사유" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                        lineNumber: 141,
+                        columnNumber: 30
+                      }, void 0)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                      lineNumber: 139,
+                      columnNumber: 29
+                    },
+                    void 0
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex-1 text-base flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "textarea",
+                    {
+                      value: reason,
+                      onChange: (e) => setReason(e.target.value),
+                      className: "bg-white text-base w-full h-[200px] border border-gray-40 rounded-2xl px-[12px] py-[6px] whitespace-pre-wrap overflow-y-auto resize-none break-words"
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                      lineNumber: 143,
+                      columnNumber: 33
+                    },
+                    void 0
+                  ) }, void 0, false, {
+                    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                    lineNumber: 142,
+                    columnNumber: 29
+                  }, void 0)
+                ] }, void 0, true, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                  lineNumber: 138,
+                  columnNumber: 25
+                }, void 0),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "w-full flex items-center justify-end gap-[20px]", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "button",
+                    {
+                      onClick: () => setOpen(false),
+                      className: "border border-gray-40 text-base rounded-2xl px-[12px] py-[6px] cursor-pointer bg-white hover:bg-gray-100 transition-all",
+                      children: "취소"
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                      lineNumber: 151,
+                      columnNumber: 29
+                    },
+                    void 0
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "button",
+                    {
+                      onClick: onCreate,
+                      className: "border border-blue-700 text-base rounded-2xl px-[12px] py-[6px] cursor-pointer bg-blue-700 text-white hover:bg-blue-600 transition-all",
+                      children: "휴가 신청"
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                      lineNumber: 157,
+                      columnNumber: 29
+                    },
+                    void 0
+                  )
+                ] }, void 0, true, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
+                  lineNumber: 150,
+                  columnNumber: 25
+                }, void 0)
+              ] }, void 0, true, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                lineNumber: 118,
-                columnNumber: 29
+                lineNumber: 88,
+                columnNumber: 21
               }, void 0)
-            ] }, void 0, true, {
-              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-              lineNumber: 114,
-              columnNumber: 25
-            }, void 0),
-            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "w-full flex items-center justify-end gap-[20px]", children: [
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                "button",
-                {
-                  onClick: () => setOpen(false),
-                  className: "border border-gray-40 text-base rounded-2xl px-[12px] py-[6px] cursor-pointer bg-white hover:bg-gray-100 transition-all",
-                  children: "취소"
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                  lineNumber: 127,
-                  columnNumber: 29
-                },
-                void 0
-              ),
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                "button",
-                {
-                  onClick: onCreate,
-                  className: "border border-blue-700 text-base rounded-2xl px-[12px] py-[6px] cursor-pointer bg-blue-700 text-white hover:bg-blue-600 transition-all",
-                  children: "휴가 신청"
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-                  lineNumber: 133,
-                  columnNumber: 29
-                },
-                void 0
-              )
-            ] }, void 0, true, {
-              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-              lineNumber: 126,
-              columnNumber: 25
-            }, void 0)
-          ] }, void 0, true, {
+            ]
+          },
+          void 0,
+          true,
+          {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-            lineNumber: 64,
-            columnNumber: 21
-          }, void 0)
-        ]
+            lineNumber: 76,
+            columnNumber: 17
+          },
+          void 0
+        )
       },
       void 0,
-      true,
+      false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-        lineNumber: 53,
-        columnNumber: 17
+        lineNumber: 70,
+        columnNumber: 13
       },
       void 0
-    ) }, void 0, false, {
-      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-      lineNumber: 52,
-      columnNumber: 13
-    }, void 0)
+    )
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/CreateLeavesDialog.tsx",
-    lineNumber: 44,
+    lineNumber: 62,
     columnNumber: 9
   }, void 0);
 };
