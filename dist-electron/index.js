@@ -63857,7 +63857,7 @@ function LeavesSummaryCard({ summaryData }) {
 }
 const leavesColumn = [
   {
-    accessorKey: "leaveType",
+    accessorKey: "leave_type",
     header: "휴가 종류",
     cell: (info) => info.getValue(),
     meta: {
@@ -63867,7 +63867,7 @@ const leavesColumn = [
     }
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "created_at",
     header: "휴가 신청일",
     cell: (info) => {
       const value = info.getValue();
@@ -63890,7 +63890,7 @@ const leavesColumn = [
     }
   },
   {
-    accessorKey: "startdate",
+    accessorKey: "start_date",
     header: "휴가 개시일",
     cell: (info) => {
       const value = info.getValue();
@@ -63903,7 +63903,7 @@ const leavesColumn = [
     }
   },
   {
-    accessorKey: "endDate",
+    accessorKey: "end_date",
     header: "휴가 종료일",
     cell: (info) => {
       const value = info.getValue();

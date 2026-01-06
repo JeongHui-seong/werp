@@ -4,7 +4,7 @@ import { format } from "date-fns";
 
 export const leavesColumn: ColumnDef<leavesColumnRow>[] = [
         {
-            accessorKey: "leaveType",
+            accessorKey: "leave_type",
             header: "휴가 종류",
             cell: info => info.getValue<string>(),
             meta: {
@@ -14,7 +14,7 @@ export const leavesColumn: ColumnDef<leavesColumnRow>[] = [
             }
         },
         {
-            accessorKey: "createdAt",
+            accessorKey: "created_at",
             header: "휴가 신청일",
             cell: info => {
                 const value = info.getValue<string>();
@@ -37,7 +37,7 @@ export const leavesColumn: ColumnDef<leavesColumnRow>[] = [
             }
         },
         {
-            accessorKey: "startdate",
+            accessorKey: "start_date",
             header: "휴가 개시일",
             cell: info => {
                 const value = info.getValue<string>();
@@ -50,7 +50,7 @@ export const leavesColumn: ColumnDef<leavesColumnRow>[] = [
             }
         },
         {
-            accessorKey: "endDate",
+            accessorKey: "end_date",
             header: "휴가 종료일",
             cell: info => {
                 const value = info.getValue<string>();
