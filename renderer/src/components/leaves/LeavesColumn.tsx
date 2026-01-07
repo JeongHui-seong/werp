@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { leavesColumnRow } from "../../types/leaves/leavesType";
 import { format } from "date-fns";
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
 export const leavesColumn: ColumnDef<leavesColumnRow>[] = [
         {
@@ -62,4 +63,17 @@ export const leavesColumn: ColumnDef<leavesColumnRow>[] = [
                 }
             }
         },
+        {
+            id: "actions",
+            header: "",
+            enableSorting: false,
+            cell: ({ row, table }) => (
+                <button
+                    onClick={() => table.options.meta?.openDetail(row.original)}
+                    className="cursor-pointer"
+                >
+                    <SearchRoundedIcon fontSize="small" />
+                </button>
+            )
+        }
     ]

@@ -12,15 +12,15 @@ export type leavesSummaryProps = {
 
 export type leavesColumnRow = {
     id: number;
-    startdate: string;
-    enddate: string;
+    start_date: string;
+    end_date: string;
     status: string;
     reason: string | null;
-    approvedAt: string | null;
-    createdAt: string;
-    rejectionReason: string | null;
-    approverName: string | null;
-    leaveType: string;
+    approved_at: string | null;
+    created_at: string;
+    rejection_reason: string | null;
+    approver_name: string | null;
+    leave_type: string;
 }
 
 export type leavesColumnProps = {
@@ -42,4 +42,10 @@ export type createLeavesPayload = {
     startdate: string | null;
     enddate: string | null;
     reason: string;
+}
+
+export type LeaveDetailModalProps = {
+    open: boolean;
+    data: leavesColumnRow | null;
+    onClose: () => void;
 }
