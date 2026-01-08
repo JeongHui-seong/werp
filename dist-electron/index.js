@@ -36551,7 +36551,7 @@ const useAuthStore = create(
   })
 );
 function PublicRoute() {
-  const { token } = useAuthStore.getState();
+  const token = useAuthStore((state) => state.token);
   return token ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Navigate, { to: "/dashboard", replace: true }, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/utils/routerState.tsx",
     lineNumber: 8,
@@ -36563,7 +36563,7 @@ function PublicRoute() {
   }, this);
 }
 function PrivateRoute() {
-  const { token } = useAuthStore.getState();
+  const token = useAuthStore((state) => state.token);
   return token ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Outlet, {}, void 0, false, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/utils/routerState.tsx",
     lineNumber: 14,
@@ -59517,6 +59517,9 @@ function Dialog({ dialogData, onClose, open }) {
     this
   );
 }
+const ArrowDropDownRoundedIcon = createSvgIcon(/* @__PURE__ */ jsxRuntimeExports.jsx("path", {
+  d: "m8.71 11.71 2.59 2.59c.39.39 1.02.39 1.41 0l2.59-2.59c.63-.63.18-1.71-.71-1.71H9.41c-.89 0-1.33 1.08-.7 1.71"
+}), "ArrowDropDownRounded");
 function Header() {
   const userName = useUserStore().user?.name;
   const { mutate: clockIn2 } = useClockIn();
@@ -59525,9 +59528,10 @@ function Header() {
   const attendance = data?.attendance;
   const isWorking = attendance?.clockin && !attendance?.clockout;
   const isDisabled = attendance?.clockin && attendance?.clockout;
-  const [open, setOpen] = reactExports.useState(false);
+  const [dialogOpen, setDialogOpen] = reactExports.useState(false);
   const [dialogData, setDialogData] = reactExports.useState(null);
   let clockInOutBtnText = attendance && isWorking ? "퇴근하기" : "출근하기";
+  const [profileMenuOpen, setProfileMenuOpen] = reactExports.useState(false);
   const handleAttendance = () => {
     if (attendance && isWorking) {
       setDialogData({
@@ -59544,86 +59548,166 @@ function Header() {
         onOK: () => clockIn2()
       });
     }
-    setOpen(true);
+    setDialogOpen(true);
+  };
+  const handleLogout = () => {
+    setDialogData({
+      title: "로그아웃",
+      content: "로그아웃 하시겠습니까?",
+      okButtonText: "로그아웃",
+      onOK: () => {
+        useAuthStore.getState().clearToken();
+        useUserStore.getState().clearUser();
+        y.success("로그아웃 되었습니다.");
+      }
+    });
+    setDialogOpen(true);
   };
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
     dialogData && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
       Dialog,
       {
-        open,
-        onClose: () => setOpen(false),
+        open: dialogOpen,
+        onClose: () => setDialogOpen(false),
         dialogData
       },
       void 0,
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 49,
+        lineNumber: 68,
         columnNumber: 13
       },
       this
     ),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-[60px] flex items-center justify-between px-[20px] bg-white", children: [
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "logo", className: "h-full" }, void 0, false, {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 57,
-        columnNumber: 21
-      }, this) }, void 0, false, {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 56,
-        columnNumber: 17
-      }, this),
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px]", children: [
-        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-          "button",
-          {
-            disabled: isDisabled,
-            onClick: handleAttendance,
-            className: `px-[12px] py-[6px] rounded-2xl text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white hover:bg-blue-600 transition-all"}`,
-            children: isLoading ? "로딩 중" : clockInOutBtnText
-          },
-          void 0,
-          false,
-          {
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      "div",
+      {
+        onClick: () => setProfileMenuOpen(false),
+        className: "w-full h-[60px] flex items-center justify-between px-[20px] bg-white",
+        children: [
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "logo", className: "h-full" }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 60,
+            lineNumber: 78,
             columnNumber: 21
-          },
-          this
-        ),
-        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[12px]", children: [
-          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "cursor-pointer", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(NotificationsNoneRoundedIcon, { className: "cursor-pointer" }, void 0, false, {
-            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 67,
-            columnNumber: 29
           }, this) }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 66,
-            columnNumber: 25
+            lineNumber: 77,
+            columnNumber: 17
           }, this),
-          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-sm", children: userName }, void 0, false, {
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px]", children: [
+            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+              "button",
+              {
+                disabled: isDisabled,
+                onClick: handleAttendance,
+                className: `px-[12px] py-[6px] rounded-2xl text-sm tracking-[-0.02em] transition-all ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-700 cursor-pointer text-white hover:bg-blue-600 transition-all"}`,
+                children: isLoading ? "로딩 중" : clockInOutBtnText
+              },
+              void 0,
+              false,
+              {
+                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+                lineNumber: 81,
+                columnNumber: 21
+              },
+              this
+            ),
+            /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[12px]", children: [
+              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "cursor-pointer", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(NotificationsNoneRoundedIcon, { className: "cursor-pointer" }, void 0, false, {
+                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+                lineNumber: 88,
+                columnNumber: 29
+              }, this) }, void 0, false, {
+                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+                lineNumber: 87,
+                columnNumber: 25
+              }, this),
+              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                "div",
+                {
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    setProfileMenuOpen(!profileMenuOpen);
+                  },
+                  className: "relative bg-white flex items-center justify-center gap-[8px] cursor-pointer rounded-2xl px-[12px] py-[6px] hover:bg-gray-100 transition-all",
+                  children: [
+                    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "text-sm cursor-pointer", children: userName }, void 0, false, {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+                      lineNumber: 96,
+                      columnNumber: 29
+                    }, this),
+                    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(ArrowDropDownRoundedIcon, {}, void 0, false, {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+                      lineNumber: 97,
+                      columnNumber: 29
+                    }, this),
+                    profileMenuOpen && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                      "div",
+                      {
+                        onClick: (e) => e.stopPropagation(),
+                        className: "absolute top-[50px] bg-white rounded-2xl shadow-lg flex flex-col ",
+                        children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                          "button",
+                          {
+                            onClick: handleLogout,
+                            className: "text-sm bg-white cursor-pointer rounded-2xl px-[12px] py-[6px] hover:bg-gray-100 transition-all",
+                            children: "로그아웃"
+                          },
+                          void 0,
+                          false,
+                          {
+                            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+                            lineNumber: 102,
+                            columnNumber: 37
+                          },
+                          this
+                        )
+                      },
+                      void 0,
+                      false,
+                      {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+                        lineNumber: 99,
+                        columnNumber: 33
+                      },
+                      this
+                    )
+                  ]
+                },
+                void 0,
+                true,
+                {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+                  lineNumber: 90,
+                  columnNumber: 25
+                },
+                this
+              )
+            ] }, void 0, true, {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
+              lineNumber: 86,
+              columnNumber: 21
+            }, this)
+          ] }, void 0, true, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 69,
-            columnNumber: 25
+            lineNumber: 80,
+            columnNumber: 17
           }, this)
-        ] }, void 0, true, {
-          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-          lineNumber: 65,
-          columnNumber: 21
-        }, this)
-      ] }, void 0, true, {
+        ]
+      },
+      void 0,
+      true,
+      {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 59,
-        columnNumber: 17
-      }, this)
-    ] }, void 0, true, {
-      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-      lineNumber: 55,
-      columnNumber: 13
-    }, this)
+        lineNumber: 74,
+        columnNumber: 13
+      },
+      this
+    )
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-    lineNumber: 47,
+    lineNumber: 66,
     columnNumber: 9
   }, this);
 }
@@ -63871,6 +63955,11 @@ function LeavesSummaryCard({ summaryData }) {
 const SearchRoundedIcon = createSvgIcon(/* @__PURE__ */ jsxRuntimeExports.jsx("path", {
   d: "M15.5 14h-.79l-.28-.27c1.2-1.4 1.82-3.31 1.48-5.34-.47-2.78-2.79-5-5.59-5.34-4.23-.52-7.79 3.04-7.27 7.27.34 2.8 2.56 5.12 5.34 5.59 2.03.34 3.94-.28 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0s.41-1.08 0-1.49zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"
 }), "SearchRounded");
+const statusMap = {
+  approved: { label: "승인", bg: "bg-green-700" },
+  pending: { label: "대기", bg: "bg-yellow-400" },
+  rejected: { label: "거절", bg: "bg-red-700" }
+};
 const leavesColumn = [
   {
     accessorKey: "leave_type",
@@ -63898,7 +63987,15 @@ const leavesColumn = [
   {
     accessorKey: "status",
     header: "상태",
-    cell: (info) => info.getValue(),
+    cell: (info) => {
+      const status = info.getValue();
+      const config = statusMap[status];
+      return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("span", { className: `${config.bg} text-white py-1 px-2 rounded-2xl text-sm`, children: config.label }, void 0, false, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeavesColumn.tsx",
+        lineNumber: 43,
+        columnNumber: 21
+      }, void 0);
+    },
     meta: {
       exportValue: (value) => {
         return value;
@@ -63942,7 +64039,7 @@ const leavesColumn = [
         className: "cursor-pointer",
         children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SearchRoundedIcon, { fontSize: "small" }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeavesColumn.tsx",
-          lineNumber: 75,
+          lineNumber: 89,
           columnNumber: 21
         }, void 0)
       },
@@ -63950,7 +64047,7 @@ const leavesColumn = [
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeavesColumn.tsx",
-        lineNumber: 71,
+        lineNumber: 85,
         columnNumber: 17
       },
       void 0
@@ -63966,7 +64063,11 @@ function LeaveDetailModal({
   onClose
 }) {
   if (!open || !data) return null;
-  console.log(data);
+  const statusMap2 = {
+    approved: "승인",
+    pending: "대기",
+    rejected: "거절"
+  };
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
     "div",
     {
@@ -63983,7 +64084,7 @@ function LeaveDetailModal({
             /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "p-[20px] border-b border-b-gray-40 bg-gray-100 flex items-center justify-between shrink-0", children: [
               /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h3", { className: "text-base font-bold", children: "휴가 상세 내역" }, void 0, false, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                lineNumber: 24,
+                lineNumber: 29,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -63996,14 +64097,14 @@ function LeaveDetailModal({
                 false,
                 {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                  lineNumber: 25,
+                  lineNumber: 30,
                   columnNumber: 21
                 },
                 this
               )
             ] }, void 0, true, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-              lineNumber: 23,
+              lineNumber: 28,
               columnNumber: 17
             }, this),
             /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { className: "bg-white flex-1 overflow-y-auto p-[20px] flex flex-col gap-[12px]", children: [
@@ -64014,7 +64115,7 @@ function LeaveDetailModal({
                     className: "w-[140px] h-[48px] flex items-center px-[20px]",
                     children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 종류" }, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                      lineNumber: 34,
+                      lineNumber: 39,
                       columnNumber: 26
                     }, this)
                   },
@@ -64022,19 +64123,19 @@ function LeaveDetailModal({
                   false,
                   {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                    lineNumber: 32,
+                    lineNumber: 37,
                     columnNumber: 25
                   },
                   this
                 ),
                 /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: data.leave_type }, void 0, false, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                  lineNumber: 35,
+                  lineNumber: 40,
                   columnNumber: 25
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                lineNumber: 31,
+                lineNumber: 36,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
@@ -64044,7 +64145,7 @@ function LeaveDetailModal({
                     className: "w-[140px] h-[48px] flex items-center px-[20px]",
                     children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 신청일" }, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                      lineNumber: 40,
+                      lineNumber: 45,
                       columnNumber: 26
                     }, this)
                   },
@@ -64052,19 +64153,19 @@ function LeaveDetailModal({
                   false,
                   {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                    lineNumber: 38,
+                    lineNumber: 43,
                     columnNumber: 25
                   },
                   this
                 ),
                 /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: format(new Date(data.created_at), "yyyy년 MM월 dd일") }, void 0, false, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                  lineNumber: 41,
+                  lineNumber: 46,
                   columnNumber: 25
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                lineNumber: 37,
+                lineNumber: 42,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
@@ -64074,7 +64175,7 @@ function LeaveDetailModal({
                     className: "w-[140px] h-[48px] flex items-center px-[20px]",
                     children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "상태" }, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                      lineNumber: 46,
+                      lineNumber: 51,
                       columnNumber: 26
                     }, this)
                   },
@@ -64082,19 +64183,19 @@ function LeaveDetailModal({
                   false,
                   {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                    lineNumber: 44,
+                    lineNumber: 49,
                     columnNumber: 25
                   },
                   this
                 ),
-                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: data.status }, void 0, false, {
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: statusMap2[data.status] }, void 0, false, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                  lineNumber: 47,
+                  lineNumber: 52,
                   columnNumber: 25
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                lineNumber: 43,
+                lineNumber: 48,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
@@ -64104,7 +64205,7 @@ function LeaveDetailModal({
                     className: "w-[140px] h-[48px] flex items-center px-[20px]",
                     children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 개시일" }, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                      lineNumber: 52,
+                      lineNumber: 57,
                       columnNumber: 26
                     }, this)
                   },
@@ -64112,19 +64213,19 @@ function LeaveDetailModal({
                   false,
                   {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                    lineNumber: 50,
+                    lineNumber: 55,
                     columnNumber: 25
                   },
                   this
                 ),
                 /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: format(new Date(data.start_date), "yyyy년 MM월 dd일") }, void 0, false, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                  lineNumber: 53,
+                  lineNumber: 58,
                   columnNumber: 25
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                lineNumber: 49,
+                lineNumber: 54,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
@@ -64134,7 +64235,7 @@ function LeaveDetailModal({
                     className: "w-[140px] h-[48px] flex items-center px-[20px]",
                     children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 종료일" }, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                      lineNumber: 58,
+                      lineNumber: 63,
                       columnNumber: 26
                     }, this)
                   },
@@ -64142,19 +64243,19 @@ function LeaveDetailModal({
                   false,
                   {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                    lineNumber: 56,
+                    lineNumber: 61,
                     columnNumber: 25
                   },
                   this
                 ),
                 /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: format(new Date(data.end_date), "yyyy년 MM월 dd일") }, void 0, false, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                  lineNumber: 59,
+                  lineNumber: 64,
                   columnNumber: 25
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                lineNumber: 55,
+                lineNumber: 60,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
@@ -64164,7 +64265,7 @@ function LeaveDetailModal({
                     className: "w-[140px] h-[48px] flex items-center px-[20px]",
                     children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "휴가 사유" }, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                      lineNumber: 64,
+                      lineNumber: 69,
                       columnNumber: 26
                     }, this)
                   },
@@ -64172,19 +64273,19 @@ function LeaveDetailModal({
                   false,
                   {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                    lineNumber: 62,
+                    lineNumber: 67,
                     columnNumber: 25
                   },
                   this
                 ),
                 /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: data.reason }, void 0, false, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                  lineNumber: 65,
+                  lineNumber: 70,
                   columnNumber: 25
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                lineNumber: 61,
+                lineNumber: 66,
                 columnNumber: 21
               }, this),
               data.approver_name && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
@@ -64194,7 +64295,7 @@ function LeaveDetailModal({
                     className: "w-[140px] h-[48px] flex items-center px-[20px]",
                     children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "승인자" }, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                      lineNumber: 71,
+                      lineNumber: 76,
                       columnNumber: 30
                     }, this)
                   },
@@ -64202,19 +64303,19 @@ function LeaveDetailModal({
                   false,
                   {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                    lineNumber: 69,
+                    lineNumber: 74,
                     columnNumber: 29
                   },
                   this
                 ),
                 /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: data.approver_name }, void 0, false, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                  lineNumber: 72,
+                  lineNumber: 77,
                   columnNumber: 29
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                lineNumber: 68,
+                lineNumber: 73,
                 columnNumber: 25
               }, this),
               data.approved_at && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
@@ -64224,7 +64325,7 @@ function LeaveDetailModal({
                     className: "w-[140px] h-[48px] flex items-center px-[20px]",
                     children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "승인일" }, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                      lineNumber: 79,
+                      lineNumber: 84,
                       columnNumber: 30
                     }, this)
                   },
@@ -64232,19 +64333,19 @@ function LeaveDetailModal({
                   false,
                   {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                    lineNumber: 77,
+                    lineNumber: 82,
                     columnNumber: 29
                   },
                   this
                 ),
                 /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: format(new Date(data.approved_at), "yyyy년 MM월 dd일") }, void 0, false, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                  lineNumber: 80,
+                  lineNumber: 85,
                   columnNumber: 29
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                lineNumber: 76,
+                lineNumber: 81,
                 columnNumber: 25
               }, this),
               data.rejection_reason && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
@@ -64254,7 +64355,7 @@ function LeaveDetailModal({
                     className: "w-[140px] h-[48px] flex items-center px-[20px]",
                     children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "반려 사유" }, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                      lineNumber: 87,
+                      lineNumber: 92,
                       columnNumber: 30
                     }, this)
                   },
@@ -64262,24 +64363,24 @@ function LeaveDetailModal({
                   false,
                   {
                     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                    lineNumber: 85,
+                    lineNumber: 90,
                     columnNumber: 29
                   },
                   this
                 ),
                 /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: data.rejection_reason }, void 0, false, {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                  lineNumber: 88,
+                  lineNumber: 93,
                   columnNumber: 29
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-                lineNumber: 84,
+                lineNumber: 89,
                 columnNumber: 25
               }, this)
             ] }, void 0, true, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-              lineNumber: 30,
+              lineNumber: 35,
               columnNumber: 17
             }, this)
           ]
@@ -64288,7 +64389,7 @@ function LeaveDetailModal({
         true,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-          lineNumber: 18,
+          lineNumber: 23,
           columnNumber: 13
         },
         this
@@ -64298,7 +64399,7 @@ function LeaveDetailModal({
     false,
     {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeaveDetailModal.tsx",
-      lineNumber: 14,
+      lineNumber: 19,
       columnNumber: 9
     },
     this

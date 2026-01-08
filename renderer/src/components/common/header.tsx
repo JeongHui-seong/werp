@@ -7,6 +7,9 @@ import { useAttendanceToday } from "../../hooks/attendance/useAttendanceToday";
 import { Dialog } from "./dialog";
 import { useState } from "react";
 import type { dialog } from "../../types/dialogData";
+import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
+import { useAuthStore } from "../../hooks/auth/useAuthStore";
+import { toast } from "react-toastify";
 
 export function Header(){
     const userName = useUserStore().user?.name;
@@ -18,10 +21,12 @@ export function Header(){
     const isWorking = attendance?.clockin && !attendance?.clockout;
     const isDisabled = attendance?.clockin && attendance?.clockout;
 
-    const [open, setOpen] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogData, setDialogData] = useState<dialog | null>(null);
 
     let clockInOutBtnText = attendance && isWorking ? "퇴근하기" : "출근하기";
+
+    const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     
     const handleAttendance = () => {
         if (attendance && isWorking) {
@@ -40,19 +45,35 @@ export function Header(){
             })
         }
 
-        setOpen(true);
+        setDialogOpen(true);
+    }
+
+    const handleLogout = () => {
+        setDialogData({
+            title: "로그아웃",
+            content: "로그아웃 하시겠습니까?",
+            okButtonText: "로그아웃",
+            onOK: () => {
+                useAuthStore.getState().clearToken();
+                useUserStore.getState().clearUser();
+                toast.success("로그아웃 되었습니다.");
+            }
+        })
+        setDialogOpen(true);
     }
 
     return(
         <>
         {dialogData && (
             <Dialog 
-                open={open}
-                onClose={() => setOpen(false)}
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
                 dialogData={dialogData}
             />
         )}
-            <div className="w-full h-[60px] flex items-center justify-between px-[20px] bg-white">
+            <div
+                onClick={() => setProfileMenuOpen(false)}
+                className="w-full h-[60px] flex items-center justify-between px-[20px] bg-white">
                 <div className="h-[20px]">
                     <img src={Logo} alt="logo" className="h-full"/>
                 </div>
@@ -66,7 +87,24 @@ export function Header(){
                         <div className="cursor-pointer">
                             <NotificationsNoneRoundedIcon className="cursor-pointer"/>
                         </div>
-                        <p className="text-sm">{userName}</p>
+                        <div
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setProfileMenuOpen(!profileMenuOpen);
+                            }}
+                            className="relative bg-white flex items-center justify-center gap-[8px] cursor-pointer rounded-2xl px-[12px] py-[6px] hover:bg-gray-100 transition-all">
+                            <button className="text-sm cursor-pointer">{userName}</button>
+                            <ArrowDropDownRoundedIcon />
+                            {profileMenuOpen && (
+                                <div 
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="absolute top-[50px] bg-white rounded-2xl shadow-lg flex flex-col ">
+                                    <button
+                                        onClick={handleLogout}
+                                        className="text-sm bg-white cursor-pointer rounded-2xl px-[12px] py-[6px] hover:bg-gray-100 transition-all">로그아웃</button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

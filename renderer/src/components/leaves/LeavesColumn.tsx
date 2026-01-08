@@ -3,6 +3,12 @@ import type { leavesColumnRow } from "../../types/leaves/leavesType";
 import { format } from "date-fns";
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
+const statusMap: Record<string, { label: string; bg: string }> = {
+    approved: { label: "승인", bg: "bg-green-700" },
+    pending: { label: "대기", bg: "bg-yellow-400" },
+    rejected: { label: "거절", bg: "bg-red-700" },
+}
+
 export const leavesColumn: ColumnDef<leavesColumnRow>[] = [
         {
             accessorKey: "leave_type",
@@ -30,7 +36,15 @@ export const leavesColumn: ColumnDef<leavesColumnRow>[] = [
         {
             accessorKey: "status",
             header: "상태",
-            cell: info => info.getValue<string>(),
+            cell: info => {
+                const status = info.getValue<string>();
+                const config = statusMap[status];
+                return (
+                    <span className={`${config.bg} text-white py-1 px-2 rounded-2xl text-sm`}>
+                        {config.label}
+                    </span>
+                )
+            },
             meta:{
                 exportValue: (value:string) => {
                     return value;

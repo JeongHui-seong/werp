@@ -9,7 +9,12 @@ export function LeaveDetailModal({
     onClose,
 }: LeaveDetailModalProps){
     if (!open || !data) return null;
-    console.log(data)
+
+    const statusMap: Record<string, string> = {
+        approved: "승인",
+        pending: "대기",
+        rejected: "거절",
+    }
     return(
         <div
             onClick={onClose}
@@ -44,7 +49,7 @@ export function LeaveDetailModal({
                         <div
                             className="w-[140px] h-[48px] flex items-center px-[20px]"
                         ><p className="text-base font-bold">상태</p></div>
-                        <div className="h-[48px] flex-1 text-base flex items-center">{data.status}</div>
+                        <div className="h-[48px] flex-1 text-base flex items-center">{statusMap[data.status]}</div>
                     </li>
                     <li className="flex items-center">
                         <div
