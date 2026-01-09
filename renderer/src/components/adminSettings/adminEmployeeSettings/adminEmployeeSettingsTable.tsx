@@ -1,0 +1,44 @@
+import { forwardRef, useImperativeHandle, useState } from "react";
+import type { fetchUserTypeResponse, usersColumnProps, usersColumnRef } from "../../../types/user/fetchUserType";
+import { getCoreRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
+import { useCsvExport } from "../../../hooks/table/useCsvExport";
+import { TableUI } from "../../table/tableUI";
+import { employeesColumn } from "./adminEmployeeSettingsColumn";
+
+
+export const EmployeesTable = forwardRef<usersColumnRef, usersColumnProps>(({ recordData, filename }, ref) => {
+    const [selectedRow, setSelectedRow] =
+        useState<fetchUserTypeResponse | null>(null);
+
+    const openDetail = (row: fetchUserTypeResponse) => {
+        setSelectedRow(row);
+    };
+
+    const closeDetail = () => {
+        setSelectedRow(null);
+    };
+
+    const table = useReactTable<fetchUserTypeResponse>({
+        data: recordData ?? [],
+        columns: employeesColumn,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        enableSorting: true,
+        meta: {
+            openDetail,
+        }
+    });
+
+    const handleExportToCsv = useCsvExport(table, filename);
+
+    useImperativeHandle(ref, () => ({
+        exportToCsv: handleExportToCsv,
+    }));
+
+
+    return(
+        <div className="mt-[20px] w-full overflow-auto text-base text-center">
+            <TableUI table={table} />
+        </div>
+    )
+})

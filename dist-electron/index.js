@@ -36586,10 +36586,10 @@ function useEmailValidation(value) {
   }, [value]);
   return isValid2;
 }
-const url$2 = "http://localhost:4000/api";
+const url$3 = "http://localhost:4000/api";
 const emailValidation = async (email) => {
   try {
-    const res = await fetch(`${url$2}/auth/find-email`, {
+    const res = await fetch(`${url$3}/auth/find-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -36608,7 +36608,7 @@ const emailValidation = async (email) => {
 };
 const resendVerification = async (email) => {
   try {
-    const res = await fetch(`${url$2}/auth/resend-code`, {
+    const res = await fetch(`${url$3}/auth/resend-code`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -36627,7 +36627,7 @@ const resendVerification = async (email) => {
 };
 const login = async (email) => {
   try {
-    const res = await fetch(`${url$2}/auth/login`, {
+    const res = await fetch(`${url$3}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -51246,14 +51246,14 @@ function subWeeks(date, amount, options) {
 function subYears(date, amount, options) {
   return addYears(date, -amount, options);
 }
-const url$1 = "http://localhost:4000/api";
+const url$2 = "http://localhost:4000/api";
 const clockIn = async (date) => {
   const token = useAuthStore.getState().token;
   if (!token) {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url$1}/attendance/clockin`, {
+    const res = await fetch(`${url$2}/attendance/clockin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -51277,7 +51277,7 @@ const fetchTodayAttendance = async (date) => {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url$1}/attendance/today?date=${date}`, {
+    const res = await fetch(`${url$2}/attendance/today?date=${date}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -51300,7 +51300,7 @@ const clockOut = async (attendanceId) => {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url$1}/attendance/clockout`, {
+    const res = await fetch(`${url$2}/attendance/clockout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -51324,7 +51324,7 @@ const fetchMonthlyAttendance = async (yearMonth, startWorkTime) => {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url$1}/attendance/monthly?yearMonth=${yearMonth}&startWorkTime=${startWorkTime}`, {
+    const res = await fetch(`${url$2}/attendance/monthly?yearMonth=${yearMonth}&startWorkTime=${startWorkTime}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -51347,7 +51347,7 @@ const fetchYearMonth = async () => {
     throw new Error("로그인 상태에 문제가 생겼습니다. 다시 로그인 부탁드립니다.");
   }
   try {
-    const res = await fetch(`${url$1}/attendance/year-months`, {
+    const res = await fetch(`${url$2}/attendance/year-months`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -59843,15 +59843,26 @@ function Navbar() {
         lineNumber: 48,
         columnNumber: 25
       }, this),
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { className: `overflow-hidden ${openMenu.admin ? "h-full" : "h-0"}`, children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.NavLink, { to: "/admin/leaveSettings", className: ({ isActive }) => `w-full flex gap-[8px] px-[24px] py-[10px] cursor-pointer rounded-2xl transition-all duration-200 ${isActive ? "text-blue-700" : ""}`, children: "휴가 설정" }, void 0, false, {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
-        lineNumber: 51,
-        columnNumber: 33
-      }, this) }, void 0, false, {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
-        lineNumber: 50,
-        columnNumber: 29
-      }, this) }, void 0, false, {
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { className: `overflow-hidden ${openMenu.admin ? "h-full" : "h-0"}`, children: [
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.NavLink, { to: "/admin/leaveSettings", className: ({ isActive }) => `w-full flex gap-[8px] px-[24px] py-[10px] cursor-pointer rounded-2xl transition-all duration-200 ${isActive ? "text-blue-700" : ""}`, children: "휴가 설정" }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
+          lineNumber: 51,
+          columnNumber: 33
+        }, this) }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
+          lineNumber: 50,
+          columnNumber: 29
+        }, this),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.NavLink, { to: "/admin/employeeSettings", className: ({ isActive }) => `w-full flex gap-[8px] px-[24px] py-[10px] cursor-pointer rounded-2xl transition-all duration-200 ${isActive ? "text-blue-700" : ""}`, children: "직원 관리" }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
+          lineNumber: 54,
+          columnNumber: 33
+        }, this) }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
+          lineNumber: 53,
+          columnNumber: 29
+        }, this)
+      ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/navbar.tsx",
         lineNumber: 49,
         columnNumber: 25
@@ -63083,11 +63094,11 @@ function AttendancePage() {
     columnNumber: 9
   }, this);
 }
-const url = "http://localhost:4000/api";
+const url$1 = "http://localhost:4000/api";
 const fetchLeavesType = async () => {
   const token = useAuthStore.getState().token;
   try {
-    const res = await fetch(`${url}/leaves/types`, {
+    const res = await fetch(`${url$1}/leaves/types`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -63107,7 +63118,7 @@ const fetchLeavesType = async () => {
 const updateLeavesType = async (leaveTypes) => {
   const token = useAuthStore.getState().token;
   try {
-    const res = await fetch(`${url}/leaves/types`, {
+    const res = await fetch(`${url$1}/leaves/types`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63128,7 +63139,7 @@ const updateLeavesType = async (leaveTypes) => {
 const deleteLeavesType = async (ids) => {
   const token = useAuthStore.getState().token;
   try {
-    const res = await fetch(`${url}/leaves/types`, {
+    const res = await fetch(`${url$1}/leaves/types`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -63149,7 +63160,7 @@ const deleteLeavesType = async (ids) => {
 const fetchLeavesPolicy = async (year) => {
   const token = useAuthStore.getState().token;
   try {
-    const res = await fetch(`${url}/leaves/policy?year=${year}`, {
+    const res = await fetch(`${url$1}/leaves/policy?year=${year}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -63169,7 +63180,7 @@ const fetchLeavesPolicy = async (year) => {
 const updateLeavesPolicy = async (year, days) => {
   const token = useAuthStore.getState().token;
   try {
-    const res = await fetch(`${url}/leaves/policy`, {
+    const res = await fetch(`${url$1}/leaves/policy`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -63190,7 +63201,7 @@ const updateLeavesPolicy = async (year, days) => {
 const fetchLeavesYearly = async (year) => {
   const token = useAuthStore.getState().token;
   try {
-    const res = await fetch(`${url}/leaves/yearly?year=${year}`, {
+    const res = await fetch(`${url$1}/leaves/yearly?year=${year}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -63210,7 +63221,7 @@ const fetchLeavesYearly = async (year) => {
 const createLeave = async (payload) => {
   const token = useAuthStore.getState().token;
   try {
-    const res = await fetch(`${url}/leaves/create`, {
+    const res = await fetch(`${url$1}/leaves/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63901,11 +63912,11 @@ function AdminLeaveSettingsCard() {
 }
 function AdminLeaveSettingsPage() {
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-[calc(100%-240px)] h-full pb-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(AdminLeaveSettingsCard, {}, void 0, false, {
-    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/pages/adminSettings.tsx",
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/pages/adminLeaveSettings.tsx",
     lineNumber: 6,
     columnNumber: 13
   }, this) }, void 0, false, {
-    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/pages/adminSettings.tsx",
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/pages/adminLeaveSettings.tsx",
     lineNumber: 5,
     columnNumber: 9
   }, this);
@@ -71599,98 +71610,273 @@ function LeavesPage() {
     columnNumber: 9
   }, this);
 }
+const url = "http://localhost:4000/api";
+const fetchAllUsers = async ({ page, limit, filter: filter2, sort, search }) => {
+  const token = useAuthStore.getState().token;
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString()
+  });
+  if (filter2) params.append("filter", JSON.stringify(filter2));
+  if (sort) params.append("sort", JSON.stringify(sort));
+  if (search) params.append("search", JSON.stringify(search));
+  try {
+    const res = await fetch(`${url}/user/get-all?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    if (!res.ok) {
+      const error2 = await res.json();
+      throw new Error(error2.message);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("fetchAllUsers API error: ", err);
+  }
+};
+const useGetAllUsers = (params) => {
+  return useQuery({
+    queryKey: ["users", params],
+    queryFn: ({ queryKey }) => {
+      const [, queryParams] = queryKey;
+      return fetchAllUsers(queryParams);
+    },
+    staleTime: Infinity,
+    retry: false
+  });
+};
+const employeesColumn = [
+  {
+    id: "select",
+    enableSorting: false,
+    header: ({ table }) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      IndeterminateCheckbox,
+      {
+        checked: table.getIsAllRowsSelected(),
+        indeterminate: table.getIsSomeRowsSelected(),
+        onChange: table.getToggleAllRowsSelectedHandler()
+      },
+      void 0,
+      false,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+        lineNumber: 11,
+        columnNumber: 13
+      },
+      void 0
+    ),
+    cell: ({ row }) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      IndeterminateCheckbox,
+      {
+        checked: row.getIsSelected(),
+        disabled: !row.getCanSelect(),
+        onChange: row.getToggleSelectedHandler()
+      },
+      void 0,
+      false,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+        lineNumber: 18,
+        columnNumber: 13
+      },
+      void 0
+    )
+  },
+  { accessorKey: "name", header: "이름" },
+  { header: "부서", accessorFn: (row) => row.department.name },
+  { header: "직급", accessorFn: (row) => row.role.name },
+  { accessorKey: "email", header: "이메일" },
+  { accessorKey: "phone", header: "전화번호" },
+  {
+    header: "입사일",
+    accessorFn: (row) => format(new Date(row.hire_date), "yyyy-MM-dd")
+  }
+];
+const EmployeesTable = reactExports.forwardRef(({ recordData, filename }, ref) => {
+  const [selectedRow, setSelectedRow] = reactExports.useState(null);
+  const openDetail = (row) => {
+    setSelectedRow(row);
+  };
+  const table = useReactTable({
+    data: recordData ?? [],
+    columns: employeesColumn,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    enableSorting: true,
+    meta: {
+      openDetail
+    }
+  });
+  const handleExportToCsv = useCsvExport(table, filename);
+  reactExports.useImperativeHandle(ref, () => ({
+    exportToCsv: handleExportToCsv
+  }));
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "mt-[20px] w-full overflow-auto text-base text-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(TableUI, { table }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsTable.tsx",
+    lineNumber: 41,
+    columnNumber: 13
+  }, void 0) }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsTable.tsx",
+    lineNumber: 40,
+    columnNumber: 9
+  }, void 0);
+});
+function AdminEmployeeSettingsCard() {
+  const [page, setPage] = reactExports.useState(1);
+  const [limit, setLimit] = reactExports.useState(10);
+  const { data: usersData } = useGetAllUsers({ page, limit });
+  const recordData = usersData?.data;
+  const employeesColumnRef = reactExports.useRef(null);
+  console.log(usersData);
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col", children: [
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "font-bold text-center text-lg", children: "직원 관리 설정" }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+      lineNumber: 15,
+      columnNumber: 13
+    }, this),
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex w-full justify-end items-center gap-[20px] mt-[20px]", children: [
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "px-[12px] py-[6px] rounded-2xl text-base bg-green-700 text-white cursor-pointer hover:bg-green-600 transition-all", children: "추가하기" }, void 0, false, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+        lineNumber: 17,
+        columnNumber: 17
+      }, this),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "px-[12px] py-[6px] rounded-2xl text-base bg-red-700  text-white cursor-pointer hover:bg-red-600 transition-all", children: "삭제하기" }, void 0, false, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+        lineNumber: 18,
+        columnNumber: 17
+      }, this)
+    ] }, void 0, true, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+      lineNumber: 16,
+      columnNumber: 13
+    }, this),
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(EmployeesTable, { ref: employeesColumnRef, recordData, filename: "employees_data.csv" }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+      lineNumber: 20,
+      columnNumber: 13
+    }, this)
+  ] }, void 0, true, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+    lineNumber: 14,
+    columnNumber: 9
+  }, this);
+}
+function AdminEmployeeSettingsPage() {
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-[calc(100%-240px)] h-full pb-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(AdminEmployeeSettingsCard, {}, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/pages/adminEmployeeSettings.tsx",
+    lineNumber: 6,
+    columnNumber: 13
+  }, this) }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/pages/adminEmployeeSettings.tsx",
+    lineNumber: 5,
+    columnNumber: 9
+  }, this);
+}
 function App() {
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Routes, { children: [
       "// outlet 컴포넌트 사용으로 토큰이 없을 때 접근 가능한 자식 라우트 렌더링",
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Route, { element: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(PublicRoute, {}, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-        lineNumber: 17,
+        lineNumber: 18,
         columnNumber: 25
       }, this), children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Route, { path: "/login", element: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(LoginPage, {}, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-        lineNumber: 18,
+        lineNumber: 19,
         columnNumber: 41
       }, this) }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-        lineNumber: 18,
+        lineNumber: 19,
         columnNumber: 11
       }, this) }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-        lineNumber: 17,
+        lineNumber: 18,
         columnNumber: 9
       }, this),
       "// outlet 컴포넌트 사용으로 토큰이 있을 때 접근 가능한 자식 라우트 렌더링",
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Route, { element: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(PrivateRoute, {}, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-        lineNumber: 21,
+        lineNumber: 22,
         columnNumber: 25
       }, this), children: [
         "// 기본 layout 설정",
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Route, { element: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(PrivateLayout, {}, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-          lineNumber: 23,
+          lineNumber: 24,
           columnNumber: 27
         }, this), children: [
           "// 기본 라우트를 /dashboard로 설정",
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Route, { path: "/", element: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Navigate, { to: "/dashboard", replace: true }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-            lineNumber: 25,
+            lineNumber: 26,
             columnNumber: 38
           }, this) }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-            lineNumber: 25,
+            lineNumber: 26,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Route, { path: "/dashboard", element: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(DashboardPage, {}, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-            lineNumber: 26,
+            lineNumber: 27,
             columnNumber: 47
           }, this) }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-            lineNumber: 26,
+            lineNumber: 27,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Route, { path: "/attendance/attendance", element: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(AttendancePage, {}, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-            lineNumber: 27,
+            lineNumber: 28,
             columnNumber: 59
           }, this) }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-            lineNumber: 27,
+            lineNumber: 28,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Route, { path: "/attendance/leaves", element: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(LeavesPage, {}, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-            lineNumber: 28,
+            lineNumber: 29,
             columnNumber: 55
           }, this) }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-            lineNumber: 28,
+            lineNumber: 29,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Route, { path: "/admin/leaveSettings", element: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(AdminLeaveSettingsPage, {}, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-            lineNumber: 29,
+            lineNumber: 30,
             columnNumber: 57
           }, this) }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-            lineNumber: 29,
+            lineNumber: 30,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(distExports.Route, { path: "/admin/employeeSettings", element: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(AdminEmployeeSettingsPage, {}, void 0, false, {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
+            lineNumber: 31,
+            columnNumber: 60
+          }, this) }, void 0, false, {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
+            lineNumber: 31,
             columnNumber: 13
           }, this)
         ] }, void 0, true, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-          lineNumber: 23,
+          lineNumber: 24,
           columnNumber: 11
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-        lineNumber: 21,
+        lineNumber: 22,
         columnNumber: 9
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-      lineNumber: 15,
+      lineNumber: 16,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -71705,14 +71891,14 @@ function App() {
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-        lineNumber: 33,
+        lineNumber: 35,
         columnNumber: 7
       },
       this
     )
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/App.tsx",
-    lineNumber: 14,
+    lineNumber: 15,
     columnNumber: 5
   }, this);
 }

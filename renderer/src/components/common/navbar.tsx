@@ -50,6 +50,9 @@ export function Navbar(){
                             <li>
                                 <NavLink to='/admin/leaveSettings'  className={({isActive}) => `w-full flex gap-[8px] px-[24px] py-[10px] cursor-pointer rounded-2xl transition-all duration-200 ${isActive ? "text-blue-700" : ''}`}>휴가 설정</NavLink>
                             </li>
+                            <li>
+                                <NavLink to='/admin/employeeSettings'  className={({isActive}) => `w-full flex gap-[8px] px-[24px] py-[10px] cursor-pointer rounded-2xl transition-all duration-200 ${isActive ? "text-blue-700" : ''}`}>직원 관리</NavLink>
+                            </li>
                         </ul>
                     </li>
                 }
