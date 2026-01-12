@@ -2,11 +2,11 @@ import type { dialogProps } from "../../types/dialogData";
 import { motion } from "framer-motion";
 
 export function Dialog({dialogData, onClose, open}: dialogProps){
-    if (!open) return null;
+    if (!open || !dialogData) return null;
 
     return(
         <div
-            className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-20">
+            className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-30">
             <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}

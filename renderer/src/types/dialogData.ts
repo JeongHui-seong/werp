@@ -6,7 +6,7 @@ export interface dialog{
 }
 
 export interface dialogProps{
-    dialogData: dialog;
+    dialogData: dialog | null;
     open: boolean;
     onClose: () => void;
 }

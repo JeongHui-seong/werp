@@ -38,7 +38,7 @@ export type fetchUserTypeResponse = {
         id: number;
         name: string;
     };
-    status: "active" | "inactive";
+    status: "active" | "inactive" | "quit";
 }
 
 export type usersColumnProps = {
@@ -48,4 +48,10 @@ export type usersColumnProps = {
 
 export type usersColumnRef = {
     exportToCsv: () => void;
+}
+
+export type userDetailDialogProps = {
+    open: boolean;
+    data: fetchUserTypeResponse | null;
+    onClose: () => void;
 }

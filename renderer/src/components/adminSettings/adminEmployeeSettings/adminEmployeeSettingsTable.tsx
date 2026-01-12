@@ -4,6 +4,7 @@ import { getCoreRowModel, getSortedRowModel, useReactTable } from "@tanstack/rea
 import { useCsvExport } from "../../../hooks/table/useCsvExport";
 import { TableUI } from "../../table/tableUI";
 import { employeesColumn } from "./adminEmployeeSettingsColumn";
+import { AdminEmployeeSettingsDetailModal } from "./adminEmployeeSettingsDetailModal";
 
 
 export const EmployeesTable = forwardRef<usersColumnRef, usersColumnProps>(({ recordData, filename }, ref) => {
@@ -38,6 +39,11 @@ export const EmployeesTable = forwardRef<usersColumnRef, usersColumnProps>(({ re
 
     return(
         <div className="mt-[20px] w-full overflow-auto text-base text-center">
+            <AdminEmployeeSettingsDetailModal
+                open={!!selectedRow}
+                data={selectedRow}
+                onClose={closeDetail}
+            />
             <TableUI table={table} />
         </div>
     )

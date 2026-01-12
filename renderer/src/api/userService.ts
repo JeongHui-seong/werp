@@ -1,5 +1,6 @@
 import { useAuthStore } from "../hooks/auth/useAuthStore"
 import type { fetchUserTypeRequest } from "../types/user/fetchUserType";
+import type { updateUserPayload } from "../types/user/updateUserType";
 
 const url: string = import.meta.env.VITE_BASE_URL
 
@@ -25,12 +26,63 @@ export const fetchAllUsers = async ({page, limit, filter, sort, search}:fetchUse
 
         if (!res.ok) {
             const error = await res.json();
-            throw new Error(error.message)
+            throw new Error(error.message);
         }
 
         const data = await res.json();
         return data;
     } catch (err) {
         console.log("fetchAllUsers API error: ", err);
+    }
+
+}
+
+export const fetchRoleAndDept = async () => {
+    const token = useAuthStore.getState().token;
+
+    try {
+        const res = await fetch(`${url}/user/get-roledept`, {
+            method: "GET",
+            headers: {
+                'Content-Type' : 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.message);
+        }
+
+        const data = await res.json();
+        return data;
+
+    } catch (err) {
+        console.log("fetchRoleAndDept API error: ", err);
+    }
+}
+
+export const updateUser = async (id: string, payload: updateUserPayload) => {
+    const token = useAuthStore.getState().token;
+
+    try{
+        const res = await fetch(`${url}/user/update-user/${id}`,{
+            method: "PATCH",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        })
+
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.message);
+        }
+
+        const data = await res.json();
+        return data;
+    } catch (err) {
+        console.log("updateUser API error : ", err);
     }
 }
