@@ -1,4 +1,5 @@
 import { useAuthStore } from "../hooks/auth/useAuthStore"
+import type { createUserPayload } from "../types/user/createUserType";
 import type { fetchUserTypeRequest } from "../types/user/fetchUserType";
 import type { updateUserPayload } from "../types/user/updateUserType";
 
@@ -84,5 +85,31 @@ export const updateUser = async (id: string, payload: updateUserPayload) => {
         return data;
     } catch (err) {
         console.log("updateUser API error : ", err);
+    }
+}
+
+export const createUser = async (payload: createUserPayload) => {
+    const token = useAuthStore.getState().token;
+
+    try{
+        const res = await fetch(`${url}/user/create-user`, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({payload})
+        })
+
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.message);
+        }
+
+        const data = await res.json();
+        return data;
+
+    } catch (err) {
+        console.log("createUser API error : ", err);
     }
 }
