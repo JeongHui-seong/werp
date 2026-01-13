@@ -71700,6 +71700,27 @@ const createUser = async (payload) => {
     console.log("createUser API error : ", err);
   }
 };
+const deleteUser = async (ids) => {
+  const token = useAuthStore.getState().token;
+  try {
+    const res = await fetch(`${url}/user/delete-user`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ ids })
+    });
+    if (!res.ok) {
+      const error2 = await res.json();
+      throw new Error(error2);
+    }
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.log("deleteUser API error : ", err);
+  }
+};
 const useGetAllUsers = (params) => {
   return useQuery({
     queryKey: ["users", params],
@@ -72414,7 +72435,7 @@ function AdminEmployeeSettingsDetailModal({
     columnNumber: 9
   }, this);
 }
-const EmployeesTable = reactExports.forwardRef(({ recordData, filename }, ref) => {
+const EmployeesTable = reactExports.forwardRef(({ recordData, filename, rowSelection, setRowSelection }, ref) => {
   const [selectedRow, setSelectedRow] = reactExports.useState(null);
   const openDetail = (row) => {
     setSelectedRow(row);
@@ -72430,7 +72451,13 @@ const EmployeesTable = reactExports.forwardRef(({ recordData, filename }, ref) =
     enableSorting: true,
     meta: {
       openDetail
-    }
+    },
+    state: {
+      rowSelection
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    getRowId: (row) => row.id
   });
   const handleExportToCsv = useCsvExport(table, filename);
   reactExports.useImperativeHandle(ref, () => ({
@@ -72448,19 +72475,19 @@ const EmployeesTable = reactExports.forwardRef(({ recordData, filename }, ref) =
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsTable.tsx",
-        lineNumber: 42,
+        lineNumber: 48,
         columnNumber: 13
       },
       void 0
     ),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(TableUI, { table }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsTable.tsx",
-      lineNumber: 47,
+      lineNumber: 53,
       columnNumber: 13
     }, void 0)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsTable.tsx",
-    lineNumber: 41,
+    lineNumber: 47,
     columnNumber: 9
   }, void 0);
 });
@@ -72999,70 +73026,148 @@ function AdminEmployeeSettingsCreateModal({ open, onClose }) {
     columnNumber: 9
   }, this);
 }
+const useDeleteUser = () => {
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: (ids) => deleteUser(ids),
+    onSuccess: (data) => {
+      y.success(data.message);
+      queryClient2.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (err) => {
+      y.error(err.message);
+    }
+  });
+};
 function AdminEmployeeSettingsCard() {
+  const { mutate: deleteUser2 } = useDeleteUser();
   const [page, setPage] = reactExports.useState(1);
   const [limit, setLimit] = reactExports.useState(10);
   const [createModalOpen, setCreateModalOpen] = reactExports.useState(false);
   const { data: usersData } = useGetAllUsers({ page, limit });
   const recordData = usersData?.data;
   const employeesColumnRef = reactExports.useRef(null);
-  console.log(usersData);
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col", children: [
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "font-bold text-center text-lg", children: "직원 관리 설정" }, void 0, false, {
-      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-      lineNumber: 17,
-      columnNumber: 13
-    }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex w-full justify-end items-center gap-[20px] mt-[20px]", children: [
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-        "button",
-        {
-          onClick: () => setCreateModalOpen(true),
-          className: "px-[12px] py-[6px] rounded-2xl text-base bg-green-700 text-white cursor-pointer hover:bg-green-600 transition-all",
-          children: "추가하기"
-        },
-        void 0,
-        false,
-        {
-          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 19,
-          columnNumber: 17
-        },
-        this
-      ),
-      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "px-[12px] py-[6px] rounded-2xl text-base bg-red-700  text-white cursor-pointer hover:bg-red-600 transition-all", children: "삭제하기" }, void 0, false, {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 23,
-        columnNumber: 17
-      }, this)
-    ] }, void 0, true, {
-      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-      lineNumber: 18,
-      columnNumber: 13
-    }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(EmployeesTable, { ref: employeesColumnRef, recordData, filename: "employees_data.csv" }, void 0, false, {
-      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-      lineNumber: 25,
-      columnNumber: 13
-    }, this),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-      AdminEmployeeSettingsCreateModal,
+  const [rowSelection, setRowSelection] = reactExports.useState({});
+  const [dialogData, setDialogData] = reactExports.useState(null);
+  const [dialogOpen, setDialogOpen] = reactExports.useState(false);
+  const onDelete = () => {
+    const ids = Object.keys(rowSelection);
+    if (ids.length === 0) {
+      y.error("삭제할 항목을 선택해주세요.");
+      return;
+    }
+    setDialogData({
+      title: "직원 삭제",
+      content: `${ids.length}명의 직원을 삭제하시겠습니까?`,
+      okButtonText: "삭제하기",
+      onOK: () => {
+        deleteUser2(ids);
+      }
+    });
+    setDialogOpen(true);
+  };
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
+    dialogData && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      Dialog,
       {
-        open: createModalOpen,
-        onClose: () => setCreateModalOpen(false)
+        dialogData,
+        onClose: () => setDialogOpen(false),
+        open: dialogOpen
       },
       void 0,
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 26,
-        columnNumber: 13
+        lineNumber: 47,
+        columnNumber: 17
       },
       this
-    )
+    ),
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col", children: [
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "font-bold text-center text-lg", children: "직원 관리 설정" }, void 0, false, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+        lineNumber: 54,
+        columnNumber: 17
+      }, this),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex w-full justify-end items-center gap-[20px] mt-[20px]", children: [
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            onClick: () => setCreateModalOpen(true),
+            className: "px-[12px] py-[6px] rounded-2xl text-base bg-green-700 text-white cursor-pointer hover:bg-green-600 transition-all",
+            children: "추가하기"
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+            lineNumber: 56,
+            columnNumber: 21
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            onClick: () => onDelete(),
+            className: "px-[12px] py-[6px] rounded-2xl text-base bg-red-700  text-white cursor-pointer hover:bg-red-600 transition-all",
+            children: "삭제하기"
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+            lineNumber: 60,
+            columnNumber: 21
+          },
+          this
+        )
+      ] }, void 0, true, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+        lineNumber: 55,
+        columnNumber: 17
+      }, this),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+        EmployeesTable,
+        {
+          ref: employeesColumnRef,
+          recordData,
+          filename: "employees_data.csv",
+          rowSelection,
+          setRowSelection
+        },
+        void 0,
+        false,
+        {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+          lineNumber: 65,
+          columnNumber: 17
+        },
+        this
+      ),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+        AdminEmployeeSettingsCreateModal,
+        {
+          open: createModalOpen,
+          onClose: () => setCreateModalOpen(false)
+        },
+        void 0,
+        false,
+        {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+          lineNumber: 72,
+          columnNumber: 17
+        },
+        this
+      )
+    ] }, void 0, true, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+      lineNumber: 53,
+      columnNumber: 13
+    }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-    lineNumber: 16,
+    lineNumber: 45,
     columnNumber: 9
   }, this);
 }

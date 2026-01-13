@@ -1,3 +1,5 @@
+import type { RowSelectionState } from "@tanstack/react-table";
+
 type fetchUserFilter = {
     status?: "active" | "inactive";
     roleName?: string;
@@ -44,6 +46,8 @@ export type fetchUserTypeResponse = {
 export type usersColumnProps = {
     recordData?: fetchUserTypeResponse[];
     filename: string;
+    rowSelection: RowSelectionState;
+    setRowSelection: React.Dispatch<React.SetStateAction<RowSelectionState>>;
 }
 
 export type usersColumnRef = {

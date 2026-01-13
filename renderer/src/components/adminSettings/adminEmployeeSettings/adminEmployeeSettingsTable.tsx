@@ -7,7 +7,7 @@ import { employeesColumn } from "./adminEmployeeSettingsColumn";
 import { AdminEmployeeSettingsDetailModal } from "./adminEmployeeSettingsDetailModal";
 
 
-export const EmployeesTable = forwardRef<usersColumnRef, usersColumnProps>(({ recordData, filename }, ref) => {
+export const EmployeesTable = forwardRef<usersColumnRef, usersColumnProps>(({ recordData, filename, rowSelection, setRowSelection }, ref) => {
     const [selectedRow, setSelectedRow] =
         useState<fetchUserTypeResponse | null>(null);
 
@@ -27,7 +27,13 @@ export const EmployeesTable = forwardRef<usersColumnRef, usersColumnProps>(({ re
         enableSorting: true,
         meta: {
             openDetail,
-        }
+        },
+        state: {
+            rowSelection,
+        },
+        enableRowSelection: true,
+        onRowSelectionChange: setRowSelection,
+        getRowId: row => row.id,
     });
 
     const handleExportToCsv = useCsvExport(table, filename);

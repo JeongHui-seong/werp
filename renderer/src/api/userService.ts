@@ -113,3 +113,29 @@ export const createUser = async (payload: createUserPayload) => {
         console.log("createUser API error : ", err);
     }
 }
+
+export const deleteUser = async(ids: string[]) => {
+    const token = useAuthStore.getState().token;
+
+    try {
+        const res = await fetch(`${url}/user/delete-user`, {
+            method: "DELETE",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ids}),
+        })
+
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error)
+        }
+
+        const data = await res.json();
+        return data;
+
+    } catch (err) {
+        console.log("deleteUser API error : ", err)
+    }
+}
