@@ -1,16 +1,15 @@
 import type { RowSelectionState } from "@tanstack/react-table";
 
 type fetchUserFilter = {
-    status?: "active" | "inactive";
+    status?: "active" | "inactive" | "quit";
     roleName?: string;
     deptName?: string;
 }
 
 type fetchUserSort = {
-    name?: "ASC" | "DESC";
-    email?: "ASC" | "DESC";
-    phone?: "ASC" | "DESC";
-    hireDate?: "ASC" | "DESC";
+    name?: "asc" | "desc";
+    email?: "asc" | "desc";
+    hireDate?: "asc" | "desc";
 }
 
 type fetchUserSearch = {
@@ -32,7 +31,7 @@ export type fetchUserTypeResponse = {
         name: string;
     };
     email: string;
-    hire_date: string;
+    hireDate: string;
     id: string;
     name: string;
     phone: string;

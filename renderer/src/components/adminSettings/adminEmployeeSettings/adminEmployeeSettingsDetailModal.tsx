@@ -57,8 +57,8 @@ export function AdminEmployeeSettingsDetailModal({
         if (oriEmpData.role.id !== employeeData.role.id)
             payload.roleId = employeeData.role.id;
 
-        if (oriEmpData.hire_date !== employeeData.hire_date)
-            payload.hire_date = employeeData.hire_date;
+        if (oriEmpData.hireDate !== employeeData.hireDate)
+            payload.hire_date = employeeData.hireDate;
 
         return payload;
     };
@@ -224,7 +224,7 @@ export function AdminEmployeeSettingsDetailModal({
                             ><p className="text-base font-bold">입사일</p></div>
                             <div className="h-[48px] flex-1 text-base flex items-center">
                                 <DatePicker
-                                    selected={employeeData?.hire_date ? new Date(employeeData.hire_date) : undefined}
+                                    selected={employeeData?.hireDate ? new Date(employeeData.hireDate) : undefined}
                                     onChange={(date: Date | null) => {
                                         if (!date) return;
                                         setEmployeeData(prev => {

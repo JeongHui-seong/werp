@@ -4,18 +4,17 @@ import type { fetchUserTypeResponse } from "../../../types/user/fetchUserType";
 import { format } from "date-fns-tz";
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
-const statusMap: Record<string, string> = {
-    active: "활성",
-    inactive: "비활성",
-    quit: "퇴사",
-}
-
-const roleMap: Record<string, string> = {
-    admin: "관리자",
-    employee: "사원",
-}
-
-export const employeesColumn: ColumnDef<fetchUserTypeResponse>[] = [
+export const employeesColumn = (
+    roleData: Array<{ id: number; name: string }>,
+    deptData: Array<{ id: number; name: string }>,
+    statusMap: string[],
+    status: string,
+    onChangeDeptId: (value: string) => void,
+    deptId: string,
+    onChangeRoleId: (value: string) => void,
+    roleId: string,
+    onChangeStatus: (value: string) => void,
+): ColumnDef<fetchUserTypeResponse>[] => [
     {
         id: "select",
         enableSorting: false,
@@ -36,18 +35,84 @@ export const employeesColumn: ColumnDef<fetchUserTypeResponse>[] = [
     },
     { accessorKey: "name", header: "이름" },
     { accessorKey: "email", header: "이메일" },
-    { header: "부서", accessorFn: row => row.department.name },
     {
-        header: "직급",
-        accessorFn: row => roleMap[row.role.name] ?? row.role.name,
+        id: "department",
+        header: () => (
+            <div
+                className="w-full flex flex-col items-center justify-center gap-[6px]"
+            >   
+                <p>부서</p>
+                <select
+                    className="w-[calc(100%-12px)] px-[6px] py-[3px] text-sm border border-gray-40 rounded-2xl"
+                    name="dept" id="dept"
+                    onChange={e => onChangeDeptId(e.target.value)}
+                    value={deptId}
+                >
+                    <option value="">All</option>
+                    {deptData.map((dept: {id: number; name: string;}) => (
+                        <option key={dept.id} value={String(dept.id)}>
+                            {dept.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        ),
+        accessorFn: row => row.department.name,
+        enableSorting: false,
     },
-    {
-        header: "상태",
-        accessorFn: row => statusMap[row.status] ?? row.status,
+    {   
+        id: "role",
+        header: () => (
+            <div
+                className="w-full flex flex-col items-center justify-center gap-[6px]"
+            >   
+                <p>직급</p>
+                <select
+                    className="w-[calc(100%-12px)] px-[6px] py-[3px] text-sm border border-gray-40 rounded-2xl"
+                    name="role" id="role"
+                    onChange={e => onChangeRoleId(e.target.value)}
+                    value={roleId}
+                >
+                    <option value="">All</option>
+                    {roleData.map((role: {id: number; name: string;}) => (
+                        <option key={role.id} value={String(role.id)}>
+                            {role.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        ),
+        accessorFn: row => row.role.name,
+        enableSorting: false,
+    },
+    {   
+        id: "status",
+        header: () => (
+            <div
+                className="w-full flex flex-col items-center justify-center gap-[6px]"
+            >   
+                <p>상태</p>
+                <select
+                    className="w-[calc(100%-12px)] px-[6px] py-[3px] text-sm border border-gray-40 rounded-2xl"
+                    name="status" id="status"
+                    onChange={e => onChangeStatus(e.target.value)}
+                    value={status}
+                >
+                    <option value="">All</option>
+                    {statusMap.map((s: string) => (
+                        <option key={s} value={s}>
+                            {s}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        ),
+        accessorFn: row => row.status,
+        enableSorting: false,
     },
     {
         header: "입사일",
-        accessorFn: row => format(new Date(row.hire_date), "yyyy-MM-dd"),
+        accessorFn: row => format(new Date(row.hireDate), "yyyy-MM-dd"),
     },
     {
         id: "actions",

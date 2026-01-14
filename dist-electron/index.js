@@ -62597,6 +62597,177 @@ function getCoreRowModel() {
     return rowModel;
   }, getMemoOptions(table.options, "debugTable", "getRowModel", () => table._autoResetPageIndex()));
 }
+function filterRows(rows, filterRowImpl, table) {
+  if (table.options.filterFromLeafRows) {
+    return filterRowModelFromLeafs(rows, filterRowImpl, table);
+  }
+  return filterRowModelFromRoot(rows, filterRowImpl, table);
+}
+function filterRowModelFromLeafs(rowsToFilter, filterRow, table) {
+  var _table$options$maxLea;
+  const newFilteredFlatRows = [];
+  const newFilteredRowsById = {};
+  const maxDepth2 = (_table$options$maxLea = table.options.maxLeafRowFilterDepth) != null ? _table$options$maxLea : 100;
+  const recurseFilterRows = function(rowsToFilter2, depth) {
+    if (depth === void 0) {
+      depth = 0;
+    }
+    const rows = [];
+    for (let i = 0; i < rowsToFilter2.length; i++) {
+      var _row$subRows;
+      let row = rowsToFilter2[i];
+      const newRow = createRow(table, row.id, row.original, row.index, row.depth, void 0, row.parentId);
+      newRow.columnFilters = row.columnFilters;
+      if ((_row$subRows = row.subRows) != null && _row$subRows.length && depth < maxDepth2) {
+        newRow.subRows = recurseFilterRows(row.subRows, depth + 1);
+        row = newRow;
+        if (filterRow(row) && !newRow.subRows.length) {
+          rows.push(row);
+          newFilteredRowsById[row.id] = row;
+          newFilteredFlatRows.push(row);
+          continue;
+        }
+        if (filterRow(row) || newRow.subRows.length) {
+          rows.push(row);
+          newFilteredRowsById[row.id] = row;
+          newFilteredFlatRows.push(row);
+          continue;
+        }
+      } else {
+        row = newRow;
+        if (filterRow(row)) {
+          rows.push(row);
+          newFilteredRowsById[row.id] = row;
+          newFilteredFlatRows.push(row);
+        }
+      }
+    }
+    return rows;
+  };
+  return {
+    rows: recurseFilterRows(rowsToFilter),
+    flatRows: newFilteredFlatRows,
+    rowsById: newFilteredRowsById
+  };
+}
+function filterRowModelFromRoot(rowsToFilter, filterRow, table) {
+  var _table$options$maxLea2;
+  const newFilteredFlatRows = [];
+  const newFilteredRowsById = {};
+  const maxDepth2 = (_table$options$maxLea2 = table.options.maxLeafRowFilterDepth) != null ? _table$options$maxLea2 : 100;
+  const recurseFilterRows = function(rowsToFilter2, depth) {
+    if (depth === void 0) {
+      depth = 0;
+    }
+    const rows = [];
+    for (let i = 0; i < rowsToFilter2.length; i++) {
+      let row = rowsToFilter2[i];
+      const pass = filterRow(row);
+      if (pass) {
+        var _row$subRows2;
+        if ((_row$subRows2 = row.subRows) != null && _row$subRows2.length && depth < maxDepth2) {
+          const newRow = createRow(table, row.id, row.original, row.index, row.depth, void 0, row.parentId);
+          newRow.subRows = recurseFilterRows(row.subRows, depth + 1);
+          row = newRow;
+        }
+        rows.push(row);
+        newFilteredFlatRows.push(row);
+        newFilteredRowsById[row.id] = row;
+      }
+    }
+    return rows;
+  };
+  return {
+    rows: recurseFilterRows(rowsToFilter),
+    flatRows: newFilteredFlatRows,
+    rowsById: newFilteredRowsById
+  };
+}
+function getFilteredRowModel() {
+  return (table) => memo(() => [table.getPreFilteredRowModel(), table.getState().columnFilters, table.getState().globalFilter], (rowModel, columnFilters, globalFilter) => {
+    if (!rowModel.rows.length || !(columnFilters != null && columnFilters.length) && !globalFilter) {
+      for (let i = 0; i < rowModel.flatRows.length; i++) {
+        rowModel.flatRows[i].columnFilters = {};
+        rowModel.flatRows[i].columnFiltersMeta = {};
+      }
+      return rowModel;
+    }
+    const resolvedColumnFilters = [];
+    const resolvedGlobalFilters = [];
+    (columnFilters != null ? columnFilters : []).forEach((d) => {
+      var _filterFn$resolveFilt;
+      const column = table.getColumn(d.id);
+      if (!column) {
+        return;
+      }
+      const filterFn = column.getFilterFn();
+      if (!filterFn) {
+        {
+          console.warn(`Could not find a valid 'column.filterFn' for column with the ID: ${column.id}.`);
+        }
+        return;
+      }
+      resolvedColumnFilters.push({
+        id: d.id,
+        filterFn,
+        resolvedValue: (_filterFn$resolveFilt = filterFn.resolveFilterValue == null ? void 0 : filterFn.resolveFilterValue(d.value)) != null ? _filterFn$resolveFilt : d.value
+      });
+    });
+    const filterableIds = (columnFilters != null ? columnFilters : []).map((d) => d.id);
+    const globalFilterFn = table.getGlobalFilterFn();
+    const globallyFilterableColumns = table.getAllLeafColumns().filter((column) => column.getCanGlobalFilter());
+    if (globalFilter && globalFilterFn && globallyFilterableColumns.length) {
+      filterableIds.push("__global__");
+      globallyFilterableColumns.forEach((column) => {
+        var _globalFilterFn$resol;
+        resolvedGlobalFilters.push({
+          id: column.id,
+          filterFn: globalFilterFn,
+          resolvedValue: (_globalFilterFn$resol = globalFilterFn.resolveFilterValue == null ? void 0 : globalFilterFn.resolveFilterValue(globalFilter)) != null ? _globalFilterFn$resol : globalFilter
+        });
+      });
+    }
+    let currentColumnFilter;
+    let currentGlobalFilter;
+    for (let j = 0; j < rowModel.flatRows.length; j++) {
+      const row = rowModel.flatRows[j];
+      row.columnFilters = {};
+      if (resolvedColumnFilters.length) {
+        for (let i = 0; i < resolvedColumnFilters.length; i++) {
+          currentColumnFilter = resolvedColumnFilters[i];
+          const id2 = currentColumnFilter.id;
+          row.columnFilters[id2] = currentColumnFilter.filterFn(row, id2, currentColumnFilter.resolvedValue, (filterMeta) => {
+            row.columnFiltersMeta[id2] = filterMeta;
+          });
+        }
+      }
+      if (resolvedGlobalFilters.length) {
+        for (let i = 0; i < resolvedGlobalFilters.length; i++) {
+          currentGlobalFilter = resolvedGlobalFilters[i];
+          const id2 = currentGlobalFilter.id;
+          if (currentGlobalFilter.filterFn(row, id2, currentGlobalFilter.resolvedValue, (filterMeta) => {
+            row.columnFiltersMeta[id2] = filterMeta;
+          })) {
+            row.columnFilters.__global__ = true;
+            break;
+          }
+        }
+        if (row.columnFilters.__global__ !== true) {
+          row.columnFilters.__global__ = false;
+        }
+      }
+    }
+    const filterRowsImpl = (row) => {
+      for (let i = 0; i < filterableIds.length; i++) {
+        if (row.columnFilters[filterableIds[i]] === false) {
+          return false;
+        }
+      }
+      return true;
+    };
+    return filterRows(rowModel.rows, filterRowsImpl, table);
+  }, getMemoOptions(table.options, "debugTable", "getFilteredRowModel", () => table._autoResetPageIndex()));
+}
 function getSortedRowModel() {
   return (table) => memo(() => [table.getState().sorting, table.getPreSortedRowModel()], (sorting, rowModel) => {
     if (!rowModel.rows.length || !(sorting != null && sorting.length)) {
@@ -63966,7 +64137,7 @@ function LeavesSummaryCard({ summaryData }) {
 const SearchRoundedIcon = createSvgIcon(/* @__PURE__ */ jsxRuntimeExports.jsx("path", {
   d: "M15.5 14h-.79l-.28-.27c1.2-1.4 1.82-3.31 1.48-5.34-.47-2.78-2.79-5-5.59-5.34-4.23-.52-7.79 3.04-7.27 7.27.34 2.8 2.56 5.12 5.34 5.59 2.03.34 3.94-.28 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0s.41-1.08 0-1.49zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"
 }), "SearchRounded");
-const statusMap$1 = {
+const statusMap = {
   approved: { label: "승인", bg: "bg-green-700" },
   pending: { label: "대기", bg: "bg-yellow-400" },
   rejected: { label: "거절", bg: "bg-red-700" }
@@ -64000,7 +64171,7 @@ const leavesColumn = [
     header: "상태",
     cell: (info) => {
       const status = info.getValue();
-      const config = statusMap$1[status];
+      const config = statusMap[status];
       return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("span", { className: `${config.bg} text-white py-1 px-2 rounded-2xl text-sm`, children: config.label }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/leaves/LeavesColumn.tsx",
         lineNumber: 43,
@@ -71732,93 +71903,17 @@ const useGetAllUsers = (params) => {
     retry: false
   });
 };
-const statusMap = {
-  active: "활성",
-  inactive: "비활성",
-  quit: "퇴사"
+const EmployeesTable = ({ table }) => {
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "mt-[20px] w-full overflow-auto text-base text-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(TableUI, { table }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsTable.tsx",
+    lineNumber: 13,
+    columnNumber: 13
+  }, void 0) }, void 0, false, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsTable.tsx",
+    lineNumber: 12,
+    columnNumber: 9
+  }, void 0);
 };
-const roleMap = {
-  admin: "관리자",
-  employee: "사원"
-};
-const employeesColumn = [
-  {
-    id: "select",
-    enableSorting: false,
-    header: ({ table }) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-      IndeterminateCheckbox,
-      {
-        checked: table.getIsAllRowsSelected(),
-        indeterminate: table.getIsSomeRowsSelected(),
-        onChange: table.getToggleAllRowsSelectedHandler()
-      },
-      void 0,
-      false,
-      {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
-        lineNumber: 23,
-        columnNumber: 13
-      },
-      void 0
-    ),
-    cell: ({ row }) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-      IndeterminateCheckbox,
-      {
-        checked: row.getIsSelected(),
-        disabled: !row.getCanSelect(),
-        onChange: row.getToggleSelectedHandler()
-      },
-      void 0,
-      false,
-      {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
-        lineNumber: 30,
-        columnNumber: 13
-      },
-      void 0
-    )
-  },
-  { accessorKey: "name", header: "이름" },
-  { accessorKey: "email", header: "이메일" },
-  { header: "부서", accessorFn: (row) => row.department.name },
-  {
-    header: "직급",
-    accessorFn: (row) => roleMap[row.role.name] ?? row.role.name
-  },
-  {
-    header: "상태",
-    accessorFn: (row) => statusMap[row.status] ?? row.status
-  },
-  {
-    header: "입사일",
-    accessorFn: (row) => format(new Date(row.hire_date), "yyyy-MM-dd")
-  },
-  {
-    id: "actions",
-    header: "",
-    enableSorting: false,
-    cell: ({ row, table }) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-      "button",
-      {
-        onClick: () => table.options.meta?.openDetail(row.original),
-        className: "cursor-pointer",
-        children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SearchRoundedIcon, { fontSize: "small" }, void 0, false, {
-          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
-          lineNumber: 61,
-          columnNumber: 17
-        }, void 0)
-      },
-      void 0,
-      false,
-      {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
-        lineNumber: 57,
-        columnNumber: 13
-      },
-      void 0
-    )
-  }
-];
 function useGetRoleDept() {
   return useQuery({
     queryKey: ["role-dept"],
@@ -71827,670 +71922,6 @@ function useGetRoleDept() {
     retry: false
   });
 }
-function useUpdateUser() {
-  const queryClient2 = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id: id2, payload }) => updateUser(id2, payload),
-    onSuccess: (data) => {
-      y.success(data.message);
-      queryClient2.invalidateQueries({ queryKey: ["users"] });
-    },
-    onError: (err) => {
-      y.error(err.message);
-    }
-  });
-}
-function AdminEmployeeSettingsDetailModal({
-  open,
-  data,
-  onClose
-}) {
-  const { data: roleDeptData } = useGetRoleDept();
-  const [employeeData, setEmployeeData] = reactExports.useState(null);
-  const [oriEmpData, setOriEmpData] = reactExports.useState(null);
-  const [isDirty, setIsDirty] = reactExports.useState(false);
-  const roleData = roleDeptData?.role || [];
-  const deptData = roleDeptData?.dept || [];
-  const [dialogData, setDialogData] = reactExports.useState(null);
-  const [dialogOpen, setDialogOpen] = reactExports.useState(false);
-  const { mutate: updateUser2 } = useUpdateUser();
-  reactExports.useEffect(() => {
-    if (!data) return;
-    setEmployeeData(structuredClone(data));
-    setOriEmpData(structuredClone(data));
-    setIsDirty(false);
-  }, [data]);
-  if (!open || !data) return null;
-  const buildPatchPayload = () => {
-    if (!oriEmpData || !employeeData) return null;
-    const payload = {};
-    if (oriEmpData.name !== employeeData.name)
-      payload.name = employeeData.name;
-    if (oriEmpData.email !== employeeData.email)
-      payload.email = employeeData.email;
-    if (oriEmpData.phone !== employeeData.phone)
-      payload.phone = employeeData.phone;
-    if (oriEmpData.status !== employeeData.status)
-      payload.status = employeeData.status;
-    if (oriEmpData.department.id !== employeeData.department.id)
-      payload.departmentId = employeeData.department.id;
-    if (oriEmpData.role.id !== employeeData.role.id)
-      payload.roleId = employeeData.role.id;
-    if (oriEmpData.hire_date !== employeeData.hire_date)
-      payload.hire_date = employeeData.hire_date;
-    return payload;
-  };
-  const onCreate = () => {
-    setDialogData({
-      title: "직원 정보 수정",
-      content: "직원 정보를 수정하시겠습니까?",
-      okButtonText: "수정하기",
-      onOK: () => {
-        const payload = buildPatchPayload();
-        const id2 = data.id;
-        if (!payload || Object.keys(payload).length === 0) return;
-        updateUser2({ id: id2, payload });
-        onClose();
-      }
-    });
-    setDialogOpen(true);
-  };
-  const statusMap2 = {
-    active: "활성",
-    inactive: "비활성",
-    quit: "퇴사"
-  };
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
-    dialogData && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-      Dialog,
-      {
-        dialogData,
-        onClose: () => setDialogOpen(false),
-        open: dialogOpen
-      },
-      void 0,
-      false,
-      {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-        lineNumber: 93,
-        columnNumber: 17
-      },
-      this
-    ),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-      "div",
-      {
-        onClick: onClose,
-        className: "absolute top-0 left-0 w-full h-full flex items-center justify-center z-20",
-        children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-          motion.div,
-          {
-            initial: { scale: 0 },
-            animate: { scale: 1 },
-            onClick: (e) => e.stopPropagation(),
-            className: "rounded-2xl border border-gray-40 w-[500px] max-h-[calc(100vh-40px)] flex flex-col overflow-hidden bg-white text-base",
-            children: [
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "p-[20px] border-b border-b-gray-40 bg-gray-100 flex items-center justify-between shrink-0", children: [
-                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h3", { className: "text-base font-bold", children: "직원 상세 내역" }, void 0, false, {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                  lineNumber: 109,
-                  columnNumber: 25
-                }, this),
-                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                  CloseRoundedIcon,
-                  {
-                    onClick: onClose,
-                    className: "cursor-pointer"
-                  },
-                  void 0,
-                  false,
-                  {
-                    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                    lineNumber: 110,
-                    columnNumber: 25
-                  },
-                  this
-                )
-              ] }, void 0, true, {
-                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                lineNumber: 108,
-                columnNumber: 21
-              }, this),
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { className: "bg-white flex-1 overflow-y-auto p-[20px] flex flex-col gap-[12px]", children: [
-                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "div",
-                    {
-                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "이름" }, void 0, false, {
-                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                        lineNumber: 119,
-                        columnNumber: 30
-                      }, this)
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 117,
-                      columnNumber: 29
-                    },
-                    this
-                  ),
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "input",
-                    {
-                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
-                      value: employeeData?.name ?? "",
-                      onChange: (e) => {
-                        setEmployeeData((prev) => {
-                          if (!prev) return prev;
-                          return {
-                            ...prev,
-                            name: e.target.value
-                          };
-                        });
-                        setIsDirty(true);
-                      }
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 120,
-                      columnNumber: 29
-                    },
-                    this
-                  )
-                ] }, void 0, true, {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                  lineNumber: 116,
-                  columnNumber: 25
-                }, this),
-                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "div",
-                    {
-                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "이메일" }, void 0, false, {
-                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                        lineNumber: 138,
-                        columnNumber: 30
-                      }, this)
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 136,
-                      columnNumber: 29
-                    },
-                    this
-                  ),
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "input",
-                    {
-                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
-                      value: employeeData?.email ?? "",
-                      onChange: (e) => {
-                        setEmployeeData((prev) => {
-                          if (!prev) return prev;
-                          return {
-                            ...prev,
-                            email: e.target.value
-                          };
-                        });
-                        setIsDirty(true);
-                      }
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 139,
-                      columnNumber: 29
-                    },
-                    this
-                  )
-                ] }, void 0, true, {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                  lineNumber: 135,
-                  columnNumber: 25
-                }, this),
-                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "div",
-                    {
-                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "부서" }, void 0, false, {
-                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                        lineNumber: 157,
-                        columnNumber: 30
-                      }, this)
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 155,
-                      columnNumber: 29
-                    },
-                    this
-                  ),
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "select",
-                    {
-                      name: "department",
-                      id: "department",
-                      value: employeeData?.department.id ?? "",
-                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
-                      onChange: (e) => {
-                        const selectedDept = deptData.find((dept) => dept.id === Number(e.target.value));
-                        if (selectedDept) {
-                          setEmployeeData((prev) => {
-                            if (!prev) return prev;
-                            return {
-                              ...prev,
-                              department: {
-                                id: selectedDept.id,
-                                name: selectedDept.name
-                              }
-                            };
-                          });
-                          setIsDirty(true);
-                        }
-                      },
-                      children: deptData.map((dept) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                        "option",
-                        {
-                          value: dept.id,
-                          children: dept.name
-                        },
-                        dept.id,
-                        false,
-                        {
-                          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                          lineNumber: 179,
-                          columnNumber: 37
-                        },
-                        this
-                      ))
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 158,
-                      columnNumber: 29
-                    },
-                    this
-                  )
-                ] }, void 0, true, {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                  lineNumber: 154,
-                  columnNumber: 25
-                }, this),
-                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "div",
-                    {
-                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "직급" }, void 0, false, {
-                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                        lineNumber: 191,
-                        columnNumber: 30
-                      }, this)
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 189,
-                      columnNumber: 29
-                    },
-                    this
-                  ),
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "select",
-                    {
-                      name: "role",
-                      id: "role",
-                      value: employeeData?.role.id ?? "",
-                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
-                      onChange: (e) => {
-                        const selectedRole = roleData.find((role) => role.id === Number(e.target.value));
-                        if (selectedRole) {
-                          setEmployeeData((prev) => {
-                            if (!prev) return prev;
-                            return {
-                              ...prev,
-                              role: {
-                                id: selectedRole.id,
-                                name: selectedRole.name
-                              }
-                            };
-                          });
-                          setIsDirty(true);
-                        }
-                      },
-                      children: roleData.map((role) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                        "option",
-                        {
-                          value: role.id,
-                          children: role.name
-                        },
-                        role.id,
-                        false,
-                        {
-                          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                          lineNumber: 212,
-                          columnNumber: 37
-                        },
-                        this
-                      ))
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 192,
-                      columnNumber: 29
-                    },
-                    this
-                  )
-                ] }, void 0, true, {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                  lineNumber: 188,
-                  columnNumber: 25
-                }, this),
-                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "div",
-                    {
-                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "입사일" }, void 0, false, {
-                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                        lineNumber: 224,
-                        columnNumber: 30
-                      }, this)
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 222,
-                      columnNumber: 29
-                    },
-                    this
-                  ),
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    DatePicker,
-                    {
-                      selected: employeeData?.hire_date ? new Date(employeeData.hire_date) : void 0,
-                      onChange: (date) => {
-                        if (!date) return;
-                        setEmployeeData((prev) => {
-                          if (!prev) return prev;
-                          return {
-                            ...prev,
-                            hire_date: date.toISOString()
-                          };
-                        });
-                        setIsDirty(true);
-                      },
-                      dateFormat: "yyyy년 MM월 dd일",
-                      className: "border border-gray-40 rounded-2xl px-[12px] py-[6px] cursor-pointer"
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 226,
-                      columnNumber: 33
-                    },
-                    this
-                  ) }, void 0, false, {
-                    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                    lineNumber: 225,
-                    columnNumber: 29
-                  }, this)
-                ] }, void 0, true, {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                  lineNumber: 221,
-                  columnNumber: 25
-                }, this),
-                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "div",
-                    {
-                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "상태" }, void 0, false, {
-                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                        lineNumber: 246,
-                        columnNumber: 30
-                      }, this)
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 244,
-                      columnNumber: 29
-                    },
-                    this
-                  ),
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "select",
-                    {
-                      name: "status",
-                      id: "status",
-                      value: employeeData?.status ?? "",
-                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
-                      onChange: (e) => {
-                        const selectedStatus = e.target.value;
-                        if (selectedStatus) {
-                          setEmployeeData((prev) => {
-                            if (!prev) return prev;
-                            return {
-                              ...prev,
-                              status: selectedStatus
-                            };
-                          });
-                          setIsDirty(true);
-                        }
-                      },
-                      children: Object.entries(statusMap2).map(([key, value]) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                        "option",
-                        {
-                          value: key,
-                          children: value
-                        },
-                        key,
-                        false,
-                        {
-                          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                          lineNumber: 264,
-                          columnNumber: 37
-                        },
-                        this
-                      ))
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 247,
-                      columnNumber: 29
-                    },
-                    this
-                  )
-                ] }, void 0, true, {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                  lineNumber: 243,
-                  columnNumber: 25
-                }, this),
-                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "div",
-                    {
-                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
-                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "전화번호" }, void 0, false, {
-                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                        lineNumber: 276,
-                        columnNumber: 30
-                      }, this)
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 274,
-                      columnNumber: 29
-                    },
-                    this
-                  ),
-                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                    "input",
-                    {
-                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
-                      value: employeeData?.phone ?? "",
-                      onChange: (e) => {
-                        setEmployeeData((prev) => {
-                          if (!prev) return prev;
-                          return {
-                            ...prev,
-                            phone: e.target.value
-                          };
-                        });
-                        setIsDirty(true);
-                      }
-                    },
-                    void 0,
-                    false,
-                    {
-                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                      lineNumber: 277,
-                      columnNumber: 29
-                    },
-                    this
-                  )
-                ] }, void 0, true, {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                  lineNumber: 273,
-                  columnNumber: 25
-                }, this)
-              ] }, void 0, true, {
-                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                lineNumber: 115,
-                columnNumber: 21
-              }, this),
-              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "p-[20px] flex items-center justify-end", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-                "button",
-                {
-                  onClick: (e) => {
-                    e.stopPropagation();
-                    onCreate();
-                  },
-                  disabled: !isDirty,
-                  className: `${!isDirty ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-green-700 text-white cursor-pointer hover:bg-green-600 transition-all"} px-[12px] py-[6px] rounded-2xl text-base`,
-                  children: "수정하기"
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                  lineNumber: 294,
-                  columnNumber: 25
-                },
-                this
-              ) }, void 0, false, {
-                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-                lineNumber: 293,
-                columnNumber: 21
-              }, this)
-            ]
-          },
-          void 0,
-          true,
-          {
-            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-            lineNumber: 103,
-            columnNumber: 17
-          },
-          this
-        )
-      },
-      void 0,
-      false,
-      {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-        lineNumber: 99,
-        columnNumber: 13
-      },
-      this
-    )
-  ] }, void 0, true, {
-    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
-    lineNumber: 91,
-    columnNumber: 9
-  }, this);
-}
-const EmployeesTable = reactExports.forwardRef(({ recordData, filename, rowSelection, setRowSelection }, ref) => {
-  const [selectedRow, setSelectedRow] = reactExports.useState(null);
-  const openDetail = (row) => {
-    setSelectedRow(row);
-  };
-  const closeDetail = () => {
-    setSelectedRow(null);
-  };
-  const table = useReactTable({
-    data: recordData ?? [],
-    columns: employeesColumn,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    enableSorting: true,
-    meta: {
-      openDetail
-    },
-    state: {
-      rowSelection
-    },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    getRowId: (row) => row.id
-  });
-  const handleExportToCsv = useCsvExport(table, filename);
-  reactExports.useImperativeHandle(ref, () => ({
-    exportToCsv: handleExportToCsv
-  }));
-  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "mt-[20px] w-full overflow-auto text-base text-center", children: [
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
-      AdminEmployeeSettingsDetailModal,
-      {
-        open: !!selectedRow,
-        data: selectedRow,
-        onClose: closeDetail
-      },
-      void 0,
-      false,
-      {
-        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsTable.tsx",
-        lineNumber: 48,
-        columnNumber: 13
-      },
-      void 0
-    ),
-    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(TableUI, { table }, void 0, false, {
-      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsTable.tsx",
-      lineNumber: 53,
-      columnNumber: 13
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsTable.tsx",
-    lineNumber: 47,
-    columnNumber: 9
-  }, void 0);
-});
 const useCreateUser = () => {
   const queryClient2 = useQueryClient();
   return useMutation({
@@ -73039,17 +72470,942 @@ const useDeleteUser = () => {
     }
   });
 };
+const KeyboardArrowLeftRoundedIcon = createSvgIcon(/* @__PURE__ */ jsxRuntimeExports.jsx("path", {
+  d: "M14.71 15.88 10.83 12l3.88-3.88c.39-.39.39-1.02 0-1.41a.996.996 0 0 0-1.41 0L8.71 11.3c-.39.39-.39 1.02 0 1.41l4.59 4.59c.39.39 1.02.39 1.41 0 .38-.39.39-1.03 0-1.42"
+}), "KeyboardArrowLeftRounded");
+const KeyboardDoubleArrowLeftRoundedIcon = createSvgIcon([/* @__PURE__ */ jsxRuntimeExports.jsx("path", {
+  d: "M18.29 17.29c.39-.39.39-1.02 0-1.41L14.42 12l3.88-3.88c.39-.39.39-1.02 0-1.41a.996.996 0 0 0-1.41 0L12.3 11.3c-.39.39-.39 1.02 0 1.41l4.59 4.59c.38.38 1.01.38 1.4-.01"
+}, "0"), /* @__PURE__ */ jsxRuntimeExports.jsx("path", {
+  d: "M11.7 17.29c.39-.39.39-1.02 0-1.41L7.83 12l3.88-3.88c.39-.39.39-1.02 0-1.41a.996.996 0 0 0-1.41 0L5.71 11.3c-.39.39-.39 1.02 0 1.41l4.59 4.59c.38.38 1.01.38 1.4-.01"
+}, "1")], "KeyboardDoubleArrowLeftRounded");
+const KeyboardDoubleArrowRightRoundedIcon = createSvgIcon([/* @__PURE__ */ jsxRuntimeExports.jsx("path", {
+  d: "M5.7 6.71c-.39.39-.39 1.02 0 1.41L9.58 12 5.7 15.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L7.12 6.71c-.39-.39-1.03-.39-1.42 0"
+}, "0"), /* @__PURE__ */ jsxRuntimeExports.jsx("path", {
+  d: "M12.29 6.71c-.39.39-.39 1.02 0 1.41L16.17 12l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L13.7 6.7c-.38-.38-1.02-.38-1.41.01"
+}, "1")], "KeyboardDoubleArrowRightRounded");
+const employeesColumn = (roleData, deptData, statusMap2, status, onChangeDeptId, deptId, onChangeRoleId, roleId, onChangeStatus) => [
+  {
+    id: "select",
+    enableSorting: false,
+    header: ({ table }) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      IndeterminateCheckbox,
+      {
+        checked: table.getIsAllRowsSelected(),
+        indeterminate: table.getIsSomeRowsSelected(),
+        onChange: table.getToggleAllRowsSelectedHandler()
+      },
+      void 0,
+      false,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+        lineNumber: 22,
+        columnNumber: 13
+      },
+      void 0
+    ),
+    cell: ({ row }) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      IndeterminateCheckbox,
+      {
+        checked: row.getIsSelected(),
+        disabled: !row.getCanSelect(),
+        onChange: row.getToggleSelectedHandler()
+      },
+      void 0,
+      false,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+        lineNumber: 29,
+        columnNumber: 13
+      },
+      void 0
+    )
+  },
+  { accessorKey: "name", header: "이름" },
+  { accessorKey: "email", header: "이메일" },
+  {
+    id: "department",
+    header: () => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      "div",
+      {
+        className: "w-full flex flex-col items-center justify-center gap-[6px]",
+        children: [
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: "부서" }, void 0, false, {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+            lineNumber: 44,
+            columnNumber: 17
+          }, void 0),
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+            "select",
+            {
+              className: "w-[calc(100%-12px)] px-[6px] py-[3px] text-sm border border-gray-40 rounded-2xl",
+              name: "dept",
+              id: "dept",
+              onChange: (e) => onChangeDeptId(e.target.value),
+              value: deptId,
+              children: [
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: "", children: "All" }, void 0, false, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+                  lineNumber: 51,
+                  columnNumber: 21
+                }, void 0),
+                deptData.map((dept) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: String(dept.id), children: dept.name }, dept.id, false, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+                  lineNumber: 53,
+                  columnNumber: 25
+                }, void 0))
+              ]
+            },
+            void 0,
+            true,
+            {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+              lineNumber: 45,
+              columnNumber: 17
+            },
+            void 0
+          )
+        ]
+      },
+      void 0,
+      true,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+        lineNumber: 41,
+        columnNumber: 13
+      },
+      void 0
+    ),
+    accessorFn: (row) => row.department.name,
+    enableSorting: false
+  },
+  {
+    id: "role",
+    header: () => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      "div",
+      {
+        className: "w-full flex flex-col items-center justify-center gap-[6px]",
+        children: [
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: "직급" }, void 0, false, {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+            lineNumber: 69,
+            columnNumber: 17
+          }, void 0),
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+            "select",
+            {
+              className: "w-[calc(100%-12px)] px-[6px] py-[3px] text-sm border border-gray-40 rounded-2xl",
+              name: "role",
+              id: "role",
+              onChange: (e) => onChangeRoleId(e.target.value),
+              value: roleId,
+              children: [
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: "", children: "All" }, void 0, false, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+                  lineNumber: 76,
+                  columnNumber: 21
+                }, void 0),
+                roleData.map((role) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: String(role.id), children: role.name }, role.id, false, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+                  lineNumber: 78,
+                  columnNumber: 25
+                }, void 0))
+              ]
+            },
+            void 0,
+            true,
+            {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+              lineNumber: 70,
+              columnNumber: 17
+            },
+            void 0
+          )
+        ]
+      },
+      void 0,
+      true,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+        lineNumber: 66,
+        columnNumber: 13
+      },
+      void 0
+    ),
+    accessorFn: (row) => row.role.name,
+    enableSorting: false
+  },
+  {
+    id: "status",
+    header: () => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      "div",
+      {
+        className: "w-full flex flex-col items-center justify-center gap-[6px]",
+        children: [
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: "상태" }, void 0, false, {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+            lineNumber: 94,
+            columnNumber: 17
+          }, void 0),
+          /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+            "select",
+            {
+              className: "w-[calc(100%-12px)] px-[6px] py-[3px] text-sm border border-gray-40 rounded-2xl",
+              name: "status",
+              id: "status",
+              onChange: (e) => onChangeStatus(e.target.value),
+              value: status,
+              children: [
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: "", children: "All" }, void 0, false, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+                  lineNumber: 101,
+                  columnNumber: 21
+                }, void 0),
+                statusMap2.map((s) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: s, children: s }, s, false, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+                  lineNumber: 103,
+                  columnNumber: 25
+                }, void 0))
+              ]
+            },
+            void 0,
+            true,
+            {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+              lineNumber: 95,
+              columnNumber: 17
+            },
+            void 0
+          )
+        ]
+      },
+      void 0,
+      true,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+        lineNumber: 91,
+        columnNumber: 13
+      },
+      void 0
+    ),
+    accessorFn: (row) => row.status,
+    enableSorting: false
+  },
+  {
+    header: "입사일",
+    accessorFn: (row) => format(new Date(row.hireDate), "yyyy-MM-dd")
+  },
+  {
+    id: "actions",
+    header: "",
+    enableSorting: false,
+    cell: ({ row, table }) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      "button",
+      {
+        onClick: () => table.options.meta?.openDetail(row.original),
+        className: "cursor-pointer",
+        children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SearchRoundedIcon, { fontSize: "small" }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+          lineNumber: 126,
+          columnNumber: 17
+        }, void 0)
+      },
+      void 0,
+      false,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsColumn.tsx",
+        lineNumber: 122,
+        columnNumber: 13
+      },
+      void 0
+    )
+  }
+];
+function useUpdateUser() {
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id: id2, payload }) => updateUser(id2, payload),
+    onSuccess: (data) => {
+      y.success(data.message);
+      queryClient2.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (err) => {
+      y.error(err.message);
+    }
+  });
+}
+function AdminEmployeeSettingsDetailModal({
+  open,
+  data,
+  onClose
+}) {
+  const { data: roleDeptData } = useGetRoleDept();
+  const [employeeData, setEmployeeData] = reactExports.useState(null);
+  const [oriEmpData, setOriEmpData] = reactExports.useState(null);
+  const [isDirty, setIsDirty] = reactExports.useState(false);
+  const roleData = roleDeptData?.role || [];
+  const deptData = roleDeptData?.dept || [];
+  const [dialogData, setDialogData] = reactExports.useState(null);
+  const [dialogOpen, setDialogOpen] = reactExports.useState(false);
+  const { mutate: updateUser2 } = useUpdateUser();
+  reactExports.useEffect(() => {
+    if (!data) return;
+    setEmployeeData(structuredClone(data));
+    setOriEmpData(structuredClone(data));
+    setIsDirty(false);
+  }, [data]);
+  if (!open || !data) return null;
+  const buildPatchPayload = () => {
+    if (!oriEmpData || !employeeData) return null;
+    const payload = {};
+    if (oriEmpData.name !== employeeData.name)
+      payload.name = employeeData.name;
+    if (oriEmpData.email !== employeeData.email)
+      payload.email = employeeData.email;
+    if (oriEmpData.phone !== employeeData.phone)
+      payload.phone = employeeData.phone;
+    if (oriEmpData.status !== employeeData.status)
+      payload.status = employeeData.status;
+    if (oriEmpData.department.id !== employeeData.department.id)
+      payload.departmentId = employeeData.department.id;
+    if (oriEmpData.role.id !== employeeData.role.id)
+      payload.roleId = employeeData.role.id;
+    if (oriEmpData.hireDate !== employeeData.hireDate)
+      payload.hire_date = employeeData.hireDate;
+    return payload;
+  };
+  const onCreate = () => {
+    setDialogData({
+      title: "직원 정보 수정",
+      content: "직원 정보를 수정하시겠습니까?",
+      okButtonText: "수정하기",
+      onOK: () => {
+        const payload = buildPatchPayload();
+        const id2 = data.id;
+        if (!payload || Object.keys(payload).length === 0) return;
+        updateUser2({ id: id2, payload });
+        onClose();
+      }
+    });
+    setDialogOpen(true);
+  };
+  const statusMap2 = {
+    active: "활성",
+    inactive: "비활성",
+    quit: "퇴사"
+  };
+  return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(jsxDevRuntimeExports.Fragment, { children: [
+    dialogData && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      Dialog,
+      {
+        dialogData,
+        onClose: () => setDialogOpen(false),
+        open: dialogOpen
+      },
+      void 0,
+      false,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+        lineNumber: 93,
+        columnNumber: 17
+      },
+      this
+    ),
+    /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+      "div",
+      {
+        onClick: onClose,
+        className: "absolute top-0 left-0 w-full h-full flex items-center justify-center z-20",
+        children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          motion.div,
+          {
+            initial: { scale: 0 },
+            animate: { scale: 1 },
+            onClick: (e) => e.stopPropagation(),
+            className: "rounded-2xl border border-gray-40 w-[500px] max-h-[calc(100vh-40px)] flex flex-col overflow-hidden bg-white text-base",
+            children: [
+              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "p-[20px] border-b border-b-gray-40 bg-gray-100 flex items-center justify-between shrink-0", children: [
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h3", { className: "text-base font-bold", children: "직원 상세 내역" }, void 0, false, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                  lineNumber: 109,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                  CloseRoundedIcon,
+                  {
+                    onClick: onClose,
+                    className: "cursor-pointer"
+                  },
+                  void 0,
+                  false,
+                  {
+                    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                    lineNumber: 110,
+                    columnNumber: 25
+                  },
+                  this
+                )
+              ] }, void 0, true, {
+                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                lineNumber: 108,
+                columnNumber: 21
+              }, this),
+              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("ul", { className: "bg-white flex-1 overflow-y-auto p-[20px] flex flex-col gap-[12px]", children: [
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "이름" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                        lineNumber: 119,
+                        columnNumber: 30
+                      }, this)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 117,
+                      columnNumber: 29
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "input",
+                    {
+                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
+                      value: employeeData?.name ?? "",
+                      onChange: (e) => {
+                        setEmployeeData((prev) => {
+                          if (!prev) return prev;
+                          return {
+                            ...prev,
+                            name: e.target.value
+                          };
+                        });
+                        setIsDirty(true);
+                      }
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 120,
+                      columnNumber: 29
+                    },
+                    this
+                  )
+                ] }, void 0, true, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                  lineNumber: 116,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "이메일" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                        lineNumber: 138,
+                        columnNumber: 30
+                      }, this)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 136,
+                      columnNumber: 29
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "input",
+                    {
+                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
+                      value: employeeData?.email ?? "",
+                      onChange: (e) => {
+                        setEmployeeData((prev) => {
+                          if (!prev) return prev;
+                          return {
+                            ...prev,
+                            email: e.target.value
+                          };
+                        });
+                        setIsDirty(true);
+                      }
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 139,
+                      columnNumber: 29
+                    },
+                    this
+                  )
+                ] }, void 0, true, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                  lineNumber: 135,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "부서" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                        lineNumber: 157,
+                        columnNumber: 30
+                      }, this)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 155,
+                      columnNumber: 29
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "select",
+                    {
+                      name: "department",
+                      id: "department",
+                      value: employeeData?.department.id ?? "",
+                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
+                      onChange: (e) => {
+                        const selectedDept = deptData.find((dept) => dept.id === Number(e.target.value));
+                        if (selectedDept) {
+                          setEmployeeData((prev) => {
+                            if (!prev) return prev;
+                            return {
+                              ...prev,
+                              department: {
+                                id: selectedDept.id,
+                                name: selectedDept.name
+                              }
+                            };
+                          });
+                          setIsDirty(true);
+                        }
+                      },
+                      children: deptData.map((dept) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                        "option",
+                        {
+                          value: dept.id,
+                          children: dept.name
+                        },
+                        dept.id,
+                        false,
+                        {
+                          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                          lineNumber: 179,
+                          columnNumber: 37
+                        },
+                        this
+                      ))
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 158,
+                      columnNumber: 29
+                    },
+                    this
+                  )
+                ] }, void 0, true, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                  lineNumber: 154,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "직급" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                        lineNumber: 191,
+                        columnNumber: 30
+                      }, this)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 189,
+                      columnNumber: 29
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "select",
+                    {
+                      name: "role",
+                      id: "role",
+                      value: employeeData?.role.id ?? "",
+                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
+                      onChange: (e) => {
+                        const selectedRole = roleData.find((role) => role.id === Number(e.target.value));
+                        if (selectedRole) {
+                          setEmployeeData((prev) => {
+                            if (!prev) return prev;
+                            return {
+                              ...prev,
+                              role: {
+                                id: selectedRole.id,
+                                name: selectedRole.name
+                              }
+                            };
+                          });
+                          setIsDirty(true);
+                        }
+                      },
+                      children: roleData.map((role) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                        "option",
+                        {
+                          value: role.id,
+                          children: role.name
+                        },
+                        role.id,
+                        false,
+                        {
+                          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                          lineNumber: 212,
+                          columnNumber: 37
+                        },
+                        this
+                      ))
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 192,
+                      columnNumber: 29
+                    },
+                    this
+                  )
+                ] }, void 0, true, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                  lineNumber: 188,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "입사일" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                        lineNumber: 224,
+                        columnNumber: 30
+                      }, this)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 222,
+                      columnNumber: 29
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[48px] flex-1 text-base flex items-center", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    DatePicker,
+                    {
+                      selected: employeeData?.hireDate ? new Date(employeeData.hireDate) : void 0,
+                      onChange: (date) => {
+                        if (!date) return;
+                        setEmployeeData((prev) => {
+                          if (!prev) return prev;
+                          return {
+                            ...prev,
+                            hire_date: date.toISOString()
+                          };
+                        });
+                        setIsDirty(true);
+                      },
+                      dateFormat: "yyyy년 MM월 dd일",
+                      className: "border border-gray-40 rounded-2xl px-[12px] py-[6px] cursor-pointer"
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 226,
+                      columnNumber: 33
+                    },
+                    this
+                  ) }, void 0, false, {
+                    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                    lineNumber: 225,
+                    columnNumber: 29
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                  lineNumber: 221,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "상태" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                        lineNumber: 246,
+                        columnNumber: 30
+                      }, this)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 244,
+                      columnNumber: 29
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "select",
+                    {
+                      name: "status",
+                      id: "status",
+                      value: employeeData?.status ?? "",
+                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
+                      onChange: (e) => {
+                        const selectedStatus = e.target.value;
+                        if (selectedStatus) {
+                          setEmployeeData((prev) => {
+                            if (!prev) return prev;
+                            return {
+                              ...prev,
+                              status: selectedStatus
+                            };
+                          });
+                          setIsDirty(true);
+                        }
+                      },
+                      children: Object.entries(statusMap2).map(([key, value]) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                        "option",
+                        {
+                          value: key,
+                          children: value
+                        },
+                        key,
+                        false,
+                        {
+                          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                          lineNumber: 264,
+                          columnNumber: 37
+                        },
+                        this
+                      ))
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 247,
+                      columnNumber: 29
+                    },
+                    this
+                  )
+                ] }, void 0, true, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                  lineNumber: 243,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("li", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "div",
+                    {
+                      className: "w-[140px] h-[48px] flex items-center px-[20px]",
+                      children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base font-bold", children: "전화번호" }, void 0, false, {
+                        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                        lineNumber: 276,
+                        columnNumber: 30
+                      }, this)
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 274,
+                      columnNumber: 29
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                    "input",
+                    {
+                      className: "h-[48px] flex-1 text-base flex items-center border border-gray-40 rounded-2xl px-[12px]",
+                      value: employeeData?.phone ?? "",
+                      onChange: (e) => {
+                        setEmployeeData((prev) => {
+                          if (!prev) return prev;
+                          return {
+                            ...prev,
+                            phone: e.target.value
+                          };
+                        });
+                        setIsDirty(true);
+                      }
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                      lineNumber: 277,
+                      columnNumber: 29
+                    },
+                    this
+                  )
+                ] }, void 0, true, {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                  lineNumber: 273,
+                  columnNumber: 25
+                }, this)
+              ] }, void 0, true, {
+                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                lineNumber: 115,
+                columnNumber: 21
+              }, this),
+              /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "p-[20px] flex items-center justify-end", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+                "button",
+                {
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    onCreate();
+                  },
+                  disabled: !isDirty,
+                  className: `${!isDirty ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-green-700 text-white cursor-pointer hover:bg-green-600 transition-all"} px-[12px] py-[6px] rounded-2xl text-base`,
+                  children: "수정하기"
+                },
+                void 0,
+                false,
+                {
+                  fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                  lineNumber: 294,
+                  columnNumber: 25
+                },
+                this
+              ) }, void 0, false, {
+                fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+                lineNumber: 293,
+                columnNumber: 21
+              }, this)
+            ]
+          },
+          void 0,
+          true,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+            lineNumber: 103,
+            columnNumber: 17
+          },
+          this
+        )
+      },
+      void 0,
+      false,
+      {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+        lineNumber: 99,
+        columnNumber: 13
+      },
+      this
+    )
+  ] }, void 0, true, {
+    fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsDetailModal.tsx",
+    lineNumber: 91,
+    columnNumber: 9
+  }, this);
+}
 function AdminEmployeeSettingsCard() {
   const { mutate: deleteUser2 } = useDeleteUser();
-  const [page, setPage] = reactExports.useState(1);
-  const [limit, setLimit] = reactExports.useState(10);
-  const [createModalOpen, setCreateModalOpen] = reactExports.useState(false);
+  const [searchParams, setSearchParams] = distExports.useSearchParams();
+  const page = Number(searchParams.get("page") ?? 1);
+  const limit = Number(searchParams.get("limit") ?? 10);
+  console.log(searchParams.toString());
+  const deptId = searchParams.get("deptId") ?? "";
+  const onChangeDeptId = (value) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      value ? params.set("deptId", value) : params.delete("deptId");
+      params.set("page", "1");
+      return params;
+    });
+  };
+  const roleId = searchParams.get("roleId") ?? "";
+  const onChangeRoleId = (value) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      value ? params.set("roleId", value) : params.delete("roleId");
+      params.set("page", "1");
+      return params;
+    });
+  };
   const { data: usersData } = useGetAllUsers({ page, limit });
   const recordData = usersData?.data;
-  const employeesColumnRef = reactExports.useRef(null);
+  const [createModalOpen, setCreateModalOpen] = reactExports.useState(false);
   const [rowSelection, setRowSelection] = reactExports.useState({});
   const [dialogData, setDialogData] = reactExports.useState(null);
   const [dialogOpen, setDialogOpen] = reactExports.useState(false);
+  const statusMap2 = ["active", "inactive", "quit"];
+  const status = searchParams.get("status") ?? "";
+  const onChangeStatus = (value) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      value ? params.set("status", value) : params.delete("status");
+      params.set("page", "1");
+      return params;
+    });
+  };
+  const { data: roleDeptData } = useGetRoleDept();
+  const roleData = roleDeptData?.role || [];
+  const deptData = roleDeptData?.dept || [];
+  const columns = employeesColumn(
+    roleData,
+    deptData,
+    statusMap2,
+    status,
+    onChangeDeptId,
+    deptId,
+    onChangeRoleId,
+    roleId,
+    onChangeStatus
+  );
+  const [selectedRow, setSelectedRow] = reactExports.useState(null);
+  const openDetail = (row) => {
+    setSelectedRow(row);
+  };
+  const closeDetail = () => {
+    setSelectedRow(null);
+  };
+  const table = useReactTable({
+    data: recordData ?? [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    enableSorting: true,
+    state: {
+      rowSelection
+    },
+    meta: {
+      openDetail
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    getRowId: (row) => row.id,
+    getFilteredRowModel: getFilteredRowModel()
+  });
   const onDelete = () => {
     const ids = Object.keys(rowSelection);
     if (ids.length === 0) {
@@ -73078,7 +73434,7 @@ function AdminEmployeeSettingsCard() {
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 47,
+        lineNumber: 136,
         columnNumber: 17
       },
       this
@@ -73086,7 +73442,7 @@ function AdminEmployeeSettingsCard() {
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "font-bold text-center text-lg", children: "직원 관리 설정" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 54,
+        lineNumber: 143,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex w-full justify-end items-center gap-[20px] mt-[20px]", children: [
@@ -73101,7 +73457,7 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 56,
+            lineNumber: 145,
             columnNumber: 21
           },
           this
@@ -73117,34 +73473,171 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 60,
+            lineNumber: 149,
             columnNumber: 21
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 55,
+        lineNumber: 144,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
         EmployeesTable,
         {
-          ref: employeesColumnRef,
-          recordData,
-          filename: "employees_data.csv",
-          rowSelection,
-          setRowSelection
+          table
         },
         void 0,
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 65,
+          lineNumber: 154,
           columnNumber: 17
         },
         this
       ),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+        AdminEmployeeSettingsDetailModal,
+        {
+          open: !!selectedRow,
+          data: selectedRow,
+          onClose: closeDetail
+        },
+        void 0,
+        false,
+        {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+          lineNumber: 157,
+          columnNumber: 17
+        },
+        this
+      ),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-end w-full gap-[12px] mt-[20px]", children: [
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            className: "cursor-pointer flex items-center justify-center p-[3px] border border-black text-base text-black bg-white rounded-lg hover:bg-gray-100 transition-all",
+            onClick: () => table.firstPage(),
+            disabled: !table.getCanPreviousPage(),
+            children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardDoubleArrowLeftRoundedIcon, { fontSize: "small" }, void 0, false, {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+              lineNumber: 168,
+              columnNumber: 25
+            }, this)
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+            lineNumber: 163,
+            columnNumber: 21
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            className: "cursor-pointer flex items-center justify-center p-[3px] border border-black text-base text-black bg-white rounded-lg hover:bg-gray-100 transition-all",
+            onClick: () => table.previousPage(),
+            disabled: !table.getCanPreviousPage(),
+            children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardArrowLeftRoundedIcon, { fontSize: "small" }, void 0, false, {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+              lineNumber: 175,
+              columnNumber: 25
+            }, this)
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+            lineNumber: 170,
+            columnNumber: 21
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("span", { className: "text-base text-black", children: `${table.getState().pagination.pageIndex + 1} / ${table.getPageCount().toLocaleString()}` }, void 0, false, {
+          fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+          lineNumber: 177,
+          columnNumber: 21
+        }, this),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            className: "cursor-pointer flex items-center justify-center p-[3px] border border-black text-base text-black bg-white rounded-lg hover:bg-gray-100 transition-all",
+            onClick: () => table.nextPage(),
+            disabled: !table.getCanNextPage(),
+            children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardArrowRightRoundedIcon, { fontSize: "small" }, void 0, false, {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+              lineNumber: 185,
+              columnNumber: 25
+            }, this)
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+            lineNumber: 180,
+            columnNumber: 21
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            className: "cursor-pointer flex items-center justify-center p-[3px] border border-black text-base text-black bg-white rounded-lg hover:bg-gray-100 transition-all",
+            onClick: () => table.lastPage(),
+            disabled: !table.getCanNextPage(),
+            children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardDoubleArrowRightRoundedIcon, { fontSize: "small" }, void 0, false, {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+              lineNumber: 192,
+              columnNumber: 25
+            }, this)
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+            lineNumber: 187,
+            columnNumber: 21
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "select",
+          {
+            name: "limit",
+            id: "limit",
+            value: limit,
+            className: "cursor-pointer flex items-center justify-center p-[3px] border border-black text-base text-black bg-white rounded-lg hover:bg-gray-100 transition-all",
+            onChange: (e) => {
+              setSearchParams((prev) => {
+                const params = new URLSearchParams(prev);
+                params.set("limit", e.target.value);
+                params.set("page", "1");
+                return params;
+              });
+            },
+            children: [10, 20, 30, 40, 50].map((n) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: n, children: `${n}개씩 보기` }, n, false, {
+              fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+              lineNumber: 207,
+              columnNumber: 29
+            }, this))
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+            lineNumber: 194,
+            columnNumber: 21
+          },
+          this
+        )
+      ] }, void 0, true, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+        lineNumber: 162,
+        columnNumber: 17
+      }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
         AdminEmployeeSettingsCreateModal,
         {
@@ -73155,19 +73648,19 @@ function AdminEmployeeSettingsCard() {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 72,
+          lineNumber: 213,
           columnNumber: 17
         },
         this
       )
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-      lineNumber: 53,
+      lineNumber: 142,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-    lineNumber: 45,
+    lineNumber: 134,
     columnNumber: 9
   }, this);
 }
