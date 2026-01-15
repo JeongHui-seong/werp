@@ -18,6 +18,7 @@ export function AdminLeaveSettingsPolicy() {
     const { mutate: editLeavePolicy } = useEditLeavePolicy(year ?? "")
 
     useEffect(() => {
+        if (yearMonth?.yearMonth.length === 0) return;
         setYear(yearMonth?.yearMonth[0].split("-")[0] ?? null);
     },[yearMonth]);
 

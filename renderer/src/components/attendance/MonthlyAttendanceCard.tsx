@@ -31,6 +31,14 @@ export function MonthlyAttendanceCard() {
         setYearMonth(first);
     }, [data, yearMonth, setSearchParams]);
 
+    if (data && data.yearMonth.length === 0) {
+        return (
+            <div className="w-full h-full bg-white rounded-2xl flex items-center justify-center text-base">
+                <p>출퇴근 기록이 존재하지 않습니다.</p>
+            </div>
+        )
+    }
+
     return(
         <div className="w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col">
             <h2 className="text-lg text-center font-bold">{yearMonth} 출퇴근 근태 현황</h2>

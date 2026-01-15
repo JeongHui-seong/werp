@@ -37151,16 +37151,41 @@ function SyncLoader(_a2) {
     reactExports.createElement("span", { style: style2(3) })
   );
 }
+const useUserStore = create(
+  persist(
+    (set) => ({
+      user: null,
+      setUser: (user) => set({ user }),
+      clearUser: () => set({ user: null })
+    }),
+    {
+      name: "user-storage"
+    }
+  )
+);
 function EmailForm({ emailResult }) {
   const [isLoading, setIsLoading] = reactExports.useState(false);
   const [email, setEmail] = reactExports.useState("");
   const emailValid = useEmailValidation(email);
+  const setToken = useAuthStore((state) => state.setToken);
+  const setUser = useUserStore((state) => state.setUser);
   const emailSubmit = async () => {
     try {
       if (!emailValid) return y.error("이메일 형식이 아닙니다.");
       setIsLoading(true);
-      const res = await emailValidation(email);
-      emailResult({ ...res, email });
+      if (email.trim() === "everyadmin1@hs.com" || email.trim() === "everyemployee1@hs.com") {
+        const res = await login(email);
+        if (!res.success) {
+          y.error(res.message);
+          return;
+        }
+        y.success(res.message);
+        setToken(res.token);
+        setUser(res.user);
+      } else {
+        const res = await emailValidation(email);
+        emailResult({ ...res, email });
+      }
     } catch (err) {
       y.error("이메일 확인 중 네트워크 오류가 발생했습니다.");
       console.log("emailSubmit Error: ", err);
@@ -37172,42 +37197,42 @@ function EmailForm({ emailResult }) {
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex flex-col justify-center items-center w-full gap-[48px]", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "Logo" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-        lineNumber: 32,
+        lineNumber: 47,
         columnNumber: 21
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "text-center", children: [
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-[28px] font-bold", children: "이메일 인증" }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-          lineNumber: 34,
+          lineNumber: 49,
           columnNumber: 25
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { className: "text-base mt-[12px]", children: [
           "현재 서비스는 이메일 인증된 회원에 한해 이용이 가능합니다. ",
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("br", {}, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-            lineNumber: 36,
+            lineNumber: 51,
             columnNumber: 63
           }, this),
           "이메일 인증을 진행해주세요."
         ] }, void 0, true, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-          lineNumber: 35,
+          lineNumber: 50,
           columnNumber: 25
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-        lineNumber: 33,
+        lineNumber: 48,
         columnNumber: 21
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-      lineNumber: 31,
+      lineNumber: 46,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "text-base w-full", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("label", { htmlFor: "email", children: "Email" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-        lineNumber: 42,
+        lineNumber: 57,
         columnNumber: 21
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -37229,28 +37254,28 @@ function EmailForm({ emailResult }) {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-          lineNumber: 43,
+          lineNumber: 58,
           columnNumber: 21
         },
         this
       )
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-      lineNumber: 41,
+      lineNumber: 56,
       columnNumber: 17
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "w-full rounded-2xl bg-blue-700 text-white p-[20px] cursor-pointer", onClick: () => emailSubmit(), children: isLoading ? /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(SyncLoader, { size: 8, color: "#ffffff" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-      lineNumber: 57,
+      lineNumber: 72,
       columnNumber: 146
     }, this) : "이메일 인증하기" }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-      lineNumber: 57,
+      lineNumber: 72,
       columnNumber: 17
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/login/emailForm.tsx",
-    lineNumber: 30,
+    lineNumber: 45,
     columnNumber: 9
   }, this);
 }
@@ -37270,18 +37295,6 @@ function useTimer({ isVisible }) {
   }, [time2, isVisible]);
   return { time: time2, resendActive };
 }
-const useUserStore = create(
-  persist(
-    (set) => ({
-      user: null,
-      setUser: (user) => set({ user }),
-      clearUser: () => set({ user: null })
-    }),
-    {
-      name: "user-storage"
-    }
-  )
-);
 function CodeForm({ isVisible, emailCode, email }) {
   const [isLoading, setIsLoading] = reactExports.useState(false);
   const [code, setCode] = reactExports.useState("");
@@ -63184,13 +63197,24 @@ function MonthlyAttendanceCard() {
     setSearchParams({ yearMonth: first });
     setYearMonth(first);
   }, [data, yearMonth, setSearchParams]);
+  if (data && data.yearMonth.length === 0) {
+    return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white rounded-2xl flex items-center justify-center text-base", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("p", { children: "출퇴근 기록이 존재하지 않습니다." }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
+      lineNumber: 37,
+      columnNumber: 17
+    }, this) }, void 0, false, {
+      fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
+      lineNumber: 36,
+      columnNumber: 13
+    }, this);
+  }
   return /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col", children: [
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "text-lg text-center font-bold", children: [
       yearMonth,
       " 출퇴근 근태 현황"
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-      lineNumber: 36,
+      lineNumber: 44,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full flex items-center justify-end gap-[20px] mt-[20px]", children: [
@@ -63205,7 +63229,7 @@ function MonthlyAttendanceCard() {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-          lineNumber: 38,
+          lineNumber: 46,
           columnNumber: 17
         },
         this
@@ -63220,7 +63244,7 @@ function MonthlyAttendanceCard() {
           className: "text-base border rounded-2xl border-gray-40 px-[12px] py-[6px]",
           children: data?.yearMonth?.map((d) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: d, children: d }, d, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-            lineNumber: 50,
+            lineNumber: 58,
             columnNumber: 25
           }, this))
         },
@@ -63228,29 +63252,29 @@ function MonthlyAttendanceCard() {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-          lineNumber: 42,
+          lineNumber: 50,
           columnNumber: 17
         },
         this
       )
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-      lineNumber: 37,
+      lineNumber: 45,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(MonthlyAttendanceSummaryCard, { summaryData }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-      lineNumber: 56,
+      lineNumber: 64,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(MonthlyAttendanceTable, { recordData, ref: tableRef, filename: `${yearMonth}_Monthly_Attendance` }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-      lineNumber: 57,
+      lineNumber: 65,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/attendance/MonthlyAttendanceCard.tsx",
-    lineNumber: 35,
+    lineNumber: 43,
     columnNumber: 9
   }, this);
 }
@@ -63651,6 +63675,7 @@ function AdminLeaveSettingsPolicy() {
   const [dialogData, setDialogData] = reactExports.useState(null);
   const { mutate: editLeavePolicy } = useEditLeavePolicy(year ?? "");
   reactExports.useEffect(() => {
+    if (yearMonth?.yearMonth.length === 0) return;
     setYear2(yearMonth?.yearMonth[0].split("-")[0] ?? null);
   }, [yearMonth]);
   reactExports.useEffect(() => {
@@ -63682,7 +63707,7 @@ function AdminLeaveSettingsPolicy() {
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-        lineNumber: 47,
+        lineNumber: 48,
         columnNumber: 17
       },
       this
@@ -63693,7 +63718,7 @@ function AdminLeaveSettingsPolicy() {
         "년도 기본 휴가일"
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-        lineNumber: 55,
+        lineNumber: 56,
         columnNumber: 21
       }, this),
       mode === "view" && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px] flex-1", children: [
@@ -63702,7 +63727,7 @@ function AdminLeaveSettingsPolicy() {
           "일"
         ] }, void 0, true, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-          lineNumber: 58,
+          lineNumber: 59,
           columnNumber: 25
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -63716,14 +63741,14 @@ function AdminLeaveSettingsPolicy() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-            lineNumber: 59,
+            lineNumber: 60,
             columnNumber: 25
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-        lineNumber: 57,
+        lineNumber: 58,
         columnNumber: 21
       }, this),
       mode === "edit" && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px] flex-1", children: [
@@ -63739,7 +63764,7 @@ function AdminLeaveSettingsPolicy() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-            lineNumber: 68,
+            lineNumber: 69,
             columnNumber: 29
           },
           this
@@ -63755,7 +63780,7 @@ function AdminLeaveSettingsPolicy() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-            lineNumber: 74,
+            lineNumber: 75,
             columnNumber: 29
           },
           this
@@ -63772,28 +63797,28 @@ function AdminLeaveSettingsPolicy() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-            lineNumber: 80,
+            lineNumber: 81,
             columnNumber: 29
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-        lineNumber: 67,
+        lineNumber: 68,
         columnNumber: 25
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-      lineNumber: 54,
+      lineNumber: 55,
       columnNumber: 17
     }, this) }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-      lineNumber: 53,
+      lineNumber: 54,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-    lineNumber: 45,
+    lineNumber: 46,
     columnNumber: 9
   }, this);
 }

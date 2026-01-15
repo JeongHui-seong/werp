@@ -1,23 +1,38 @@
 import { useState } from "react";
 import Logo from "../../assets/logo.png"
 import useEmailValidation from "../../hooks/auth/useEmailValidation";
-import { emailValidation } from "../../api/authService";
+import { emailValidation, login } from "../../api/authService";
 import type { EmailFormProps } from "../../types/login/emailResult"
 import { toast } from "react-toastify";
 import { SyncLoader } from "react-spinners";
+import { useAuthStore } from "../../hooks/auth/useAuthStore";
+import { useUserStore } from "../../hooks/auth/useUserStore";
 
 
 export function EmailForm({ emailResult }: EmailFormProps){
     const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState("");
     const emailValid = useEmailValidation(email);
+    const setToken = useAuthStore(state => state.setToken);
+    const setUser = useUserStore(state => state.setUser);
 
     const emailSubmit = async () => {
         try{
             if (!emailValid) return toast.error("이메일 형식이 아닙니다.");
             setIsLoading(true);
-            const res = await emailValidation(email);
-            emailResult({...res, email});
+            if (email.trim() === "everyadmin1@hs.com" || email.trim() === "everyemployee1@hs.com") {
+                const res = await login(email);
+                if (!res.success) {
+                    toast.error(res.message);
+                    return;
+                }
+                toast.success(res.message);
+                setToken(res.token);
+                setUser(res.user);
+            } else {
+                const res = await emailValidation(email);
+                emailResult({...res, email});
+            }
         } catch (err) {
             toast.error("이메일 확인 중 네트워크 오류가 발생했습니다.");
             console.log("emailSubmit Error: ", err)
