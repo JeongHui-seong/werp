@@ -59533,6 +59533,17 @@ function Dialog({ dialogData, onClose, open }) {
 const ArrowDropDownRoundedIcon = createSvgIcon(/* @__PURE__ */ jsxRuntimeExports.jsx("path", {
   d: "m8.71 11.71 2.59 2.59c.39.39 1.02.39 1.41 0l2.59-2.59c.63-.63.18-1.71-.71-1.71H9.41c-.89 0-1.33 1.08-.7 1.71"
 }), "ArrowDropDownRounded");
+const useClickOutside = (ref, handler) => {
+  reactExports.useEffect(() => {
+    const listener = (event) => {
+      if (!ref.current) return;
+      if (ref.current.contains(event.target)) return;
+      handler();
+    };
+    document.addEventListener("mousedown", listener);
+    return () => document.removeEventListener("mousedown", listener);
+  }, [ref, handler]);
+};
 function Header() {
   const userName = useUserStore().user?.name;
   const { mutate: clockIn2 } = useClockIn();
@@ -59545,6 +59556,8 @@ function Header() {
   const [dialogData, setDialogData] = reactExports.useState(null);
   let clockInOutBtnText = attendance && isWorking ? "퇴근하기" : "출근하기";
   const [profileMenuOpen, setProfileMenuOpen] = reactExports.useState(false);
+  const profileMenuRef = reactExports.useRef(null);
+  useClickOutside(profileMenuRef, () => setProfileMenuOpen(false));
   const handleAttendance = () => {
     if (attendance && isWorking) {
       setDialogData({
@@ -59588,7 +59601,7 @@ function Header() {
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 68,
+        lineNumber: 72,
         columnNumber: 13
       },
       this
@@ -59596,16 +59609,15 @@ function Header() {
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
       "div",
       {
-        onClick: () => setProfileMenuOpen(false),
         className: "w-full h-[60px] flex items-center justify-between px-[20px] bg-white",
         children: [
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "h-[20px]", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("img", { src: Logo, alt: "logo", className: "h-full" }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 78,
+            lineNumber: 81,
             columnNumber: 21
           }, this) }, void 0, false, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 77,
+            lineNumber: 80,
             columnNumber: 17
           }, this),
           /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px]", children: [
@@ -59621,7 +59633,7 @@ function Header() {
               false,
               {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-                lineNumber: 81,
+                lineNumber: 84,
                 columnNumber: 21
               },
               this
@@ -59629,30 +59641,31 @@ function Header() {
             /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[12px]", children: [
               /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "cursor-pointer", children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(NotificationsNoneRoundedIcon, { className: "cursor-pointer" }, void 0, false, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-                lineNumber: 88,
+                lineNumber: 91,
                 columnNumber: 29
               }, this) }, void 0, false, {
                 fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-                lineNumber: 87,
+                lineNumber: 90,
                 columnNumber: 25
               }, this),
               /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
                 "div",
                 {
+                  ref: profileMenuRef,
                   onClick: (e) => {
                     e.stopPropagation();
-                    setProfileMenuOpen(!profileMenuOpen);
+                    setProfileMenuOpen((prev) => !prev);
                   },
                   className: "relative bg-white flex items-center justify-center gap-[8px] cursor-pointer rounded-2xl px-[12px] py-[6px] hover:bg-gray-100 transition-all",
                   children: [
                     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("button", { className: "text-sm cursor-pointer", children: userName }, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-                      lineNumber: 96,
+                      lineNumber: 100,
                       columnNumber: 29
                     }, this),
                     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(ArrowDropDownRoundedIcon, {}, void 0, false, {
                       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-                      lineNumber: 97,
+                      lineNumber: 101,
                       columnNumber: 29
                     }, this),
                     profileMenuOpen && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -59671,7 +59684,7 @@ function Header() {
                           false,
                           {
                             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-                            lineNumber: 102,
+                            lineNumber: 106,
                             columnNumber: 37
                           },
                           this
@@ -59681,7 +59694,7 @@ function Header() {
                       false,
                       {
                         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-                        lineNumber: 99,
+                        lineNumber: 103,
                         columnNumber: 33
                       },
                       this
@@ -59692,19 +59705,19 @@ function Header() {
                 true,
                 {
                   fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-                  lineNumber: 90,
+                  lineNumber: 93,
                   columnNumber: 25
                 },
                 this
               )
             ] }, void 0, true, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-              lineNumber: 86,
+              lineNumber: 89,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-            lineNumber: 80,
+            lineNumber: 83,
             columnNumber: 17
           }, this)
         ]
@@ -59713,14 +59726,14 @@ function Header() {
       true,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-        lineNumber: 74,
+        lineNumber: 78,
         columnNumber: 13
       },
       this
     )
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/common/header.tsx",
-    lineNumber: 66,
+    lineNumber: 70,
     columnNumber: 9
   }, this);
 }

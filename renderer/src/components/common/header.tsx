@@ -5,11 +5,12 @@ import { useClockIn } from "../../hooks/attendance/useClockIn";
 import { useClockOut } from "../../hooks/attendance/useClockOut";
 import { useAttendanceToday } from "../../hooks/attendance/useAttendanceToday";
 import { Dialog } from "./dialog";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { dialog } from "../../types/dialogData";
 import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
 import { useAuthStore } from "../../hooks/auth/useAuthStore";
 import { toast } from "react-toastify";
+import { useClickOutside } from "../../hooks/common/useClickOutside";
 
 export function Header(){
     const userName = useUserStore().user?.name;
@@ -27,6 +28,9 @@ export function Header(){
     let clockInOutBtnText = attendance && isWorking ? "퇴근하기" : "출근하기";
 
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+
+    const profileMenuRef = useRef<HTMLDivElement>(null);
+    useClickOutside(profileMenuRef, () => setProfileMenuOpen(false))
     
     const handleAttendance = () => {
         if (attendance && isWorking) {
@@ -72,7 +76,6 @@ export function Header(){
             />
         )}
             <div
-                onClick={() => setProfileMenuOpen(false)}
                 className="w-full h-[60px] flex items-center justify-between px-[20px] bg-white">
                 <div className="h-[20px]">
                     <img src={Logo} alt="logo" className="h-full"/>
@@ -88,9 +91,10 @@ export function Header(){
                             <NotificationsNoneRoundedIcon className="cursor-pointer"/>
                         </div>
                         <div
+                            ref={profileMenuRef}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                setProfileMenuOpen(!profileMenuOpen);
+                                setProfileMenuOpen(prev => !prev);
                             }}
                             className="relative bg-white flex items-center justify-center gap-[8px] cursor-pointer rounded-2xl px-[12px] py-[6px] hover:bg-gray-100 transition-all">
                             <button className="text-sm cursor-pointer">{userName}</button>
