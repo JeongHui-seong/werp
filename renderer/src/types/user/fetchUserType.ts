@@ -6,7 +6,7 @@ type fetchUserFilter = {
     deptName?: string;
 }
 
-type fetchUserSort = {
+export type fetchUserSort = {
     name?: "asc" | "desc";
     email?: "asc" | "desc";
     hireDate?: "asc" | "desc";
@@ -14,7 +14,7 @@ type fetchUserSort = {
 
 type fetchUserSearch = {
     keyword?: string;
-    fields?: "name" | "email" | "phone";
+    fields?: readonly ("name" | "email" | "phone")[];
 }
 
 export type fetchUserTypeRequest = {

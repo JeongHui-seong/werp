@@ -7,7 +7,7 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 export const employeesColumn = (
     roleData: Array<{ id: number; name: string }>,
     deptData: Array<{ id: number; name: string }>,
-    statusMap: string[],
+    statusMap: readonly ("active" | "inactive" | "quit")[],
     status: string,
     onChangeDeptId: (value: string) => void,
     deptId: string,

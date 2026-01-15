@@ -73352,12 +73352,6 @@ function AdminEmployeeSettingsCard() {
       return params;
     });
   };
-  const { data: usersData } = useGetAllUsers({ page, limit });
-  const recordData = usersData?.data;
-  const [createModalOpen, setCreateModalOpen] = reactExports.useState(false);
-  const [rowSelection, setRowSelection] = reactExports.useState({});
-  const [dialogData, setDialogData] = reactExports.useState(null);
-  const [dialogOpen, setDialogOpen] = reactExports.useState(false);
   const statusMap2 = ["active", "inactive", "quit"];
   const status = searchParams.get("status") ?? "";
   const onChangeStatus = (value) => {
@@ -73368,6 +73362,46 @@ function AdminEmployeeSettingsCard() {
       return params;
     });
   };
+  const isStatus = (value) => {
+    return statusMap2.includes(value);
+  };
+  const filter2 = {
+    ...deptId && { deptId },
+    ...roleId && { roleId },
+    ...isStatus(status) && { status }
+  };
+  const sortBy = searchParams.get("sortBy");
+  const order = searchParams.get("order");
+  const sort = sortBy && order ? { [sortBy]: order } : void 0;
+  const sorting = reactExports.useMemo(() => {
+    if (!sortBy || !order) return [];
+    return [{ id: sortBy, desc: "desc" === order }];
+  }, [sortBy, order]);
+  const [searchValue, setSearchValue] = reactExports.useState("");
+  const keyword = searchParams.get("keyword");
+  const onSearch = () => {
+    if (searchValue.trim().length === 0) {
+      y.error("검색어를 입력해주세요.");
+      return;
+    }
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set("keyword", searchValue);
+      params.set("page", "1");
+      return params;
+    });
+  };
+  const searchFields = ["name", "email", "phone"];
+  const search = keyword ? {
+    keyword,
+    fields: searchFields
+  } : void 0;
+  const { data: usersData } = useGetAllUsers({ page, limit, sort, filter: filter2, search });
+  const recordData = usersData?.data;
+  const [createModalOpen, setCreateModalOpen] = reactExports.useState(false);
+  const [rowSelection, setRowSelection] = reactExports.useState({});
+  const [dialogData, setDialogData] = reactExports.useState(null);
+  const [dialogOpen, setDialogOpen] = reactExports.useState(false);
   const { data: roleDeptData } = useGetRoleDept();
   const roleData = roleDeptData?.role || [];
   const deptData = roleDeptData?.dept || [];
@@ -73393,10 +73427,11 @@ function AdminEmployeeSettingsCard() {
     data: recordData ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    manualSorting: true,
     enableSorting: true,
     state: {
-      rowSelection
+      rowSelection,
+      sorting
     },
     meta: {
       openDetail
@@ -73404,7 +73439,23 @@ function AdminEmployeeSettingsCard() {
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getRowId: (row) => row.id,
-    getFilteredRowModel: getFilteredRowModel()
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: (updater) => {
+      const next = typeof updater === "function" ? updater(sorting) : updater;
+      const first = next[0];
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        if (!first) {
+          params.delete("sortBy");
+          params.delete("order");
+        } else {
+          params.set("sortBy", first.id);
+          params.set("order", first.desc ? "desc" : "asc");
+          params.set("page", "1");
+        }
+        return params;
+      });
+    }
   });
   const onDelete = () => {
     const ids = Object.keys(rowSelection);
@@ -73434,7 +73485,7 @@ function AdminEmployeeSettingsCard() {
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 136,
+        lineNumber: 202,
         columnNumber: 17
       },
       this
@@ -73442,7 +73493,7 @@ function AdminEmployeeSettingsCard() {
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "font-bold text-center text-lg", children: "직원 관리 설정" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 143,
+        lineNumber: 209,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex w-full justify-end items-center gap-[20px] mt-[20px]", children: [
@@ -73457,7 +73508,7 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 145,
+            lineNumber: 211,
             columnNumber: 21
           },
           this
@@ -73473,14 +73524,54 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 149,
+            lineNumber: 215,
             columnNumber: 21
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 144,
+        lineNumber: 210,
+        columnNumber: 17
+      }, this),
+      /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex align-center justify-start gap-[12px] mt-[20px]", children: [
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "input",
+          {
+            type: "text",
+            value: searchValue,
+            onChange: (e) => setSearchValue(e.target.value),
+            placeholder: "이름, 이메일, 전화번호 검색",
+            className: "rounded-2xl border border-gray-40 px-[12px] py-[6px] text-base w-[250px]"
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+            lineNumber: 221,
+            columnNumber: 21
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            className: "rounded-2xl border border-gray-40 px-[12px] py-[6px] bg-white text-base hover:bg-gray-100 transition-all cursor-pointer",
+            onClick: onSearch,
+            children: "검색"
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+            lineNumber: 228,
+            columnNumber: 21
+          },
+          this
+        )
+      ] }, void 0, true, {
+        fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+        lineNumber: 220,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -73492,7 +73583,7 @@ function AdminEmployeeSettingsCard() {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 154,
+          lineNumber: 233,
           columnNumber: 17
         },
         this
@@ -73508,7 +73599,7 @@ function AdminEmployeeSettingsCard() {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 157,
+          lineNumber: 236,
           columnNumber: 17
         },
         this
@@ -73522,7 +73613,7 @@ function AdminEmployeeSettingsCard() {
             disabled: !table.getCanPreviousPage(),
             children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardDoubleArrowLeftRoundedIcon, { fontSize: "small" }, void 0, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-              lineNumber: 168,
+              lineNumber: 247,
               columnNumber: 25
             }, this)
           },
@@ -73530,7 +73621,7 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 163,
+            lineNumber: 242,
             columnNumber: 21
           },
           this
@@ -73543,7 +73634,7 @@ function AdminEmployeeSettingsCard() {
             disabled: !table.getCanPreviousPage(),
             children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardArrowLeftRoundedIcon, { fontSize: "small" }, void 0, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-              lineNumber: 175,
+              lineNumber: 254,
               columnNumber: 25
             }, this)
           },
@@ -73551,14 +73642,14 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 170,
+            lineNumber: 249,
             columnNumber: 21
           },
           this
         ),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("span", { className: "text-base text-black", children: `${table.getState().pagination.pageIndex + 1} / ${table.getPageCount().toLocaleString()}` }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 177,
+          lineNumber: 256,
           columnNumber: 21
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -73569,7 +73660,7 @@ function AdminEmployeeSettingsCard() {
             disabled: !table.getCanNextPage(),
             children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardArrowRightRoundedIcon, { fontSize: "small" }, void 0, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-              lineNumber: 185,
+              lineNumber: 264,
               columnNumber: 25
             }, this)
           },
@@ -73577,7 +73668,7 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 180,
+            lineNumber: 259,
             columnNumber: 21
           },
           this
@@ -73590,7 +73681,7 @@ function AdminEmployeeSettingsCard() {
             disabled: !table.getCanNextPage(),
             children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardDoubleArrowRightRoundedIcon, { fontSize: "small" }, void 0, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-              lineNumber: 192,
+              lineNumber: 271,
               columnNumber: 25
             }, this)
           },
@@ -73598,7 +73689,7 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 187,
+            lineNumber: 266,
             columnNumber: 21
           },
           this
@@ -73620,7 +73711,7 @@ function AdminEmployeeSettingsCard() {
             },
             children: [10, 20, 30, 40, 50].map((n) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: n, children: `${n}개씩 보기` }, n, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-              lineNumber: 207,
+              lineNumber: 286,
               columnNumber: 29
             }, this))
           },
@@ -73628,14 +73719,14 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 194,
+            lineNumber: 273,
             columnNumber: 21
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 162,
+        lineNumber: 241,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -73648,19 +73739,19 @@ function AdminEmployeeSettingsCard() {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 213,
+          lineNumber: 292,
           columnNumber: 17
         },
         this
       )
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-      lineNumber: 142,
+      lineNumber: 208,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-    lineNumber: 134,
+    lineNumber: 200,
     columnNumber: 9
   }, this);
 }

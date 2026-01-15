@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useGetAllUsers } from "../../../hooks/admin/users/useGetAllUsers";
 import { EmployeesTable } from "./adminEmployeeSettingsTable";
 import type { fetchUserTypeResponse } from "../../../types/user/fetchUserType";
 import { AdminEmployeeSettingsCreateModal } from "./adminEmployeeSettingsCreateModal";
-import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable, type RowSelectionState } from "@tanstack/react-table";
+import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable, type RowSelectionState, type SortingState } from "@tanstack/react-table";
 import { useDeleteUser } from "../../../hooks/admin/users/useDeleteUser";
 import type { dialog } from "../../../types/dialogData";
 import { toast } from "react-toastify";
@@ -16,6 +16,7 @@ import { employeesColumn } from "./adminEmployeeSettingsColumn";
 import { AdminEmployeeSettingsDetailModal } from "./adminEmployeeSettingsDetailModal";
 import { useGetRoleDept } from "../../../hooks/admin/users/useGetRoleDept";
 import { useSearchParams } from "react-router-dom";
+import type { fetchUserSort } from "../../../types/user/fetchUserType";
 
 export function AdminEmployeeSettingsCard(){
     const { mutate: deleteUser } = useDeleteUser();
@@ -51,16 +52,8 @@ export function AdminEmployeeSettingsCard(){
         })
     }
 
-    const { data: usersData } = useGetAllUsers({ page, limit });
-    const recordData = usersData?.data;
-
-    const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
-
-    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-    const [dialogData, setDialogData] = useState<dialog | null>(null);
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-
-    const statusMap: string[] = ["active", "inactive", "quit"];
+    const statusMap = ["active", "inactive", "quit"] as const;
+    type Status = typeof statusMap[number];
     const status = searchParams.get("status") ?? "";
     const onChangeStatus = (value: string) => {
         setSearchParams(prev => {
@@ -73,6 +66,57 @@ export function AdminEmployeeSettingsCard(){
             return params;
         })
     }
+
+    const isStatus = (value: string | null): value is Status => {
+        return statusMap.includes(value as Status)
+    }
+
+    const filter = {
+        ...(deptId && { deptId }),
+        ...(roleId && { roleId }),
+        ...(isStatus(status) && { status }),
+    };
+    
+    const sortBy = searchParams.get("sortBy");
+    const order = searchParams.get("order") as "asc" | "desc" | null;
+
+    const sort: fetchUserSort | undefined = sortBy && order
+        ? {[sortBy] : order} : undefined;
+
+    const sorting = useMemo<SortingState>(() => {
+        if (!sortBy || !order) return [];
+        return [{id: sortBy, desc: "desc" === order}]
+    }, [sortBy, order]);
+
+    const [searchValue, setSearchValue] = useState<string>("");
+    const keyword = searchParams.get("keyword");
+    const onSearch = () => {
+        if (searchValue.trim().length === 0) {
+            toast.error("검색어를 입력해주세요.");
+            return; 
+        } 
+
+        setSearchParams(prev => {
+            const params = new URLSearchParams(prev);
+            params.set("keyword", searchValue);
+            params.set("page", "1");
+            return params;
+        })
+    }
+    const searchFields = ["name", "email", "phone"] as const;
+    const search = keyword ? {
+        keyword,
+        fields: searchFields,
+    } : undefined;
+
+    const { data: usersData } = useGetAllUsers({ page, limit, sort, filter, search});
+    const recordData = usersData?.data;
+
+    const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
+
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+    const [dialogData, setDialogData] = useState<dialog | null>(null);
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
     const { data: roleDeptData } = useGetRoleDept();
     const roleData = roleDeptData?.role || [];
@@ -95,10 +139,11 @@ export function AdminEmployeeSettingsCard(){
         data: recordData ?? [],
         columns,
         getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
+        manualSorting: true,
         enableSorting: true,
         state: {
             rowSelection,
+            sorting,
         },
         meta: {
             openDetail
@@ -106,7 +151,28 @@ export function AdminEmployeeSettingsCard(){
         enableRowSelection: true,
         onRowSelectionChange: setRowSelection,
         getRowId: row => row.id,
-        getFilteredRowModel: getFilteredRowModel()
+        getFilteredRowModel: getFilteredRowModel(),
+        onSortingChange: updater => {
+            const next = typeof updater === "function" ?
+                updater(sorting) : updater;
+
+            const first = next[0];
+
+            setSearchParams(prev => {
+                const params = new URLSearchParams(prev);
+
+                if (!first) {
+                    params.delete("sortBy");
+                    params.delete("order");
+                } else {
+                    params.set("sortBy", first.id);
+                    params.set("order", first.desc ? "desc" : "asc");
+                    params.set("page", "1");
+                }
+
+                return params;
+            })
+        }
     });
     
 
@@ -150,6 +216,19 @@ export function AdminEmployeeSettingsCard(){
                         onClick={() => onDelete()}
                         className="px-[12px] py-[6px] rounded-2xl text-base bg-red-700  text-white cursor-pointer hover:bg-red-600 transition-all"
                     >삭제하기</button>
+                </div>
+                <div className="flex align-center justify-start gap-[12px] mt-[20px]">
+                    <input
+                        type="text"
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                        placeholder="이름, 이메일, 전화번호 검색"
+                        className="rounded-2xl border border-gray-40 px-[12px] py-[6px] text-base w-[250px]"
+                    />
+                    <button
+                        className="rounded-2xl border border-gray-40 px-[12px] py-[6px] bg-white text-base hover:bg-gray-100 transition-all cursor-pointer"
+                        onClick={onSearch}
+                    >검색</button>
                 </div>
                 <EmployeesTable
                     table={table}
