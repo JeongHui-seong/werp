@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import { useYearMonths } from "../../../hooks/attendance/useYearMonths";
 import { useGetLeavePolicy } from "../../../hooks/admin/leaves/useGetLeavePolicy";
 import { Dialog } from "../../common/dialog";
 import type { dialog } from "../../../types/dialogData";
 import { useEditLeavePolicy } from "../../../hooks/admin/leaves/useEditLeavePolicy";
+import { format } from "date-fns";
 
 export function AdminLeaveSettingsPolicy() {
-    const { data: yearMonth } = useYearMonths();
-    const [year, setYear] = useState<string | null>(null);
+    const year = format(new Date(), "yyyy");
     const { data: leavePolicy } = useGetLeavePolicy(year ?? "");
     const [mode, setMode] = useState<"view" | "edit">("view");
     const [rawDays, setRawDays] = useState<number>(0);
@@ -16,11 +15,6 @@ export function AdminLeaveSettingsPolicy() {
     const [open, setOpen] = useState(false);
     const [dialogData, setDialogData] = useState<dialog | null>(null);
     const { mutate: editLeavePolicy } = useEditLeavePolicy(year ?? "")
-
-    useEffect(() => {
-        if (yearMonth?.yearMonth.length === 0) return;
-        setYear(yearMonth?.yearMonth[0].split("-")[0] ?? null);
-    },[yearMonth]);
 
     useEffect(() => {
         if (!leavePolicy?.result) return;

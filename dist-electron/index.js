@@ -63664,8 +63664,7 @@ function useEditLeavePolicy(year) {
   });
 }
 function AdminLeaveSettingsPolicy() {
-  const { data: yearMonth } = useYearMonths();
-  const [year, setYear2] = reactExports.useState(null);
+  const year = format$1(/* @__PURE__ */ new Date(), "yyyy");
   const { data: leavePolicy } = useGetLeavePolicy(year ?? "");
   const [mode, setMode] = reactExports.useState("view");
   const [rawDays, setRawDays] = reactExports.useState(0);
@@ -63674,10 +63673,6 @@ function AdminLeaveSettingsPolicy() {
   const [open, setOpen] = reactExports.useState(false);
   const [dialogData, setDialogData] = reactExports.useState(null);
   const { mutate: editLeavePolicy } = useEditLeavePolicy(year ?? "");
-  reactExports.useEffect(() => {
-    if (yearMonth?.yearMonth.length === 0) return;
-    setYear2(yearMonth?.yearMonth[0].split("-")[0] ?? null);
-  }, [yearMonth]);
   reactExports.useEffect(() => {
     if (!leavePolicy?.result) return;
     setRawDays(leavePolicy.result.days);
@@ -63707,7 +63702,7 @@ function AdminLeaveSettingsPolicy() {
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-        lineNumber: 48,
+        lineNumber: 42,
         columnNumber: 17
       },
       this
@@ -63718,7 +63713,7 @@ function AdminLeaveSettingsPolicy() {
         "년도 기본 휴가일"
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-        lineNumber: 56,
+        lineNumber: 50,
         columnNumber: 21
       }, this),
       mode === "view" && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px] flex-1", children: [
@@ -63727,7 +63722,7 @@ function AdminLeaveSettingsPolicy() {
           "일"
         ] }, void 0, true, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-          lineNumber: 59,
+          lineNumber: 53,
           columnNumber: 25
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -63741,14 +63736,14 @@ function AdminLeaveSettingsPolicy() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-            lineNumber: 60,
+            lineNumber: 54,
             columnNumber: 25
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-        lineNumber: 58,
+        lineNumber: 52,
         columnNumber: 21
       }, this),
       mode === "edit" && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex items-center justify-center gap-[20px] flex-1", children: [
@@ -63764,7 +63759,7 @@ function AdminLeaveSettingsPolicy() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-            lineNumber: 69,
+            lineNumber: 63,
             columnNumber: 29
           },
           this
@@ -63780,7 +63775,7 @@ function AdminLeaveSettingsPolicy() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-            lineNumber: 75,
+            lineNumber: 69,
             columnNumber: 29
           },
           this
@@ -63797,28 +63792,28 @@ function AdminLeaveSettingsPolicy() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-            lineNumber: 81,
+            lineNumber: 75,
             columnNumber: 29
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-        lineNumber: 68,
+        lineNumber: 62,
         columnNumber: 25
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-      lineNumber: 55,
+      lineNumber: 49,
       columnNumber: 17
     }, this) }, void 0, false, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-      lineNumber: 54,
+      lineNumber: 48,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminLeaveSettings/adminLeaveSettingsPolicy.tsx",
-    lineNumber: 46,
+    lineNumber: 40,
     columnNumber: 9
   }, this);
 }
