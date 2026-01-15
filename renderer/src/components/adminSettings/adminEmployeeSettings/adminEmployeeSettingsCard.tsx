@@ -3,7 +3,7 @@ import { useGetAllUsers } from "../../../hooks/admin/users/useGetAllUsers";
 import { EmployeesTable } from "./adminEmployeeSettingsTable";
 import type { fetchUserTypeResponse } from "../../../types/user/fetchUserType";
 import { AdminEmployeeSettingsCreateModal } from "./adminEmployeeSettingsCreateModal";
-import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable, type RowSelectionState, type SortingState } from "@tanstack/react-table";
+import { getCoreRowModel, getFilteredRowModel, useReactTable, type RowSelectionState, type SortingState } from "@tanstack/react-table";
 import { useDeleteUser } from "../../../hooks/admin/users/useDeleteUser";
 import type { dialog } from "../../../types/dialogData";
 import { toast } from "react-toastify";
@@ -102,6 +102,15 @@ export function AdminEmployeeSettingsCard(){
             params.set("page", "1");
             return params;
         })
+    }
+    const clearSearch = () => {
+        setSearchParams(prev => {
+            const params = new URLSearchParams(prev);
+            params.delete("keyword");
+            params.set("page", "1");
+            return params;
+        });
+        setSearchValue("");
     }
     const searchFields = ["name", "email", "phone"] as const;
     const search = keyword ? {
@@ -229,6 +238,12 @@ export function AdminEmployeeSettingsCard(){
                         className="rounded-2xl border border-gray-40 px-[12px] py-[6px] bg-white text-base hover:bg-gray-100 transition-all cursor-pointer"
                         onClick={onSearch}
                     >검색</button>
+                    {keyword && 
+                        <button
+                            onClick={clearSearch}
+                            className="rounded-2xl border border-gray-40 px-[12px] py-[6px] bg-white text-base hover:bg-gray-100 transition-all cursor-pointer"
+                        >검색 초기화</button>
+                    }
                 </div>
                 <EmployeesTable
                     table={table}

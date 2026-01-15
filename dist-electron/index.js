@@ -73391,6 +73391,15 @@ function AdminEmployeeSettingsCard() {
       return params;
     });
   };
+  const clearSearch = () => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.delete("keyword");
+      params.set("page", "1");
+      return params;
+    });
+    setSearchValue("");
+  };
   const searchFields = ["name", "email", "phone"];
   const search = keyword ? {
     keyword,
@@ -73485,7 +73494,7 @@ function AdminEmployeeSettingsCard() {
       false,
       {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 202,
+        lineNumber: 211,
         columnNumber: 17
       },
       this
@@ -73493,7 +73502,7 @@ function AdminEmployeeSettingsCard() {
     /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "w-full h-full bg-white p-[20px] rounded-2xl overflow-hidden flex flex-col", children: [
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("h2", { className: "font-bold text-center text-lg", children: "직원 관리 설정" }, void 0, false, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 209,
+        lineNumber: 218,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex w-full justify-end items-center gap-[20px] mt-[20px]", children: [
@@ -73508,7 +73517,7 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 211,
+            lineNumber: 220,
             columnNumber: 21
           },
           this
@@ -73524,14 +73533,14 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 215,
+            lineNumber: 224,
             columnNumber: 21
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 210,
+        lineNumber: 219,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("div", { className: "flex align-center justify-start gap-[12px] mt-[20px]", children: [
@@ -73548,7 +73557,7 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 221,
+            lineNumber: 230,
             columnNumber: 21
           },
           this
@@ -73564,14 +73573,30 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 228,
+            lineNumber: 237,
             columnNumber: 21
+          },
+          this
+        ),
+        keyword && /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
+          "button",
+          {
+            onClick: clearSearch,
+            className: "rounded-2xl border border-gray-40 px-[12px] py-[6px] bg-white text-base hover:bg-gray-100 transition-all cursor-pointer",
+            children: "검색 초기화"
+          },
+          void 0,
+          false,
+          {
+            fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
+            lineNumber: 242,
+            columnNumber: 25
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 220,
+        lineNumber: 229,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -73583,7 +73608,7 @@ function AdminEmployeeSettingsCard() {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 233,
+          lineNumber: 248,
           columnNumber: 17
         },
         this
@@ -73599,7 +73624,7 @@ function AdminEmployeeSettingsCard() {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 236,
+          lineNumber: 251,
           columnNumber: 17
         },
         this
@@ -73613,7 +73638,7 @@ function AdminEmployeeSettingsCard() {
             disabled: !table.getCanPreviousPage(),
             children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardDoubleArrowLeftRoundedIcon, { fontSize: "small" }, void 0, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-              lineNumber: 247,
+              lineNumber: 262,
               columnNumber: 25
             }, this)
           },
@@ -73621,7 +73646,7 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 242,
+            lineNumber: 257,
             columnNumber: 21
           },
           this
@@ -73634,7 +73659,7 @@ function AdminEmployeeSettingsCard() {
             disabled: !table.getCanPreviousPage(),
             children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardArrowLeftRoundedIcon, { fontSize: "small" }, void 0, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-              lineNumber: 254,
+              lineNumber: 269,
               columnNumber: 25
             }, this)
           },
@@ -73642,14 +73667,14 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 249,
+            lineNumber: 264,
             columnNumber: 21
           },
           this
         ),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("span", { className: "text-base text-black", children: `${table.getState().pagination.pageIndex + 1} / ${table.getPageCount().toLocaleString()}` }, void 0, false, {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 256,
+          lineNumber: 271,
           columnNumber: 21
         }, this),
         /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -73660,7 +73685,7 @@ function AdminEmployeeSettingsCard() {
             disabled: !table.getCanNextPage(),
             children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardArrowRightRoundedIcon, { fontSize: "small" }, void 0, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-              lineNumber: 264,
+              lineNumber: 279,
               columnNumber: 25
             }, this)
           },
@@ -73668,7 +73693,7 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 259,
+            lineNumber: 274,
             columnNumber: 21
           },
           this
@@ -73681,7 +73706,7 @@ function AdminEmployeeSettingsCard() {
             disabled: !table.getCanNextPage(),
             children: /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(KeyboardDoubleArrowRightRoundedIcon, { fontSize: "small" }, void 0, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-              lineNumber: 271,
+              lineNumber: 286,
               columnNumber: 25
             }, this)
           },
@@ -73689,7 +73714,7 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 266,
+            lineNumber: 281,
             columnNumber: 21
           },
           this
@@ -73711,7 +73736,7 @@ function AdminEmployeeSettingsCard() {
             },
             children: [10, 20, 30, 40, 50].map((n) => /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV("option", { value: n, children: `${n}개씩 보기` }, n, false, {
               fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-              lineNumber: 286,
+              lineNumber: 301,
               columnNumber: 29
             }, this))
           },
@@ -73719,14 +73744,14 @@ function AdminEmployeeSettingsCard() {
           false,
           {
             fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-            lineNumber: 273,
+            lineNumber: 288,
             columnNumber: 21
           },
           this
         )
       ] }, void 0, true, {
         fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-        lineNumber: 241,
+        lineNumber: 256,
         columnNumber: 17
       }, this),
       /* @__PURE__ */ jsxDevRuntimeExports.jsxDEV(
@@ -73739,19 +73764,19 @@ function AdminEmployeeSettingsCard() {
         false,
         {
           fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-          lineNumber: 292,
+          lineNumber: 307,
           columnNumber: 17
         },
         this
       )
     ] }, void 0, true, {
       fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-      lineNumber: 208,
+      lineNumber: 217,
       columnNumber: 13
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/jhs/Documents/dev/2025/werp/renderer/src/components/adminSettings/adminEmployeeSettings/adminEmployeeSettingsCard.tsx",
-    lineNumber: 200,
+    lineNumber: 209,
     columnNumber: 9
   }, this);
 }
